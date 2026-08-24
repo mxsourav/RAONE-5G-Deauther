@@ -83,9 +83,9 @@ static const uint8_t MAIN_MENU_COUNT = sizeof(MAIN_MENU_ITEMS) / sizeof(MAIN_MEN
 static const uint8_t BLE_MENU_COUNT  = sizeof(BLE_MENU_ITEMS)  / sizeof(BLE_MENU_ITEMS[0]);
 
 // Lab constants
-static const uint16_t LAB_DEAUTH_REASON     = 0x06;
-static const uint8_t  LAB_DEAUTH_CYCLE_LIMIT = 10;
-static const uint16_t LAB_DEAUTH_TX_GAP_MS  = 100;
+static const uint16_t LAB_DEAUTH_REASON     = 0x07;
+static const uint8_t  LAB_DEAUTH_CYCLE_LIMIT = 50;
+static const uint16_t LAB_DEAUTH_TX_GAP_MS  = 10;
 static const uint16_t RADAR_REFRESH_MS      = 2500;
 
 // ─────────────────────────────────────────────────────────────
