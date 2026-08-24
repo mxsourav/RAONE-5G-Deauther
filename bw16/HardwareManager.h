@@ -13,6 +13,7 @@ enum LedMode {
 };
 
 void hwBegin();
+bool okPressed();
 bool navPressed();
 void ledAllOff();
 void ledRedOn();

@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────
-//  RAONE  –  BW16 RTL8720DN  Firmware v1.0
+//  RAONE  –  BW16 RTL8720DN  Firmware v5.0
 //  WiFi / Bluetooth / IR attack & analysis toolkit
-//  2-button UI: BTN_NAV (capacitive touch) + BTN_OK (tactile)
-//  Long-press OK (>800 ms) = go back one level
+//  2-button UI: BTN_OK (TTP223 touch) + BTN_NAV (tactile push)
+//  Long-hold OK (>800 ms) = EMERGENCY BACK (universal, any state)
 //
 //  NOTE: Serial debug is DISABLED — PA7/PA8 used for
 //        buzzer and IR blaster.  OLED is the only output.
@@ -153,14 +153,13 @@ static const uint8_t ACTION_MENU_COUNT = 5;
 //  Button helpers
 // ─────────────────────────────────────────────────────────────
 
-// Returns true if BTN_OK is currently pressed (active LOW)
-static bool okPressed() {
-  return digitalRead(BTN_OK) == LOW;
-}
+// okPressed() and navPressed() are now in HardwareManager.cpp
+// OK = TTP223 touch sensor on PB20 (active HIGH)
+// NAV = Tactile push button on PB3 (active LOW)
 
-// Debounce wait
-static void waitButtonsReleased() {
-  while (okPressed() || navPressed()) delay(20);
+// Returns true if EITHER button is pressed (for emergency stop)
+static bool anyButtonPressed() {
+  return okPressed() || navPressed();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -170,6 +169,7 @@ static void waitButtonsReleased() {
 void handleNav();
 void handleOk();
 void handleBack();
+void emergencyBack();
 
 void drawMainMenu();
 void drawWifiMenu();
@@ -213,7 +213,7 @@ void setup() {
   delay(100);
   Serial.println("\n[SYSTEM] Booting RAONE V4.0 ULTIMATE...");
 
-  pinMode(BTN_OK,  INPUT_PULLUP);
+  // Buttons are initialized in hwBegin()
   hwBegin();
   irBegin();
   uiBegin();
@@ -257,35 +257,40 @@ void setup() {
 
 void loop() {
   // ── Button reading ──────────────────────────────────────────
-  if (navPressed()) {
+  // OK  = TTP223 touch sensor (PB20, active HIGH)
+  //   Short tap  → handleOk()
+  //   Long hold  → UNIVERSAL emergency back (handleBack from ANY state)
+  // NAV = Tactile push button (PB3, active LOW)
+  //   Short tap  → handleNav()
+
+  if (okPressed()) {
     delay(30); // debounce
-    if (navPressed()) {
-      buzzerClick(); // beep on press
+    if (okPressed()) {
+      buzzerClick();
       uint32_t pressStart = millis();
       bool longPress = false;
-      while (navPressed()) {
+      while (okPressed()) {
         if (millis() - pressStart > BTN_LONG_PRESS_MS) {
           longPress = true;
-          buzzerClick(); // extra feedback beep for long press
-          while (navPressed()) delay(10); // wait release
-          handleBack();
+          buzzerClick(); // extra feedback for long press
+          while (okPressed()) delay(10); // wait release
+          emergencyBack(); // universal emergency terminator
           goto after_buttons;
         }
         delay(10);
       }
       if (!longPress) {
-        handleNav();
+        handleOk();
       }
     }
   }
 
-  if (okPressed()) {
+  if (navPressed()) {
     delay(30); // debounce
-    if (okPressed()) {
-      buzzerClick(); // beep on press
-      // Wait for release
-      while (okPressed()) delay(10);
-      handleOk();
+    if (navPressed()) {
+      buzzerClick();
+      while (navPressed()) delay(10); // wait release
+      handleNav();
     }
   }
 
@@ -503,6 +508,28 @@ void handleNav() {
     analyzerBand = (analyzerBand == 5) ? 2 : 5;
     uiDrawAnalyzer(analyzerBand);
     delay(200);
+    return;
+  }
+
+  if (uiState == UI_ACTION_MENU) {
+    actionMenuIndex = (actionMenuIndex + 1) % ACTION_MENU_COUNT;
+    uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex);
+    delay(150);
+    return;
+  }
+
+  if (uiState == UI_CLIENT_LIST) {
+    uint8_t count = clientScanCount() + 1; // +1 for Back item
+    clientListSel = (clientListSel + 1) % count;
+    if (clientListSel >= clientListTop + 4) {
+      clientListTop++;
+    } else if (clientListSel < clientListTop) {
+      clientListTop = clientListSel;
+    }
+    const char *macStrs[MAX_CLIENTS];
+    for(uint8_t i=0; i<clientScanCount(); i++) macStrs[i] = clientScanGet(i).macStr;
+    uiDrawClientList(macStrs, clientListSel, clientListTop, clientScanCount());
+    delay(150);
     return;
   }
 
@@ -730,26 +757,6 @@ void handleBack() {
   if (uiState == UI_RADAR_BAND_MENU)  { drawWifiMenu(); return; }
   if (uiState == UI_RADAR_NETWORK_LIST) { uiState = UI_WIFI_RADAR; uiDrawWifiRadar(&radarNetwork, radarNetworkFound); return; }
   if (uiState == UI_LAB_PRECHECK || uiState == UI_TARGET_MONITOR || uiState == UI_LAB_STATS || uiState == UI_PRINCIPAL_TEST) { drawLabMenu(); return; }
-  if (uiState == UI_ACTION_MENU) {
-    actionMenuIndex = (actionMenuIndex + 1) % ACTION_MENU_COUNT;
-    uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex);
-    return;
-  }
-  
-  if (uiState == UI_CLIENT_LIST) {
-    uint8_t count = clientScanCount() + 1; // +1 for Back
-    clientListSel = (clientListSel + 1) % count;
-    if (clientListSel >= clientListTop + 4) {
-      clientListTop++;
-    } else if (clientListSel < clientListTop) {
-      clientListTop = clientListSel;
-    }
-    const char *macStrs[MAX_CLIENTS];
-    for(uint8_t i=0; i<clientScanCount(); i++) macStrs[i] = clientScanGet(i).macStr;
-    uiDrawClientList(macStrs, clientListSel, clientListTop, clientScanCount());
-    return;
-  }
-
   if (uiState == UI_SYSTEM_INFO)      { drawMainMenu(); return; }
   if (uiState == UI_BLE_DETAILS)      { uiState = UI_BLE_LIST; uiDrawBleList(selectedBleDevice, bleListTop); return; }
   if (uiState == UI_BLE_LIST)         { closeBleScanList(); return; }
@@ -760,6 +767,36 @@ void handleBack() {
   if (uiState == UI_SNIFFER)          { exitSniffer(); return; }
   if (uiState == UI_BAND_MENU || uiState == UI_NETWORK_LIST) { drawWifiMenu(); return; }
   // Default: back to main
+  drawMainMenu();
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Emergency back — universal terminator from ANY state
+//  Touch sensor long-hold triggers this.
+//  Stops any running attack, scan, or tool and goes to main menu.
+// ─────────────────────────────────────────────────────────────
+
+void emergencyBack() {
+  // Stop any active attack/scan tools
+  beaconSpamStop();
+  bleSpamStop();
+  sniffStop();
+  clientScanStop();
+  if (bleActive()) {
+    bleStop();
+    bleMarkStackStopped();
+  }
+  
+  // Turn off status LEDs
+  ledAllOff();
+  setLedMode(LED_MODE_IDLE);
+  
+  // Double beep to confirm emergency stop
+  buzzerBeep(1000, 80);
+  delay(60);
+  buzzerBeep(1000, 80);
+  
+  // Always go back to main menu
   drawMainMenu();
 }
 
@@ -1239,17 +1276,22 @@ void returnToDeauthCaller(UiState returnState) {
     uiDrawNetworkList(selectedBand, selectedNetwork, listTop);
     return;
   }
+  if (returnState == UI_ACTION_MENU) {
+    uiState = UI_ACTION_MENU;
+    uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex);
+    return;
+  }
   drawWifiMenu();
 }
 
 bool labStopRequested() {
-  if (!okPressed()) return false;
+  if (!anyButtonPressed()) return false;
   delay(220);
-  return okPressed();
+  return anyButtonPressed();
 }
 
 void waitForLabButtonsReleased() {
-  while (okPressed() || navPressed()) delay(20);
+  while (anyButtonPressed()) delay(20);
 }
 
 bool isInjectionBlockedSecurity(uint32_t security) {

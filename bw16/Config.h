@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define FIRMWARE_NAME    "RAONE"
-#define FIRMWARE_VERSION "V4.0 ULTIMATE"
+#define FIRMWARE_VERSION "V5.0 ULTIMATE"
 #define FIRMWARE_BOARD   "BW16 RTL8720DN"
 
 // ─────────────────────────────────────────────────────────────
@@ -14,7 +14,8 @@
 #define OLED_ADDR   0x3C
 
 // ─── Buttons ─────────────────────────────────────────────────
-#define BTN_OK    PB3   // D6 tactile push-button, active LOW
+#define BTN_NAV   PB3   // D6 tactile push-button, active LOW (NAV)
+// BTN_OK is PB20 TTP223 touch sensor, active HIGH — handled via mbed GPIO in HardwareManager
 #define BTN_LONG_PRESS_MS  800
 
 // ─── Status LEDs (Standard Arduino Pins) ──────────────────────

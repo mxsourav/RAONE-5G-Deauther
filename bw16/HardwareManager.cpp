@@ -9,7 +9,7 @@
 //  YELLOW = PA13 (D11)
 // ─────────────────────────────────────────────────────────────
 
-static gpio_t _btnNav;
+static gpio_t _btnOk;  // PB20 TTP223 touch sensor = OK button (active HIGH)
 
 void hwBegin() {
   // Buzzer
@@ -30,18 +30,27 @@ void hwBegin() {
   digitalWrite(LED_GREEN, LOW);
   digitalWrite(LED_YELLOW, LOW);
 
-  // NAV touch sensor on PB20 — mbed GPIO (TTP223, active HIGH)
-  gpio_init(&_btnNav, PB_20);
-  gpio_dir(&_btnNav, PIN_INPUT);
-  gpio_mode(&_btnNav, PullDown);
+  // OK touch sensor on PB20 — mbed GPIO (TTP223, active HIGH)
+  gpio_init(&_btnOk, PB_20);
+  gpio_dir(&_btnOk, PIN_INPUT);
+  gpio_mode(&_btnOk, PullDown);
+
+  // NAV push button on PB3 — standard Arduino (active LOW with pullup)
+  pinMode(BTN_NAV, INPUT_PULLUP);
 
   ledAllOff();
 }
 
 // ── Button primitives ────────────────────────────────────────
 
+// OK button = TTP223 touch sensor on PB20 (active HIGH)
+bool okPressed() {
+  return gpio_read(&_btnOk) == 1;
+}
+
+// NAV button = Tactile push button on PB3 (active LOW)
 bool navPressed() {
-  return gpio_read(&_btnNav) == 1;
+  return digitalRead(BTN_NAV) == LOW;
 }
 
 // ── LED primitives ───────────────────────────────────────────
