@@ -477,7 +477,55 @@ void uiDrawTargetDetails(const NetworkInfo &network) {
 // ─────────────────────────────────────────────────────────────
 //  Deauth TX screen
 // ─────────────────────────────────────────────────────────────
-// uiDrawTxCounter is already defined above
+
+void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t packetCount) {
+  oled.clearDisplay();
+  
+  char titleBuf[24];
+  snprintf(titleBuf, sizeof(titleBuf), "DEAUTH [%s]", is5g ? "5G" : "2.4G");
+  drawStatusBar(titleBuf, "TX ACTIVE");
+
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+  
+  // Line 1: Target SSID
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 1);
+  oled.print("AP: ");
+  printTruncated(ssid && ssid[0] ? ssid : "<hidden>", 15);
+
+  // Line 2: Channel
+  char chBuf[24];
+  snprintf(chBuf, sizeof(chBuf), "CH: %-2u  BURST: ACTIVE", channel);
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 11);
+  oled.print(chBuf);
+
+  // Line 3: Big packet counter in center
+  oled.setTextSize(2);
+  char countBuf[16];
+  snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
+  int16_t sw = strlen(countBuf) * 12;
+  int16_t sx = (OLED_W - sw) / 2;
+  oled.setCursor(sx, UI_CONTENT_Y + 22);
+  oled.print(countBuf);
+
+  oled.setTextSize(1);
+  drawFooter("NAV=Stop  Touch=Back");
+  oledFlush();
+}
+
+void uiRefreshDeauthCounter(uint32_t packetCount) {
+  oled.fillRect(0, UI_CONTENT_Y + 22, OLED_W, 16, SSD1306_BLACK);
+  oled.setTextSize(2);
+  oled.setTextColor(SSD1306_WHITE);
+  char countBuf[16];
+  snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
+  int16_t sw = strlen(countBuf) * 12;
+  int16_t sx = (OLED_W - sw) / 2;
+  oled.setCursor(sx, UI_CONTENT_Y + 22);
+  oled.print(countBuf);
+  oled.setTextSize(1);
+  oledFlush();
+}
 
 // ─────────────────────────────────────────────────────────────
 //  Lab precheck

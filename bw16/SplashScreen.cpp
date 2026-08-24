@@ -18,36 +18,35 @@
 void splashDrawProgress(Adafruit_SSD1306 &oled, uint8_t percent, const char *msg) {
   oled.clearDisplay();
 
-  // ── "There Ra-One V1.8" ──────────────────────────────────────
+  // ── Top Title ────────────────────────────────────────────────
   oled.setTextColor(SSD1306_WHITE);
   oled.setTextSize(1);
-  const char *title = "There Ra-One V1.8";
+  const char *title = "RAONE  2.4G / 5GHz";
   int16_t tx = (OLED_W - (int16_t)(strlen(title) * 6)) / 2;
-  oled.setCursor(tx, 5);
+  oled.setCursor(tx, 3);
   oled.print(title);
-
-  // ── Animated Boot Status Message ─────────────────────────────
-  if (msg) {
-    int16_t msgW = strlen(msg) * 6;
-    int16_t msgX = (OLED_W - msgW) / 2;
-    oled.setCursor(msgX, 15);
-    oled.print(msg);
-  }
 
   // ── Boxed "dev/mx_sourav" ────────────────────────────────────
   const char *dev = "dev/mx_sourav";
   int16_t devW = strlen(dev) * 6;
   int16_t devX = (OLED_W - devW) / 2;
-  int16_t devY = 30;
-  oled.drawRect(devX - 4, devY - 4, devW + 8, 16, SSD1306_WHITE);
+  int16_t devY = 17;
+  oled.drawRect(devX - 4, devY - 3, devW + 8, 14, SSD1306_WHITE);
   oled.setCursor(devX, devY);
   oled.print(dev);
 
-  // ── Progress bar outline ─────────────────────────────────────
-  int16_t barY = 52;
+  // ── Animated Boot Status Message ─────────────────────────────
+  if (msg && msg[0]) {
+    int16_t msgW = strlen(msg) * 6;
+    int16_t msgX = max((int16_t)2, (int16_t)((OLED_W - msgW) / 2));
+    oled.setCursor(msgX, 35);
+    oled.print(msg);
+  }
+
+  // ── Progress bar outline & fill ──────────────────────────────
+  int16_t barY = 49;
   oled.drawRect(UI_PAD, barY, OLED_W - UI_PAD * 2, 8, SSD1306_WHITE);
 
-  // ── Animated fill ────────────────────────────────────────────
   if (percent > 100) percent = 100;
   int16_t fillW = ((OLED_W - UI_PAD * 2 - 2) * percent) / 100;
   if (fillW > 0) {

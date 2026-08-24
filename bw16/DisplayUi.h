@@ -39,6 +39,8 @@ void uiDrawSystemInfo(bool hasTarget, uint8_t scanCount,
                       uint8_t count24, uint8_t count5);
 
 // Lab / Deauth screens
+void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t packetCount);
+void uiRefreshDeauthCounter(uint32_t packetCount);
 void uiDrawLabPrecheck(bool hasTarget, const NetworkInfo *network);
 void uiDrawTargetMonitor(const NetworkInfo &network, bool found);
 void uiDrawLabStats(const LabStats &stats);

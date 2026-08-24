@@ -176,27 +176,11 @@ void startSniffer(uint8_t band);
 
 void setup() {
   Serial.begin(115200);
-  delay(100);
-  Serial.println("\n[SYSTEM] Booting RAONE V6.0 ULTIMATE...");
+  delay(50);
 
   hwBegin();
   irBegin();
   uiBegin();
-
-  // ─── Fast Boot Animation & Accurate Melody ─────────────────────
-  uiDrawSplashProgress(10, "Initializing Core");
-  ledRedOn();
-  delay(100);
-  uiDrawSplashProgress(30, "Setting up WiFi");
-  ledGreenOn();
-  delay(100);
-  uiDrawSplashProgress(60, "Configuring Environment");
-  ledYellowOn();
-  delay(100);
-  uiDrawSplashProgress(80, "Starting Scanners");
-  delay(100);
-  uiDrawSplashProgress(100, "Ready!");
-  ledAllOff();
 
   wifiScannerBegin();
   sniffBegin();
@@ -204,20 +188,88 @@ void setup() {
   beaconSpamBegin();
   bleSpamBegin();
 
-  // Play full accurate Harry Potter melody while scanning on boot
-  uiDrawStatus("Scanning WiFi...");
-  ledYellowOn();
+  // Start background dual-band WiFi scan immediately
   wifiScannerStartScan();
 
-  buzzerBootMelody();
+  // ─── 6-Second Boot Splash Synchronized with Harry Potter Melody ──
+  struct MelodyNote {
+    uint16_t freq;
+    uint16_t dur;
+    uint16_t pause;
+  };
 
-  bool scanFinished = false;
-  while (!wifiScannerPollScan(&scanFinished)) {
-    delay(50);
+  static const MelodyNote NOTES[] = {
+    { 494, 200, 120 }, // B4
+    { 659, 250, 150 }, // E5
+    { 784, 100,  80 }, // G5
+    { 740, 200, 120 }, // F#5
+    { 659, 400, 200 }, // E5
+    { 988, 200, 120 }, // B5
+    { 880, 400, 200 }, // A5
+    { 740, 400, 200 }, // F#5
+    { 659, 250, 150 }, // E5
+    { 784, 100,  80 }, // G5
+    { 740, 200, 120 }, // F#5
+    { 622, 400, 200 }, // D#5
+    { 698, 200, 120 }, // F5
+    { 494, 400, 250 }, // B4
+    { 440, 200, 120 }, // A4
+    { 494, 250, 200 }, // B4
+    // Second phrase
+    { 494, 200, 120 }, // B4
+    { 659, 250, 150 }, // E5
+    { 784, 100,  80 }, // G5
+    { 740, 200, 120 }, // F#5
+    { 659, 400, 200 }, // E5
+    { 988, 200, 120 }, // B5
+    { 1175, 400, 200 }, // D6
+    { 1109, 200, 120 }, // C#6
+    { 1046, 400, 200 }, // C6
+    { 880, 200, 120 }, // A5
+    { 1046, 250, 150 }, // C6
+    { 988, 100,  80 }, // B5
+    { 932, 200, 120 }, // A#5
+    { 880, 400, 200 }, // A5
+    { 784, 200, 120 }, // G5
+    { 659, 600, 100 }  // E5
+  };
+
+  size_t totalNotes = sizeof(NOTES) / sizeof(NOTES[0]);
+
+  for (size_t i = 0; i < totalNotes; i++) {
+    uint8_t percent = ((i + 1) * 100) / totalNotes;
+    const char *msg = "BOOTING RAONE...";
+    if (percent < 15) {
+      msg = "INIT HARDWARE...";
+      ledRedOn();
+    } else if (percent < 40) {
+      msg = "SCANNING 2.4G & 5G...";
+      ledYellowOn();
+    } else if (percent < 70) {
+      msg = "BUILDING AP MATRIX...";
+      ledGreenOn();
+    } else if (percent < 90) {
+      msg = "CALIBRATING RADIO...";
+      ledYellowOn();
+    } else {
+      msg = "SYSTEM READY!";
+      ledGreenOn();
+    }
+
+    uiDrawSplashProgress(percent, msg);
+
+    playTone(NOTES[i].freq, NOTES[i].dur);
+    if (NOTES[i].pause > 0) delay(NOTES[i].pause);
   }
 
-  ledYellowOff();
-  ledFlashGreen(3, 100);
+  // Ensure background scan has finalized
+  bool scanFinished = false;
+  while (!wifiScannerPollScan(&scanFinished)) {
+    delay(40);
+  }
+
+  ledAllOff();
+  ledFlashGreen(3, 80);
   buzzerScanDone();
   setLedMode(LED_MODE_IDLE);
 
@@ -827,26 +879,21 @@ void openBleMenuItem() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
 //  Deauth Lab
 // ─────────────────────────────────────────────────────────────
 
 void runDeauthLab() {
-  if (!targetHasSelection()) return;
+  if (!targetHasSelection()) {
+    showPlaceholder("Deauth", "No target set");
+    return;
+  }
 
   const NetworkInfo &target = targetGet();
   UiState returnState = uiState;
 
-  uiState = UI_LAB_PRECHECK;
-  uiDrawLabPrecheck(true, &target);
-  delay(600);
-
-  ledYellowOn();
-  uiDrawStatus("Setting up...");
-
   labInjectionStoppedByUser = false;
   bool anySent = runPacketInjectionLab();
-
-  ledYellowOff();
 
   if (anySent) {
     ledFlashGreen(2, 100);
@@ -856,37 +903,23 @@ void runDeauthLab() {
     buzzerError();
   }
 
-  // After attack: show lab stats
-  if (labStatsActive()) {
-    const LabStats &s = labStatsGet();
-    labTestSimulateDeauth(target, s.found > 0, s, anySent);
-    uiState = UI_PRINCIPAL_TEST;
-    uiDrawPrincipalTest(labTestGetReport());
-  } else {
-    returnToDeauthCaller(returnState);
-  }
+  returnToDeauthCaller(returnState);
 }
 
 // Forward declaration of runDeauthLabTargeted's inner function
 bool runPacketInjectionLabTargeted(const uint8_t *dstMac);
 
 void runDeauthLabTargeted(const uint8_t *dstMac) {
-  if (!targetHasSelection()) return;
+  if (!targetHasSelection()) {
+    showPlaceholder("Deauth", "No target set");
+    return;
+  }
 
   const NetworkInfo &target = targetGet();
   UiState returnState = uiState;
 
-  uiState = UI_LAB_PRECHECK;
-  uiDrawLabPrecheck(true, &target);
-  delay(600);
-
-  ledYellowOn();
-  uiDrawStatus("Setting up targeted...");
-
   labInjectionStoppedByUser = false;
   bool anySent = runPacketInjectionLabTargeted(dstMac);
-
-  ledYellowOff();
 
   if (anySent) {
     ledFlashGreen(2, 100);
@@ -896,14 +929,7 @@ void runDeauthLabTargeted(const uint8_t *dstMac) {
     buzzerError();
   }
 
-  if (labStatsActive()) {
-    const LabStats &s = labStatsGet();
-    labTestSimulateDeauth(target, s.found > 0, s, anySent);
-    uiState = UI_PRINCIPAL_TEST;
-    uiDrawPrincipalTest(labTestGetReport());
-  } else {
-    returnToDeauthCaller(returnState);
-  }
+  returnToDeauthCaller(returnState);
 }
 
 bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
@@ -926,46 +952,27 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
     return false;
   }
 
-  wifi_off();
-  delay(150);
+  // Draw full deauth attack screen with live counter
+  uiDrawDeauthScreen(target.ssid, target.channel, target.channel >= 36, 0);
 
-  if (wifi_on(RTW_MODE_STA) != RTW_SUCCESS) {
-    uiDrawStatus("WiFi ON failed");
-    ledFlashRed(2, 200);
-    buzzerError();
-    delay(900);
-    return false;
-  }
-  delay(150);
-
+  wifi_on(RTW_MODE_STA);
   wifi_change_channel_plan(0x25);
-  delay(100);
-
-  if (wifi_set_channel(target.channel) != RTW_SUCCESS) {
-    uiDrawStatus("Channel set failed");
-    ledFlashRed(2, 200);
-    buzzerError();
-    delay(900);
-    return false;
-  }
-  delay(50);
-
-  uiDrawTxCounter(0);
+  wifi_set_channel(target.channel);
 
   bool anySent = false;
   uint32_t sentCount = 0;
   uint32_t lastUiUpdate = 0;
-  int consecutiveFails = 0;
+  uint32_t lastBuzzer = 0;
 
   uint8_t dstMacBuf[6];
   memcpy(dstMacBuf, dstMac, 6);
 
   while (true) {
-    if (labStopRequested()) {
+    if (anyButtonPressed()) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
-    for (uint8_t burst = 0; burst < LAB_DEAUTH_CYCLE_LIMIT; burst++) {
+    for (uint8_t burst = 0; burst < 10; burst++) {
       if (anyButtonPressed()) {
         return stopPacketInjectionLab(anySent, sentCount);
       }
@@ -974,28 +981,27 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
       if (sent) {
         anySent = true;
         sentCount++;
-        consecutiveFails = 0;
-        ledFlashGreen(1, 10);
+        ledFlashGreen(1, 5);
       } else {
-        consecutiveFails++;
-        ledFlashRed(1, 10);
+        ledFlashRed(1, 5);
       }
 
-      if (millis() - lastUiUpdate > 100) {
-        lastUiUpdate = millis();
-        uiDrawTxCounter(sentCount);
-      }
-
-      if (consecutiveFails >= 25) {
-        uiDrawStatus("TX Retrying...");
-        delay(100);
-        wifi_set_channel(target.channel);
-        consecutiveFails = 0;
-      }
-
-      delay(LAB_DEAUTH_TX_GAP_MS);
+      delay(5);
       yield();
     }
+
+    if (millis() - lastUiUpdate > 60) {
+      lastUiUpdate = millis();
+      uiRefreshDeauthCounter(sentCount);
+    }
+
+    if (sentCount - lastBuzzer >= 40) {
+      lastBuzzer = sentCount;
+      buzzerClick();
+    }
+
+    delay(10);
+    yield();
   }
 }
 
@@ -1019,43 +1025,24 @@ bool runPacketInjectionLab() {
     return false;
   }
 
-  wifi_off();
-  delay(150);
+  // Draw full deauth attack screen with live counter
+  uiDrawDeauthScreen(target.ssid, target.channel, target.channel >= 36, 0);
 
-  if (wifi_on(RTW_MODE_STA) != RTW_SUCCESS) {
-    uiDrawStatus("WiFi ON failed");
-    ledFlashRed(2, 200);
-    buzzerError();
-    delay(900);
-    return false;
-  }
-  delay(150);
-
+  wifi_on(RTW_MODE_STA);
   wifi_change_channel_plan(0x25);
-  delay(100);
-
-  if (wifi_set_channel(target.channel) != RTW_SUCCESS) {
-    uiDrawStatus("Channel set failed");
-    ledFlashRed(2, 200);
-    buzzerError();
-    delay(900);
-    return false;
-  }
-  delay(50);
-
-  uiDrawTxCounter(0);
+  wifi_set_channel(target.channel);
 
   bool anySent = false;
   uint32_t sentCount = 0;
   uint32_t lastUiUpdate = 0;
-  int consecutiveFails = 0;
+  uint32_t lastBuzzer = 0;
 
   while (true) {
-    if (labStopRequested()) {
+    if (anyButtonPressed()) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
-    for (uint8_t burst = 0; burst < LAB_DEAUTH_CYCLE_LIMIT; burst++) {
+    for (uint8_t burst = 0; burst < 10; burst++) {
       if (anyButtonPressed()) {
         return stopPacketInjectionLab(anySent, sentCount);
       }
@@ -1064,28 +1051,27 @@ bool runPacketInjectionLab() {
       if (sent) {
         anySent = true;
         sentCount++;
-        consecutiveFails = 0;
-        ledFlashGreen(1, 10);
+        ledFlashGreen(1, 5);
       } else {
-        consecutiveFails++;
-        ledFlashRed(1, 10);
+        ledFlashRed(1, 5);
       }
 
-      if (millis() - lastUiUpdate > 100) {
-        lastUiUpdate = millis();
-        uiDrawTxCounter(sentCount);
-      }
-
-      if (consecutiveFails >= 25) {
-        uiDrawStatus("TX Retrying...");
-        delay(100);
-        wifi_set_channel(target.channel);
-        consecutiveFails = 0;
-      }
-
-      delay(LAB_DEAUTH_TX_GAP_MS);
+      delay(5);
       yield();
     }
+
+    if (millis() - lastUiUpdate > 60) {
+      lastUiUpdate = millis();
+      uiRefreshDeauthCounter(sentCount);
+    }
+
+    if (sentCount - lastBuzzer >= 40) {
+      lastBuzzer = sentCount;
+      buzzerClick();
+    }
+
+    delay(10);
+    yield();
   }
 }
 
