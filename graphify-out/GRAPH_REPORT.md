@@ -1,7 +1,7 @@
 # Graph Report - D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16  (2026-08-24)
 
 ## Corpus Check
-- 28 files · ~2,581,090 words
+- 28 files · ~2,581,066 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

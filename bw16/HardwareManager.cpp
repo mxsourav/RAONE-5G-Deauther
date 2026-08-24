@@ -173,21 +173,25 @@ void buzzerSuccess() {
   playTone(2400, 80);
 }
 
-// ── Nokia Ringtone (Gran Vals — accurate) ─────────────────────
+// ── Hedwig's Theme (Harry Potter) ─────────────────────────────
 void buzzerBootMelody() {
-  playTone(659, 125); delay(30);   // E5
-  playTone(587, 125); delay(30);   // D5
-  playTone(370, 250); delay(30);   // F#4
-  playTone(415, 250); delay(30);   // G#4
-  playTone(554, 125); delay(30);   // C#5
-  playTone(494, 125); delay(30);   // B4
-  playTone(294, 250); delay(30);   // D4
-  playTone(330, 250); delay(30);   // E4
-  playTone(494, 125); delay(30);   // B4
-  playTone(440, 125); delay(30);   // A4
-  playTone(277, 250); delay(30);   // C#4
-  playTone(330, 250); delay(30);   // E4
-  playTone(440, 500); delay(30);   // A4
+  // B4 - E5 - G5 - F#5 - E5 - B5 - A5 - (rest) -
+  // F#5 - E5 - G5 - F#5 - D#5 - F5 - B4
+  playTone(494, 200); delay(30);   // B4
+  playTone(659, 300); delay(30);   // E5
+  playTone(784, 150); delay(30);   // G5
+  playTone(740, 300); delay(30);   // F#5
+  playTone(659, 500); delay(30);   // E5
+  playTone(988, 300); delay(30);   // B5
+  playTone(880, 600); delay(60);   // A5
+  playTone(740, 600); delay(60);   // F#5 (hold)
+
+  playTone(659, 300); delay(30);   // E5
+  playTone(784, 150); delay(30);   // G5
+  playTone(740, 300); delay(30);   // F#5
+  playTone(622, 500); delay(30);   // D#5
+  playTone(698, 300); delay(30);   // F5
+  playTone(494, 800);              // B4 (final hold)
 }
 
 void buzzerScanDone() {

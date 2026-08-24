@@ -75,6 +75,10 @@ static uint32_t lastBurstAt = 0;
 static const uint32_t HOP_MS   = 1500;  // hop lento: da tiempo a scanners
 static const uint32_t BURST_MS = 80;    // burst de todos los SSIDs cada 80ms
 
+// Clone mode state
+static bool cloneMode = false;
+static char clonedSSID[33] = {0};
+
 // ===========================================================================
 // Construye un beacon completo conforme a 802.11.
 // La estructura BeaconFrame original en packet-injection.h NO incluye los IEs
@@ -214,29 +218,49 @@ void beaconSpamTick() {
     lastHopAt = now;
   }
 
-  // BURST: cada ~80ms mandamos TODOS los SSIDs en rafaga
-  // Asi cada SSID se transmite ~12 veces/s (vs 1.6/s del modelo anterior)
+  // BURST: cada ~80ms mandamos SSIDs en rafaga
   if (now - lastBurstAt >= BURST_MS) {
     bool is5g = (stats.band == 5);
     uint8_t buf[160];
 
-    for (uint16_t i = 0; i < SSID_COUNT; i++) {
-      // MAC source unica por SSID, bit local-administrado en 0x02
-      uint8_t srcMac[6] = {
-        0x02,
-        (uint8_t)((i * 17) & 0xFF),
-        (uint8_t)((i * 53) & 0xFF),
-        stats.currentChannel,
-        (uint8_t)0xAB,
-        (uint8_t)0xCD
-      };
+    if (cloneMode && clonedSSID[0] != '\0') {
+      // Clone mode: broadcast only the cloned SSID with multiple fake BSSIDs
+      for (uint16_t i = 0; i < 8; i++) {
+        uint8_t srcMac[6] = {
+          0x02,
+          (uint8_t)((i * 31) & 0xFF),
+          (uint8_t)((i * 67) & 0xFF),
+          stats.currentChannel,
+          0xC1,
+          0x0E
+        };
 
-      int len = buildBeacon(buf, srcMac, SSID_LIST[i],
-                            stats.currentChannel, is5g);
-      if (wifi_tx_raw_frame(buf, (size_t)len)) {
-        stats.totalTx++;
+        int len = buildBeacon(buf, srcMac, clonedSSID,
+                              stats.currentChannel, is5g);
+        if (wifi_tx_raw_frame(buf, (size_t)len)) {
+          stats.totalTx++;
+        }
+        stats.currentSsidIdx = 0;
       }
-      stats.currentSsidIdx = i;
+    } else {
+      // Normal mode: cycle through all SSIDs
+      for (uint16_t i = 0; i < SSID_COUNT; i++) {
+        uint8_t srcMac[6] = {
+          0x02,
+          (uint8_t)((i * 17) & 0xFF),
+          (uint8_t)((i * 53) & 0xFF),
+          stats.currentChannel,
+          (uint8_t)0xAB,
+          (uint8_t)0xCD
+        };
+
+        int len = buildBeacon(buf, srcMac, SSID_LIST[i],
+                              stats.currentChannel, is5g);
+        if (wifi_tx_raw_frame(buf, (size_t)len)) {
+          stats.totalTx++;
+        }
+        stats.currentSsidIdx = i;
+      }
     }
     lastBurstAt = now;
   }
@@ -251,9 +275,29 @@ const BeaconSpamStats &beaconSpamGetStats() {
 }
 
 uint16_t beaconSpamSsidCount() {
+  if (cloneMode) return 1;
   return SSID_COUNT;
 }
 
 const char *beaconSpamCurrentSsid() {
+  if (cloneMode && clonedSSID[0] != '\0') return clonedSSID;
   return SSID_LIST[stats.currentSsidIdx];
+}
+
+void beaconSpamSetCloneSSID(const char *ssid) {
+  strncpy(clonedSSID, ssid, 32);
+  clonedSSID[32] = '\0';
+  cloneMode = true;
+  Serial.print("[BEACON] Clone mode set: ");
+  Serial.println(clonedSSID);
+}
+
+void beaconSpamClearClone() {
+  cloneMode = false;
+  clonedSSID[0] = '\0';
+  Serial.println("[BEACON] Clone mode cleared");
+}
+
+bool beaconSpamIsCloneMode() {
+  return cloneMode;
 }

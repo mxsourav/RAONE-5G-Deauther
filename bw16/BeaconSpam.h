@@ -19,3 +19,8 @@ bool beaconSpamActive();
 const BeaconSpamStats &beaconSpamGetStats();
 uint16_t beaconSpamSsidCount();
 const char *beaconSpamCurrentSsid();
+
+// Clone mode: broadcast a single cloned SSID
+void beaconSpamSetCloneSSID(const char *ssid);
+void beaconSpamClearClone();
+bool beaconSpamIsCloneMode();

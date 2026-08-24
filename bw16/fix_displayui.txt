@@ -1,0 +1,88 @@
+void uiDrawActionMenu(const NetworkInfo &network, uint8_t selected) {
+  oled.clearDisplay();
+  drawStatusBar(network.ssid, "");
+
+  static const char *const ACTION_ITEMS[] = {
+    "Set Target", "Deauth", "Scan Clients",
+    "Clone SSID", "Back"
+  };
+  static const uint8_t ACTION_COUNT = 5;
+
+  uint8_t listTop = 0;
+  if (selected >= UI_MENU_VISIBLE) listTop = selected - UI_MENU_VISIBLE + 1;
+
+  for (uint8_t i = 0; i < UI_MENU_VISIBLE && (listTop + i) < ACTION_COUNT; i++) {
+    uint8_t idx = listTop + i;
+    int16_t y = UI_CONTENT_Y + 1 + i * UI_MENU_ROW_H;
+    if (idx == selected) {
+      oled.fillRect(0, y, 120, UI_MENU_ROW_H, SSD1306_WHITE);
+      oled.setTextColor(SSD1306_BLACK);
+    } else {
+      oled.setTextColor(SSD1306_WHITE);
+    }
+    oled.setCursor(UI_PAD, y + 1);
+    oled.print(ACTION_ITEMS[idx]);
+    oled.setTextColor(SSD1306_WHITE);
+  }
+
+  if (ACTION_COUNT > UI_MENU_VISIBLE) {
+    uint8_t dotY = UI_CONTENT_Y + 2 + (selected * (40 / (ACTION_COUNT - 1)));
+    oled.fillCircle(125, dotY, 2, SSD1306_WHITE);
+  }
+
+  drawFooter("OK=select");
+  oledFlush();
+}
+
+void uiDrawClientList(const char *macs[], uint8_t selected, uint8_t listTop, uint8_t total) {
+  oled.clearDisplay();
+  char titleBuf[20];
+  snprintf(titleBuf, sizeof(titleBuf), "Clients: %d", total);
+  drawStatusBar(titleBuf, "");
+
+  if (total == 0) {
+    oled.setCursor(UI_PAD, UI_CONTENT_Y + 10);
+    oled.print("No clients found.");
+    oled.setCursor(UI_PAD, UI_CONTENT_Y + 22);
+    oled.print("Try again later.");
+    drawFooter("NAV=back");
+    oledFlush();
+    return;
+  }
+
+  uint8_t itemCount = total + 1;
+
+  for (uint8_t i = 0; i < UI_MENU_VISIBLE && (listTop + i) < itemCount; i++) {
+    uint8_t idx = listTop + i;
+    int16_t y = UI_CONTENT_Y + 1 + i * UI_MENU_ROW_H;
+    if (idx == selected) {
+      oled.fillRect(0, y, 120, UI_MENU_ROW_H, SSD1306_WHITE);
+      oled.setTextColor(SSD1306_BLACK);
+    } else {
+      oled.setTextColor(SSD1306_WHITE);
+    }
+    oled.setCursor(UI_PAD, y + 1);
+    if (idx < total) {
+      oled.print(macs[idx]);
+    } else {
+      oled.print("[ Back ]");
+    }
+    oled.setTextColor(SSD1306_WHITE);
+  }
+
+  drawFooter("OK=deauth");
+  oledFlush();
+}
+
+void uiDrawGenericMessage(const char *title, const char *msg1, const char *msg2) {
+  oled.clearDisplay();
+  drawStatusBar(title, "");
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 10);
+  oled.print(msg1);
+  if (msg2) {
+    oled.setCursor(UI_PAD, UI_CONTENT_Y + 22);
+    oled.print(msg2);
+  }
+  oledFlush();
+}
+

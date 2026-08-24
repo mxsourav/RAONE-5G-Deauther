@@ -67,3 +67,11 @@ void uiDrawIrMenu(uint8_t selectedIndex);
 void uiRefreshIrMenu(uint8_t selectedIndex);
 
 
+
+
+// Action menu and Client list
+void uiDrawClientList(const char *macs[], uint8_t selected, uint8_t listTop, uint8_t total);
+void uiDrawActionMenu(const NetworkInfo &network, uint8_t selected);
+void uiDrawGenericMessage(const char *title, const char *msg1, const char *msg2);
+
+
