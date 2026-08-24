@@ -15,7 +15,7 @@
 
 void uiBegin();
 void oledFlush();
-void uiDrawSplashProgress(uint8_t percent);
+void uiDrawSplashProgress(uint8_t percent, const char *msg = nullptr);
 
 // Generic building blocks
 void uiDrawStatus(const char *message);

@@ -184,16 +184,18 @@ void setup() {
   uiBegin();
 
   // ─── Fast Boot Animation & Accurate Melody ─────────────────────
-  uiDrawSplashProgress(20);
+  uiDrawSplashProgress(10, "Initializing Core");
   ledRedOn();
   delay(100);
-  uiDrawSplashProgress(50);
+  uiDrawSplashProgress(30, "Setting up WiFi");
   ledGreenOn();
   delay(100);
-  uiDrawSplashProgress(80);
+  uiDrawSplashProgress(60, "Configuring Environment");
   ledYellowOn();
   delay(100);
-  uiDrawSplashProgress(100);
+  uiDrawSplashProgress(80, "Starting Scanners");
+  delay(100);
+  uiDrawSplashProgress(100, "Ready!");
   ledAllOff();
 
   wifiScannerBegin();
@@ -924,10 +926,20 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
     return false;
   }
 
-  // Ensure WiFi STA mode & dual-band channel plan
-  wifi_on(RTW_MODE_STA);
+  wifi_off();
+  delay(150);
+
+  if (wifi_on(RTW_MODE_STA) != RTW_SUCCESS) {
+    uiDrawStatus("WiFi ON failed");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+  delay(150);
+
   wifi_change_channel_plan(0x25);
-  delay(50);
+  delay(100);
 
   if (wifi_set_channel(target.channel) != RTW_SUCCESS) {
     uiDrawStatus("Channel set failed");
@@ -936,6 +948,7 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
     delay(900);
     return false;
   }
+  delay(50);
 
   uiDrawTxCounter(0);
 
@@ -1006,9 +1019,20 @@ bool runPacketInjectionLab() {
     return false;
   }
 
-  wifi_on(RTW_MODE_STA);
+  wifi_off();
+  delay(150);
+
+  if (wifi_on(RTW_MODE_STA) != RTW_SUCCESS) {
+    uiDrawStatus("WiFi ON failed");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+  delay(150);
+
   wifi_change_channel_plan(0x25);
-  delay(50);
+  delay(100);
 
   if (wifi_set_channel(target.channel) != RTW_SUCCESS) {
     uiDrawStatus("Channel set failed");
@@ -1017,6 +1041,7 @@ bool runPacketInjectionLab() {
     delay(900);
     return false;
   }
+  delay(50);
 
   uiDrawTxCounter(0);
 

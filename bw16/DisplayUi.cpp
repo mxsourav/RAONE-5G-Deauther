@@ -164,8 +164,8 @@ void uiBegin() {
   oledFlush();
 }
 
-void uiDrawSplashProgress(uint8_t percent) {
-  splashDrawProgress(oled, percent);
+void uiDrawSplashProgress(uint8_t percent, const char *msg) {
+  splashDrawProgress(oled, percent, msg);
 }
 
 // ─────────────────────────────────────────────────────────────

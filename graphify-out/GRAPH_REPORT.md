@@ -1,12 +1,12 @@
 # Graph Report - D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16  (2026-08-24)
 
 ## Corpus Check
-- 30 files · ~2,584,111 words
+- 33 files · ~2,586,320 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 223 nodes · 428 edges · 28 communities detected
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 41 edges (avg confidence: 0.8)
+- 227 nodes · 437 edges · 31 communities detected
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -38,18 +38,21 @@
 - [[_COMMUNITY_Community 25|Community 25]]
 - [[_COMMUNITY_Community 26|Community 26]]
 - [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
+- [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `oledFlush()` - 28 edges
-2. `drawStatusBar()` - 24 edges
-3. `drawFooter()` - 23 edges
-4. `oledClear()` - 21 edges
+1. `oledFlush()` - 29 edges
+2. `drawStatusBar()` - 25 edges
+3. `drawFooter()` - 24 edges
+4. `oledClear()` - 22 edges
 5. `printTruncated()` - 13 edges
 6. `uiRefreshWifiAnalyzer()` - 12 edges
 7. `uiDrawNetworkList()` - 9 edges
 8. `uiRefreshBleAnalyzer()` - 9 edges
-9. `uiDrawNetworkDetails()` - 8 edges
-10. `uiDrawTargetMonitor()` - 8 edges
+9. `uiDrawNetworkListAll()` - 8 edges
+10. `uiDrawNetworkDetails()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `beaconSpamSsidCount()` --calls--> `uiRefreshBeaconSpam()`  [INFERRED]
@@ -66,8 +69,8 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.15
-Nodes (42): bleCopyDevice(), bleCount(), drawFooter(), drawRssiBar(), drawStatusBar(), oledClear(), oledFlush(), printTruncated() (+34 more)
+Cohesion: 0.14
+Nodes (43): bleCopyDevice(), bleCount(), drawFooter(), drawRssiBar(), drawStatusBar(), oledClear(), oledFlush(), printTruncated() (+35 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.1
@@ -177,49 +180,69 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
+### Community 28 - "Community 28"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 29 - "Community 29"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 30 - "Community 30"
+Cohesion: 1.0
+Nodes (0): 
+
 ## Knowledge Gaps
-- **Thin community `Community 12`** (1 nodes): `BeaconSpam.h`
+- **Thin community `Community 12`** (1 nodes): `fix.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 13`** (1 nodes): `BleSpam.h`
+- **Thin community `Community 13`** (1 nodes): `fix2.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 14`** (1 nodes): `BluetoothScanner.h`
+- **Thin community `Community 14`** (1 nodes): `fix3.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 15`** (1 nodes): `ClientScanner.h`
+- **Thin community `Community 15`** (1 nodes): `BeaconSpam.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 16`** (1 nodes): `Config.h`
+- **Thin community `Community 16`** (1 nodes): `BleSpam.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (1 nodes): `DisplayUi.h`
+- **Thin community `Community 17`** (1 nodes): `BluetoothScanner.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (1 nodes): `HardwareManager.h`
+- **Thin community `Community 18`** (1 nodes): `ClientScanner.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 19`** (1 nodes): `IrBlaster.h`
+- **Thin community `Community 19`** (1 nodes): `Config.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (1 nodes): `LabStats.h`
+- **Thin community `Community 20`** (1 nodes): `DisplayUi.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 21`** (1 nodes): `LabTestEngine.h`
+- **Thin community `Community 21`** (1 nodes): `HardwareManager.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 22`** (1 nodes): `packet-injection.h`
+- **Thin community `Community 22`** (1 nodes): `IrBlaster.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 23`** (1 nodes): `PromiscuousSniffer.h`
+- **Thin community `Community 23`** (1 nodes): `LabStats.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 24`** (1 nodes): `SplashScreen.h`
+- **Thin community `Community 24`** (1 nodes): `LabTestEngine.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 25`** (1 nodes): `TargetManager.h`
+- **Thin community `Community 25`** (1 nodes): `packet-injection.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 26`** (1 nodes): `Theme.h`
+- **Thin community `Community 26`** (1 nodes): `PromiscuousSniffer.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (1 nodes): `WifiScanner.h`
+- **Thin community `Community 27`** (1 nodes): `SplashScreen.h`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 28`** (1 nodes): `TargetManager.h`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 29`** (1 nodes): `Theme.h`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 30`** (1 nodes): `WifiScanner.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `oledFlush()` connect `Community 0` to `Community 1`, `Community 2`, `Community 11`, `Community 4`?**
-  _High betweenness centrality (0.174) - this node is a cross-community bridge._
+  _High betweenness centrality (0.171) - this node is a cross-community bridge._
 - **Why does `uiBegin()` connect `Community 2` to `Community 0`?**
-  _High betweenness centrality (0.142) - this node is a cross-community bridge._
+  _High betweenness centrality (0.138) - this node is a cross-community bridge._
 - **Why does `uiRefreshWifiAnalyzer()` connect `Community 4` to `Community 0`?**
-  _High betweenness centrality (0.133) - this node is a cross-community bridge._
+  _High betweenness centrality (0.129) - this node is a cross-community bridge._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.14 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
