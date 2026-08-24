@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define FIRMWARE_NAME    "RAONE"
-#define FIRMWARE_VERSION "V5.0 ULTIMATE"
+#define FIRMWARE_VERSION "V6.0 ULTIMATE"
 #define FIRMWARE_BOARD   "BW16 RTL8720DN"
 
 // ─────────────────────────────────────────────────────────────

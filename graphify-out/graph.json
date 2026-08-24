@@ -117,7 +117,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BeaconSpam.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_beaconspam_h",
-      "community": 11,
+      "community": 12,
       "norm_label": "beaconspam.h"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BleSpam.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_blespam_h",
-      "community": 12,
+      "community": 13,
       "norm_label": "blespam.h"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_bluetoothscanner_cpp",
-      "community": 2,
+      "community": 1,
       "norm_label": "bluetoothscanner.cpp"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L32",
       "id": "bluetoothscanner_classifydevice",
-      "community": 2,
+      "community": 1,
       "norm_label": "classifydevice()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L62",
       "id": "bluetoothscanner_finddevice",
-      "community": 2,
+      "community": 1,
       "norm_label": "finddevice()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L69",
       "id": "bluetoothscanner_findweakestindex",
-      "community": 2,
+      "community": 1,
       "norm_label": "findweakestindex()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L77",
       "id": "bluetoothscanner_begindevicewrite",
-      "community": 2,
+      "community": 1,
       "norm_label": "begindevicewrite()"
     },
     {
@@ -270,7 +270,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L81",
       "id": "bluetoothscanner_enddevicewrite",
-      "community": 2,
+      "community": 1,
       "norm_label": "enddevicewrite()"
     },
     {
@@ -279,7 +279,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L88",
       "id": "bluetoothscanner_blescancallback",
-      "community": 2,
+      "community": 1,
       "norm_label": "blescancallback()"
     },
     {
@@ -288,7 +288,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L177",
       "id": "bluetoothscanner_blebegin",
-      "community": 2,
+      "community": 1,
       "norm_label": "blebegin()"
     },
     {
@@ -297,7 +297,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L182",
       "id": "bluetoothscanner_blestart",
-      "community": 2,
+      "community": 1,
       "norm_label": "blestart()"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L200",
       "id": "bluetoothscanner_blestop",
-      "community": 2,
+      "community": 1,
       "norm_label": "blestop()"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L207",
       "id": "bluetoothscanner_blerelease",
-      "community": 2,
+      "community": 1,
       "norm_label": "blerelease()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L224",
       "id": "bluetoothscanner_bleresetlist",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleresetlist()"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L257",
       "id": "bluetoothscanner_bletotalpackets",
-      "community": 2,
+      "community": 1,
       "norm_label": "bletotalpackets()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L258",
       "id": "bluetoothscanner_bleapplecount",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleapplecount()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L259",
       "id": "bluetoothscanner_blemicrosoftcount",
-      "community": 2,
+      "community": 1,
       "norm_label": "blemicrosoftcount()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L260",
       "id": "bluetoothscanner_blenamedcount",
-      "community": 2,
+      "community": 1,
       "norm_label": "blenamedcount()"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L262",
       "id": "bluetoothscanner_blekindlabel",
-      "community": 2,
+      "community": 1,
       "norm_label": "blekindlabel()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L274",
       "id": "bluetoothscanner_bleapplesubtypelabel",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleapplesubtypelabel()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L295",
       "id": "bluetoothscanner_blemanufacturername",
-      "community": 2,
+      "community": 1,
       "norm_label": "blemanufacturername()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L321",
       "id": "bluetoothscanner_bleanalyzerreset",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleanalyzerreset()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L334",
       "id": "bluetoothscanner_bleanalyzertick",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleanalyzertick()"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L358",
       "id": "bluetoothscanner_blepps",
-      "community": 2,
+      "community": 1,
       "norm_label": "blepps()"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L367",
       "id": "bluetoothscanner_bleavgrssi",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleavgrssi()"
     },
     {
@@ -468,7 +468,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L377",
       "id": "bluetoothscanner_blebaseline",
-      "community": 2,
+      "community": 1,
       "norm_label": "blebaseline()"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L394",
       "id": "bluetoothscanner_bleanalyzerstatus",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleanalyzerstatus()"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L411",
       "id": "bluetoothscanner_bleppshistory",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleppshistory()"
     },
     {
@@ -495,7 +495,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L415",
       "id": "bluetoothscanner_bleppshistoryhead",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleppshistoryhead()"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.cpp",
       "source_location": "L419",
       "id": "bluetoothscanner_bleanalyzerstatuslabel",
-      "community": 2,
+      "community": 1,
       "norm_label": "bleanalyzerstatuslabel()"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\BluetoothScanner.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_bluetoothscanner_h",
-      "community": 13,
+      "community": 14,
       "norm_label": "bluetoothscanner.h"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\ClientScanner.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_clientscanner_h",
-      "community": 14,
+      "community": 15,
       "norm_label": "clientscanner.h"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\Config.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_config_h",
-      "community": 15,
+      "community": 16,
       "norm_label": "config.h"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\DisplayUi.cpp",
       "source_location": "L150",
       "id": "displayui_uibegin",
-      "community": 3,
+      "community": 2,
       "norm_label": "uibegin()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\DisplayUi.cpp",
       "source_location": "L167",
       "id": "displayui_uidrawsplashprogress",
-      "community": 10,
+      "community": 11,
       "norm_label": "uidrawsplashprogress()"
     },
     {
@@ -936,7 +936,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\DisplayUi.cpp",
       "source_location": "L787",
       "id": "displayui_uirefreshbleanalyzer",
-      "community": 2,
+      "community": 1,
       "norm_label": "uirefreshbleanalyzer()"
     },
     {
@@ -1071,7 +1071,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\DisplayUi.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_displayui_h",
-      "community": 16,
+      "community": 17,
       "norm_label": "displayui.h"
     },
     {
@@ -1080,7 +1080,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
-      "community": 3,
+      "community": 2,
       "norm_label": "hardwaremanager.cpp"
     },
     {
@@ -1089,196 +1089,205 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
       "source_location": "L14",
       "id": "hardwaremanager_hwbegin",
-      "community": 3,
+      "community": 2,
       "norm_label": "hwbegin()"
+    },
+    {
+      "label": "okPressed()",
+      "file_type": "code",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L47",
+      "id": "hardwaremanager_okpressed",
+      "community": 2,
+      "norm_label": "okpressed()"
     },
     {
       "label": "navPressed()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L43",
+      "source_location": "L52",
       "id": "hardwaremanager_navpressed",
-      "community": 3,
+      "community": 2,
       "norm_label": "navpressed()"
     },
     {
       "label": "ledRedOn()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L49",
+      "source_location": "L58",
       "id": "hardwaremanager_ledredon",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledredon()"
     },
     {
       "label": "ledRedOff()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L50",
+      "source_location": "L59",
       "id": "hardwaremanager_ledredoff",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledredoff()"
     },
     {
       "label": "ledGreenOn()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L52",
+      "source_location": "L61",
       "id": "hardwaremanager_ledgreenon",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledgreenon()"
     },
     {
       "label": "ledGreenOff()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L53",
+      "source_location": "L62",
       "id": "hardwaremanager_ledgreenoff",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledgreenoff()"
     },
     {
       "label": "ledYellowOn()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L55",
+      "source_location": "L64",
       "id": "hardwaremanager_ledyellowon",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledyellowon()"
     },
     {
       "label": "ledYellowOff()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L56",
+      "source_location": "L65",
       "id": "hardwaremanager_ledyellowoff",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledyellowoff()"
     },
     {
       "label": "ledAllOff()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L58",
+      "source_location": "L67",
       "id": "hardwaremanager_ledalloff",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledalloff()"
     },
     {
       "label": "ledFlashRed()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L66",
+      "source_location": "L75",
       "id": "hardwaremanager_ledflashred",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledflashred()"
     },
     {
       "label": "ledFlashGreen()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L73",
+      "source_location": "L82",
       "id": "hardwaremanager_ledflashgreen",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledflashgreen()"
     },
     {
       "label": "ledFlashYellow()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L80",
+      "source_location": "L89",
       "id": "hardwaremanager_ledflashyellow",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledflashyellow()"
     },
     {
       "label": "ledBootSequence()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L87",
+      "source_location": "L96",
       "id": "hardwaremanager_ledbootsequence",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledbootsequence()"
     },
     {
       "label": "setLedMode()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L100",
+      "source_location": "L109",
       "id": "hardwaremanager_setledmode",
-      "community": 3,
+      "community": 2,
       "norm_label": "setledmode()"
     },
     {
       "label": "ledTaskUpdate()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L114",
+      "source_location": "L123",
       "id": "hardwaremanager_ledtaskupdate",
-      "community": 3,
+      "community": 2,
       "norm_label": "ledtaskupdate()"
     },
     {
       "label": "playTone()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L141",
+      "source_location": "L150",
       "id": "hardwaremanager_playtone",
-      "community": 3,
+      "community": 2,
       "norm_label": "playtone()"
     },
     {
       "label": "buzzerClick()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L155",
+      "source_location": "L164",
       "id": "hardwaremanager_buzzerclick",
-      "community": 3,
+      "community": 2,
       "norm_label": "buzzerclick()"
     },
     {
       "label": "buzzerBeep()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L159",
+      "source_location": "L168",
       "id": "hardwaremanager_buzzerbeep",
-      "community": 3,
+      "community": 2,
       "norm_label": "buzzerbeep()"
     },
     {
       "label": "buzzerError()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L164",
+      "source_location": "L173",
       "id": "hardwaremanager_buzzererror",
-      "community": 3,
+      "community": 2,
       "norm_label": "buzzererror()"
     },
     {
       "label": "buzzerSuccess()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L170",
+      "source_location": "L179",
       "id": "hardwaremanager_buzzersuccess",
-      "community": 3,
+      "community": 2,
       "norm_label": "buzzersuccess()"
     },
     {
       "label": "buzzerBootMelody()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L177",
+      "source_location": "L186",
       "id": "hardwaremanager_buzzerbootmelody",
-      "community": 3,
+      "community": 2,
       "norm_label": "buzzerbootmelody()"
     },
     {
       "label": "buzzerScanDone()",
       "file_type": "code",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L197",
+      "source_location": "L206",
       "id": "hardwaremanager_buzzerscandone",
-      "community": 3,
+      "community": 2,
       "norm_label": "buzzerscandone()"
     },
     {
@@ -1287,7 +1296,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_h",
-      "community": 17,
+      "community": 18,
       "norm_label": "hardwaremanager.h"
     },
     {
@@ -1368,7 +1377,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\IrBlaster.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_irblaster_h",
-      "community": 18,
+      "community": 19,
       "norm_label": "irblaster.h"
     },
     {
@@ -1377,7 +1386,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabStats.cpp",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_labstats_cpp",
-      "community": 1,
+      "community": 9,
       "norm_label": "labstats.cpp"
     },
     {
@@ -1386,7 +1395,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabStats.cpp",
       "source_location": "L5",
       "id": "labstats_labstatsreset",
-      "community": 1,
+      "community": 9,
       "norm_label": "labstatsreset()"
     },
     {
@@ -1395,7 +1404,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabStats.cpp",
       "source_location": "L18",
       "id": "labstats_labstatsadd",
-      "community": 1,
+      "community": 9,
       "norm_label": "labstatsadd()"
     },
     {
@@ -1404,7 +1413,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabStats.cpp",
       "source_location": "L43",
       "id": "labstats_labstatsactive",
-      "community": 1,
+      "community": 9,
       "norm_label": "labstatsactive()"
     },
     {
@@ -1413,7 +1422,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabStats.cpp",
       "source_location": "L51",
       "id": "labstats_labstatsaveragerssi",
-      "community": 1,
+      "community": 9,
       "norm_label": "labstatsaveragerssi()"
     },
     {
@@ -1422,7 +1431,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabStats.cpp",
       "source_location": "L59",
       "id": "labstats_labstatsprinttoserial",
-      "community": 1,
+      "community": 9,
       "norm_label": "labstatsprinttoserial()"
     },
     {
@@ -1431,7 +1440,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabStats.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_labstats_h",
-      "community": 19,
+      "community": 20,
       "norm_label": "labstats.h"
     },
     {
@@ -1440,7 +1449,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_labtestengine_cpp",
-      "community": 1,
+      "community": 3,
       "norm_label": "labtestengine.cpp"
     },
     {
@@ -1449,7 +1458,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L12",
       "id": "labtestengine_islikelypmfprotected",
-      "community": 1,
+      "community": 3,
       "norm_label": "islikelypmfprotected()"
     },
     {
@@ -1458,7 +1467,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L18",
       "id": "labtestengine_misspercent",
-      "community": 1,
+      "community": 3,
       "norm_label": "misspercent()"
     },
     {
@@ -1467,7 +1476,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L26",
       "id": "labtestengine_labtestprepare",
-      "community": 1,
+      "community": 3,
       "norm_label": "labtestprepare()"
     },
     {
@@ -1476,7 +1485,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L49",
       "id": "labtestengine_labtestevaluate",
-      "community": 1,
+      "community": 3,
       "norm_label": "labtestevaluate()"
     },
     {
@@ -1485,7 +1494,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L77",
       "id": "labtestengine_labtestsimulatedeauth",
-      "community": 1,
+      "community": 3,
       "norm_label": "labtestsimulatedeauth()"
     },
     {
@@ -1494,7 +1503,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L102",
       "id": "labtestengine_labtestreset",
-      "community": 1,
+      "community": 3,
       "norm_label": "labtestreset()"
     },
     {
@@ -1503,7 +1512,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.cpp",
       "source_location": "L117",
       "id": "labtestengine_labtestprinttoserial",
-      "community": 1,
+      "community": 3,
       "norm_label": "labtestprinttoserial()"
     },
     {
@@ -1512,7 +1521,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\LabTestEngine.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_labtestengine_h",
-      "community": 20,
+      "community": 21,
       "norm_label": "labtestengine.h"
     },
     {
@@ -1557,7 +1566,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\packet-injection.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_packet_injection_h",
-      "community": 21,
+      "community": 22,
       "norm_label": "packet-injection.h"
     },
     {
@@ -1755,7 +1764,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\PromiscuousSniffer.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_promiscuoussniffer_h",
-      "community": 22,
+      "community": 23,
       "norm_label": "promiscuoussniffer.h"
     },
     {
@@ -1764,7 +1773,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\SplashScreen.cpp",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_splashscreen_cpp",
-      "community": 10,
+      "community": 11,
       "norm_label": "splashscreen.cpp"
     },
     {
@@ -1773,7 +1782,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\SplashScreen.cpp",
       "source_location": "L18",
       "id": "splashscreen_splashdrawprogress",
-      "community": 10,
+      "community": 11,
       "norm_label": "splashdrawprogress()"
     },
     {
@@ -1782,7 +1791,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\SplashScreen.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_splashscreen_h",
-      "community": 23,
+      "community": 24,
       "norm_label": "splashscreen.h"
     },
     {
@@ -1791,7 +1800,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\TargetManager.cpp",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_targetmanager_cpp",
-      "community": 9,
+      "community": 10,
       "norm_label": "targetmanager.cpp"
     },
     {
@@ -1800,7 +1809,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\TargetManager.cpp",
       "source_location": "L6",
       "id": "targetmanager_targetclear",
-      "community": 9,
+      "community": 10,
       "norm_label": "targetclear()"
     },
     {
@@ -1809,7 +1818,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\TargetManager.cpp",
       "source_location": "L10",
       "id": "targetmanager_targetset",
-      "community": 9,
+      "community": 10,
       "norm_label": "targetset()"
     },
     {
@@ -1818,7 +1827,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\TargetManager.cpp",
       "source_location": "L15",
       "id": "targetmanager_targethasselection",
-      "community": 9,
+      "community": 10,
       "norm_label": "targethasselection()"
     },
     {
@@ -1827,7 +1836,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\TargetManager.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_targetmanager_h",
-      "community": 24,
+      "community": 25,
       "norm_label": "targetmanager.h"
     },
     {
@@ -1836,7 +1845,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\Theme.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_theme_h",
-      "community": 25,
+      "community": 26,
       "norm_label": "theme.h"
     },
     {
@@ -1845,7 +1854,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_wifiscanner_cpp",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscanner.cpp"
     },
     {
@@ -1854,7 +1863,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L11",
       "id": "wifiscanner_scanresulthandler",
-      "community": 1,
+      "community": 3,
       "norm_label": "scanresulthandler()"
     },
     {
@@ -1863,7 +1872,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L59",
       "id": "wifiscanner_wifiscannerbegin",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerbegin()"
     },
     {
@@ -1872,7 +1881,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L75",
       "id": "wifiscanner_wifiscannerscan",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerscan()"
     },
     {
@@ -1881,7 +1890,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L89",
       "id": "wifiscanner_wifiscannerstartscan",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerstartscan()"
     },
     {
@@ -1890,7 +1899,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L111",
       "id": "wifiscanner_wifiscannerpollscan",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerpollscan()"
     },
     {
@@ -1899,7 +1908,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L142",
       "id": "wifiscanner_wifiscannerisscanning",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerisscanning()"
     },
     {
@@ -1908,7 +1917,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L146",
       "id": "wifiscanner_wifiscannercount",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannercount()"
     },
     {
@@ -1917,7 +1926,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L154",
       "id": "wifiscanner_wifiscanneris5ghz",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscanneris5ghz()"
     },
     {
@@ -1926,7 +1935,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L158",
       "id": "wifiscanner_wifiscannernetworkinband",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannernetworkinband()"
     },
     {
@@ -1935,7 +1944,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L162",
       "id": "wifiscanner_wifiscannercountband",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannercountband()"
     },
     {
@@ -1944,7 +1953,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L174",
       "id": "wifiscanner_wifiscannercountchannel",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannercountchannel()"
     },
     {
@@ -1953,7 +1962,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L186",
       "id": "wifiscanner_wifiscannerstrongestindex",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerstrongestindex()"
     },
     {
@@ -1962,7 +1971,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L202",
       "id": "wifiscanner_wifiscannerfindbssid",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerfindbssid()"
     },
     {
@@ -1971,7 +1980,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L212",
       "id": "wifiscanner_wifiscannerbusiestchannel",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerbusiestchannel()"
     },
     {
@@ -1980,7 +1989,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L232",
       "id": "wifiscanner_wifiscannersecurityname",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannersecurityname()"
     },
     {
@@ -1989,7 +1998,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.cpp",
       "source_location": "L259",
       "id": "wifiscanner_wifiscannerprinttoserial",
-      "community": 1,
+      "community": 3,
       "norm_label": "wifiscannerprinttoserial()"
     },
     {
@@ -1998,7 +2007,7 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\WifiScanner.h",
       "source_location": "L1",
       "id": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_wifiscanner_h",
-      "community": 26,
+      "community": 27,
       "norm_label": "wifiscanner.h"
     }
   ],
@@ -5391,7 +5400,19 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L43",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
+      "_tgt": "hardwaremanager_okpressed",
+      "source": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
+      "target": "hardwaremanager_okpressed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L52",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_navpressed",
@@ -5403,7 +5424,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L49",
+      "source_location": "L58",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledredon",
@@ -5415,7 +5436,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L50",
+      "source_location": "L59",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledredoff",
@@ -5427,7 +5448,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L52",
+      "source_location": "L61",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledgreenon",
@@ -5439,7 +5460,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L53",
+      "source_location": "L62",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledgreenoff",
@@ -5451,7 +5472,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L55",
+      "source_location": "L64",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledyellowon",
@@ -5463,7 +5484,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L56",
+      "source_location": "L65",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledyellowoff",
@@ -5475,7 +5496,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L58",
+      "source_location": "L67",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledalloff",
@@ -5487,7 +5508,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L66",
+      "source_location": "L75",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledflashred",
@@ -5499,7 +5520,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L73",
+      "source_location": "L82",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledflashgreen",
@@ -5511,7 +5532,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L80",
+      "source_location": "L89",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledflashyellow",
@@ -5523,7 +5544,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L87",
+      "source_location": "L96",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledbootsequence",
@@ -5535,7 +5556,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L100",
+      "source_location": "L109",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_setledmode",
@@ -5547,7 +5568,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L114",
+      "source_location": "L123",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_ledtaskupdate",
@@ -5559,7 +5580,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L141",
+      "source_location": "L150",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_playtone",
@@ -5571,7 +5592,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L155",
+      "source_location": "L164",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_buzzerclick",
@@ -5583,7 +5604,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L159",
+      "source_location": "L168",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_buzzerbeep",
@@ -5595,7 +5616,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L164",
+      "source_location": "L173",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_buzzererror",
@@ -5607,7 +5628,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L170",
+      "source_location": "L179",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_buzzersuccess",
@@ -5619,7 +5640,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L177",
+      "source_location": "L186",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_buzzerbootmelody",
@@ -5631,7 +5652,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L197",
+      "source_location": "L206",
       "weight": 1.0,
       "_src": "d_gaar_fata_project_bwifikill_bw16_5ghz_main_bwifikill_bw16_5ghz_main_bwifikill_bw16_bw16_hardwaremanager_cpp",
       "_tgt": "hardwaremanager_buzzerscandone",
@@ -5643,7 +5664,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L38",
+      "source_location": "L41",
       "weight": 1.0,
       "_src": "hardwaremanager_hwbegin",
       "_tgt": "hardwaremanager_ledalloff",
@@ -5655,7 +5676,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L68",
+      "source_location": "L77",
       "weight": 1.0,
       "_src": "hardwaremanager_ledflashred",
       "_tgt": "hardwaremanager_ledredon",
@@ -5667,7 +5688,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L89",
+      "source_location": "L98",
       "weight": 1.0,
       "_src": "hardwaremanager_ledbootsequence",
       "_tgt": "hardwaremanager_ledredon",
@@ -5679,7 +5700,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L108",
+      "source_location": "L117",
       "weight": 1.0,
       "_src": "hardwaremanager_setledmode",
       "_tgt": "hardwaremanager_ledredon",
@@ -5691,7 +5712,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L135",
+      "source_location": "L144",
       "weight": 1.0,
       "_src": "hardwaremanager_ledtaskupdate",
       "_tgt": "hardwaremanager_ledredon",
@@ -5703,12 +5724,96 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L59",
+      "source_location": "L68",
       "weight": 1.0,
       "_src": "hardwaremanager_ledalloff",
       "_tgt": "hardwaremanager_ledredoff",
       "source": "hardwaremanager_ledredoff",
       "target": "hardwaremanager_ledalloff",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L78",
+      "weight": 1.0,
+      "_src": "hardwaremanager_ledflashred",
+      "_tgt": "hardwaremanager_ledredoff",
+      "source": "hardwaremanager_ledredoff",
+      "target": "hardwaremanager_ledflashred",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L98",
+      "weight": 1.0,
+      "_src": "hardwaremanager_ledbootsequence",
+      "_tgt": "hardwaremanager_ledredoff",
+      "source": "hardwaremanager_ledredoff",
+      "target": "hardwaremanager_ledbootsequence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L144",
+      "weight": 1.0,
+      "_src": "hardwaremanager_ledtaskupdate",
+      "_tgt": "hardwaremanager_ledredoff",
+      "source": "hardwaremanager_ledredoff",
+      "target": "hardwaremanager_ledtaskupdate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L84",
+      "weight": 1.0,
+      "_src": "hardwaremanager_ledflashgreen",
+      "_tgt": "hardwaremanager_ledgreenon",
+      "source": "hardwaremanager_ledgreenon",
+      "target": "hardwaremanager_ledflashgreen",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L99",
+      "weight": 1.0,
+      "_src": "hardwaremanager_ledbootsequence",
+      "_tgt": "hardwaremanager_ledgreenon",
+      "source": "hardwaremanager_ledgreenon",
+      "target": "hardwaremanager_ledbootsequence",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L119",
+      "weight": 1.0,
+      "_src": "hardwaremanager_setledmode",
+      "_tgt": "hardwaremanager_ledgreenon",
+      "source": "hardwaremanager_ledgreenon",
+      "target": "hardwaremanager_setledmode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
+      "source_location": "L142",
+      "weight": 1.0,
+      "_src": "hardwaremanager_ledtaskupdate",
+      "_tgt": "hardwaremanager_ledgreenon",
+      "source": "hardwaremanager_ledgreenon",
+      "target": "hardwaremanager_ledtaskupdate",
       "confidence_score": 1.0
     },
     {
@@ -5717,90 +5822,6 @@
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
       "source_location": "L69",
       "weight": 1.0,
-      "_src": "hardwaremanager_ledflashred",
-      "_tgt": "hardwaremanager_ledredoff",
-      "source": "hardwaremanager_ledredoff",
-      "target": "hardwaremanager_ledflashred",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L89",
-      "weight": 1.0,
-      "_src": "hardwaremanager_ledbootsequence",
-      "_tgt": "hardwaremanager_ledredoff",
-      "source": "hardwaremanager_ledredoff",
-      "target": "hardwaremanager_ledbootsequence",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L135",
-      "weight": 1.0,
-      "_src": "hardwaremanager_ledtaskupdate",
-      "_tgt": "hardwaremanager_ledredoff",
-      "source": "hardwaremanager_ledredoff",
-      "target": "hardwaremanager_ledtaskupdate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L75",
-      "weight": 1.0,
-      "_src": "hardwaremanager_ledflashgreen",
-      "_tgt": "hardwaremanager_ledgreenon",
-      "source": "hardwaremanager_ledgreenon",
-      "target": "hardwaremanager_ledflashgreen",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L90",
-      "weight": 1.0,
-      "_src": "hardwaremanager_ledbootsequence",
-      "_tgt": "hardwaremanager_ledgreenon",
-      "source": "hardwaremanager_ledgreenon",
-      "target": "hardwaremanager_ledbootsequence",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L110",
-      "weight": 1.0,
-      "_src": "hardwaremanager_setledmode",
-      "_tgt": "hardwaremanager_ledgreenon",
-      "source": "hardwaremanager_ledgreenon",
-      "target": "hardwaremanager_setledmode",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L133",
-      "weight": 1.0,
-      "_src": "hardwaremanager_ledtaskupdate",
-      "_tgt": "hardwaremanager_ledgreenon",
-      "source": "hardwaremanager_ledgreenon",
-      "target": "hardwaremanager_ledtaskupdate",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L60",
-      "weight": 1.0,
       "_src": "hardwaremanager_ledalloff",
       "_tgt": "hardwaremanager_ledgreenoff",
       "source": "hardwaremanager_ledgreenoff",
@@ -5811,7 +5832,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L76",
+      "source_location": "L85",
       "weight": 1.0,
       "_src": "hardwaremanager_ledflashgreen",
       "_tgt": "hardwaremanager_ledgreenoff",
@@ -5823,7 +5844,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L90",
+      "source_location": "L99",
       "weight": 1.0,
       "_src": "hardwaremanager_ledbootsequence",
       "_tgt": "hardwaremanager_ledgreenoff",
@@ -5835,7 +5856,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L133",
+      "source_location": "L142",
       "weight": 1.0,
       "_src": "hardwaremanager_ledtaskupdate",
       "_tgt": "hardwaremanager_ledgreenoff",
@@ -5847,7 +5868,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L82",
+      "source_location": "L91",
       "weight": 1.0,
       "_src": "hardwaremanager_ledflashyellow",
       "_tgt": "hardwaremanager_ledyellowon",
@@ -5859,7 +5880,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L91",
+      "source_location": "L100",
       "weight": 1.0,
       "_src": "hardwaremanager_ledbootsequence",
       "_tgt": "hardwaremanager_ledyellowon",
@@ -5871,7 +5892,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L131",
+      "source_location": "L140",
       "weight": 1.0,
       "_src": "hardwaremanager_ledtaskupdate",
       "_tgt": "hardwaremanager_ledyellowon",
@@ -5883,7 +5904,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L61",
+      "source_location": "L70",
       "weight": 1.0,
       "_src": "hardwaremanager_ledalloff",
       "_tgt": "hardwaremanager_ledyellowoff",
@@ -5895,7 +5916,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L83",
+      "source_location": "L92",
       "weight": 1.0,
       "_src": "hardwaremanager_ledflashyellow",
       "_tgt": "hardwaremanager_ledyellowoff",
@@ -5907,7 +5928,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L91",
+      "source_location": "L100",
       "weight": 1.0,
       "_src": "hardwaremanager_ledbootsequence",
       "_tgt": "hardwaremanager_ledyellowoff",
@@ -5919,7 +5940,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L131",
+      "source_location": "L140",
       "weight": 1.0,
       "_src": "hardwaremanager_ledtaskupdate",
       "_tgt": "hardwaremanager_ledyellowoff",
@@ -5931,7 +5952,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L105",
+      "source_location": "L114",
       "weight": 1.0,
       "_src": "hardwaremanager_setledmode",
       "_tgt": "hardwaremanager_ledalloff",
@@ -5955,7 +5976,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L156",
+      "source_location": "L165",
       "weight": 1.0,
       "_src": "hardwaremanager_buzzerclick",
       "_tgt": "hardwaremanager_playtone",
@@ -5967,7 +5988,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L160",
+      "source_location": "L169",
       "weight": 1.0,
       "_src": "hardwaremanager_buzzerbeep",
       "_tgt": "hardwaremanager_playtone",
@@ -5979,7 +6000,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L165",
+      "source_location": "L174",
       "weight": 1.0,
       "_src": "hardwaremanager_buzzererror",
       "_tgt": "hardwaremanager_playtone",
@@ -5991,7 +6012,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L171",
+      "source_location": "L180",
       "weight": 1.0,
       "_src": "hardwaremanager_buzzersuccess",
       "_tgt": "hardwaremanager_playtone",
@@ -6003,7 +6024,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L180",
+      "source_location": "L189",
       "weight": 1.0,
       "_src": "hardwaremanager_buzzerbootmelody",
       "_tgt": "hardwaremanager_playtone",
@@ -6015,7 +6036,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "D:\\Gaar Fata Project\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16-5Ghz-main\\BWifiKill-BW16\\bw16\\HardwareManager.cpp",
-      "source_location": "L198",
+      "source_location": "L207",
       "weight": 1.0,
       "_src": "hardwaremanager_buzzerscandone",
       "_tgt": "hardwaremanager_playtone",

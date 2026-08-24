@@ -29,6 +29,7 @@ void uiDrawHome();
 void uiDrawBandMenu(uint8_t selectedBand);
 void uiDrawRadarBandMenu(uint8_t selectedBand);
 void uiDrawNetworkList(uint8_t selectedBand, int selectedNetwork, int listTop);
+void uiDrawNetworkListAll(int selectedNetwork, int listTop);
 void uiDrawNetworkDetails(const NetworkInfo &network, bool saved);
 void uiDrawTargetDetails(const NetworkInfo &network);
 void uiDrawAnalyzer(uint8_t band);

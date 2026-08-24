@@ -375,6 +375,62 @@ void uiDrawNetworkList(uint8_t selectedBand, int selectedNetwork, int listTop) {
   oledFlush();
 }
 
+void uiDrawNetworkListAll(int selectedNetwork, int listTop) {
+  oledClear();
+  char header[20];
+  uint8_t total = wifiScannerCount();
+  snprintf(header, sizeof(header), "ALL APs (%u)", total);
+  drawStatusBar(header);
+  oled.setTextSize(1);
+
+  if (total == 0) {
+    oled.setTextColor(SSD1306_WHITE);
+    oled.setCursor(UI_PAD, UI_CONTENT_Y + 8);
+    oled.print("No networks found");
+    oled.setCursor(UI_PAD, UI_CONTENT_Y + 18);
+    oled.print("OK to re-scan");
+    drawFooter("OK=scan  Hold=back");
+    oledFlush();
+    return;
+  }
+
+  uint8_t itemCount = total + 1; // +1 for [ Back ]
+
+  for (uint8_t i = 0; i < UI_MENU_VISIBLE && (listTop + i) < itemCount; i++) {
+    uint8_t idx = listTop + i;
+    int16_t ry  = UI_CONTENT_Y + i * UI_MENU_ROW_H;
+    bool    sel = (idx == selectedNetwork);
+
+    if (sel) {
+      oled.fillRect(0, ry, OLED_W - 18, UI_MENU_ROW_H, SSD1306_WHITE);
+      oled.setTextColor(SSD1306_BLACK);
+    } else {
+      oled.setTextColor(SSD1306_WHITE);
+    }
+
+    oled.setCursor(UI_PAD, ry + 1);
+
+    if (idx < total) {
+      const NetworkInfo &n = wifiScannerNetwork(idx);
+      bool is5G = wifiScannerIs5GHz(n.channel);
+      oled.print(is5G ? "5G " : "2G ");
+
+      char ssidBuf[13];
+      strncpy(ssidBuf, (n.ssid[0] ? n.ssid : "<hidden>"), 12);
+      ssidBuf[12] = '\0';
+      oled.print(ssidBuf);
+
+      oled.setTextColor(SSD1306_WHITE);
+      drawRssiBar(OLED_W - 18, ry + 1, n.rssi);
+    } else {
+      oled.print("[ Back ]");
+    }
+  }
+
+  drawFooter("NAV=next  OK=select");
+  oledFlush();
+}
+
 // ─────────────────────────────────────────────────────────────
 //  Network details
 // ─────────────────────────────────────────────────────────────
@@ -1112,13 +1168,20 @@ void uiDrawHome() {
 
 void uiDrawActionMenu(const NetworkInfo &network, uint8_t selected) {
   oled.clearDisplay();
-  drawStatusBar(network.ssid, "");
+  char titleBuf[22];
+  bool is5G = wifiScannerIs5GHz(network.channel);
+  snprintf(titleBuf, sizeof(titleBuf), "[%s] %s", is5G ? "5G" : "2G", network.ssid[0] ? network.ssid : "<hidden>");
+  drawStatusBar(titleBuf, "");
 
   static const char *const ACTION_ITEMS[] = {
-    "Set Target", "Deauth", "Scan Clients",
-    "Clone SSID", "Back"
+    "Deauth (All)",
+    "Scan Clients",
+    "Clone & Beacon",
+    "Sniff Traffic",
+    "Set as Target",
+    "Back"
   };
-  static const uint8_t ACTION_COUNT = 5;
+  static const uint8_t ACTION_COUNT = 6;
 
   uint8_t listTop = 0;
   if (selected >= UI_MENU_VISIBLE) listTop = selected - UI_MENU_VISIBLE + 1;

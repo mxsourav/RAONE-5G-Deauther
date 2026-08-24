@@ -183,24 +183,54 @@ void buzzerSuccess() {
 }
 
 // ── Hedwig's Theme (Harry Potter) ─────────────────────────────
+// Exact note frequencies and timing from Harry_Potter.ino reference
 void buzzerBootMelody() {
-  // B4 - E5 - G5 - F#5 - E5 - B5 - A5 - (rest) -
-  // F#5 - E5 - G5 - F#5 - D#5 - F5 - B4
-  playTone(494, 200); delay(30);   // B4
-  playTone(659, 300); delay(30);   // E5
-  playTone(784, 150); delay(30);   // G5
-  playTone(740, 300); delay(30);   // F#5
-  playTone(659, 500); delay(30);   // E5
-  playTone(988, 300); delay(30);   // B5
-  playTone(880, 600); delay(60);   // A5
-  playTone(740, 600); delay(60);   // F#5 (hold)
+  struct MelodyNote {
+    uint16_t freq;
+    uint16_t dur;
+    uint16_t pause;
+  };
 
-  playTone(659, 300); delay(30);   // E5
-  playTone(784, 150); delay(30);   // G5
-  playTone(740, 300); delay(30);   // F#5
-  playTone(622, 500); delay(30);   // D#5
-  playTone(698, 300); delay(30);   // F5
-  playTone(494, 800);              // B4 (final hold)
+  static const MelodyNote NOTES[] = {
+    { 494, 200, 120 }, // B4
+    { 659, 250, 150 }, // E5
+    { 784, 100,  80 }, // G5
+    { 740, 200, 120 }, // F#5
+    { 659, 400, 200 }, // E5
+    { 988, 200, 120 }, // B5
+    { 880, 400, 200 }, // A5
+    { 740, 400, 200 }, // F#5
+    { 659, 250, 150 }, // E5
+    { 784, 100,  80 }, // G5
+    { 740, 200, 120 }, // F#5
+    { 622, 400, 200 }, // D#5
+    { 698, 200, 120 }, // F5
+    { 494, 400, 250 }, // B4
+    { 440, 200, 120 }, // A4
+    { 494, 250, 200 }, // B4
+    // Second phrase
+    { 494, 200, 120 }, // B4
+    { 659, 250, 150 }, // E5
+    { 784, 100,  80 }, // G5
+    { 740, 200, 120 }, // F#5
+    { 659, 400, 200 }, // E5
+    { 988, 200, 120 }, // B5
+    { 1175, 400, 200 }, // D6
+    { 1109, 200, 120 }, // C#6
+    { 1046, 400, 200 }, // C6
+    { 880, 200, 120 }, // A5
+    { 1046, 250, 150 }, // C6
+    { 988, 100,  80 }, // B5
+    { 932, 200, 120 }, // A#5
+    { 880, 400, 200 }, // A5
+    { 784, 200, 120 }, // G5
+    { 659, 600, 100 }  // E5
+  };
+
+  for (size_t i = 0; i < sizeof(NOTES)/sizeof(NOTES[0]); i++) {
+    playTone(NOTES[i].freq, NOTES[i].dur);
+    if (NOTES[i].pause > 0) delay(NOTES[i].pause);
+  }
 }
 
 void buzzerScanDone() {
