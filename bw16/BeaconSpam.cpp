@@ -157,19 +157,13 @@ bool beaconSpamStart(uint8_t band) {
   }
   delay(150);
 
-  // Set country code and channel plan to enable 5GHz channels
-  int rc_country = wifi_set_country(RTW_COUNTRY_IN);
-  Serial.print("[BEACON] wifi_set_country(RTW_COUNTRY_IN) = ");
-  Serial.println(rc_country);
-
-  int rc_plan = wifi_set_channel_plan(0x20);
-  Serial.print("[BEACON] wifi_set_channel_plan(0x20) = ");
-  Serial.println(rc_plan);
+  // Force dual-band channel plan (2.4G + 5G)
+  wifi_change_channel_plan(0x25);
 
   // Read back
   uint8_t readPlan = 0xFF;
   wifi_get_channel_plan(&readPlan);
-  Serial.print("[BEACON] channel_plan readback = 0x");
+  Serial.print("[BEACON] channel_plan = 0x");
   Serial.println(readPlan, HEX);
 
   delay(100);
@@ -201,8 +195,7 @@ void beaconSpamStop() {
   wifi_off();
   delay(100);
   wifi_on(RTW_MODE_STA);
-  wifi_set_country(RTW_COUNTRY_IN);
-  wifi_set_channel_plan(0x20);
+  wifi_change_channel_plan(0x25);
   delay(150);
   Serial.println("[BEACON] beaconSpamStop: DONE, radio restored");
 }

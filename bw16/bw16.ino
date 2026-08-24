@@ -940,6 +940,7 @@ bool runPacketInjectionLab() {
     delay(900);
     return false;
   }
+  wifi_change_channel_plan(0x25); // Force dual-band so 5G channels work
   delay(200);
 
   if (wifi_set_channel(target.channel) != RTW_SUCCESS) {
@@ -1000,6 +1001,7 @@ bool rearmLabWifi(uint8_t channel) {
     delay(300);
     return false;
   }
+  wifi_change_channel_plan(0x25); // Force dual-band so 5G channels work
 
   delay(240);
   uiDrawStatus("Setting channel...");

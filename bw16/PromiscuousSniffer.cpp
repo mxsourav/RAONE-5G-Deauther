@@ -122,8 +122,7 @@ bool sniffStart(uint8_t band) {
   }
   delay(150);
 
-  wifi_set_country(RTW_COUNTRY_IN);
-  wifi_set_channel_plan(0x20);
+  wifi_change_channel_plan(0x25);
   delay(100);
 
   hopIdx = 0;
@@ -145,8 +144,7 @@ void sniffStop() {
   wifi_off();
   delay(100);
   wifi_on(RTW_MODE_STA);
-  wifi_set_country(RTW_COUNTRY_IN);
-  wifi_set_channel_plan(0x20);
+  wifi_change_channel_plan(0x25);
   delay(150);
 }
 
