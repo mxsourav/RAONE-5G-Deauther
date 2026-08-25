@@ -18,6 +18,7 @@ void setSystemMode(SystemMode mode) {
 }
 
 void uartSendPong() {
+  Serial.println(F("RAONE_READY"));
   Serial.println(F("PONG_RAONE_SLAVE_READY"));
 }
 
@@ -82,15 +83,15 @@ UartCommand uartPollCommand() {
           cmd.type = UART_CMD_OK;
         } else if (strcmp(_rxBuffer, "CMD:BACK") == 0 || strcmp(_rxBuffer, "BACK") == 0) {
           cmd.type = UART_CMD_BACK;
-        } else if (strcmp(_rxBuffer, "CMD:DEAUTH_ALL_24") == 0) {
+        } else if (strcmp(_rxBuffer, "CMD:DEAUTH_ALL_24") == 0 || strcmp(_rxBuffer, "DEAUTH_24") == 0 || strcmp(_rxBuffer, "AT+DEAUTH24") == 0) {
           cmd.type = UART_CMD_DEAUTH_ALL_24;
-        } else if (strcmp(_rxBuffer, "CMD:DEAUTH_ALL_5G") == 0) {
+        } else if (strcmp(_rxBuffer, "CMD:DEAUTH_ALL_5G") == 0 || strcmp(_rxBuffer, "DEAUTH_5G") == 0 || strcmp(_rxBuffer, "AT+DEAUTH5G") == 0) {
           cmd.type = UART_CMD_DEAUTH_ALL_5G;
-        } else if (strcmp(_rxBuffer, "CMD:BEACON_24") == 0) {
+        } else if (strcmp(_rxBuffer, "CMD:BEACON_24") == 0 || strcmp(_rxBuffer, "BEACON_24") == 0 || strcmp(_rxBuffer, "AT+BEACON24") == 0) {
           cmd.type = UART_CMD_BEACON_24;
-        } else if (strcmp(_rxBuffer, "CMD:BEACON_5G") == 0) {
+        } else if (strcmp(_rxBuffer, "CMD:BEACON_5G") == 0 || strcmp(_rxBuffer, "BEACON_5G") == 0 || strcmp(_rxBuffer, "AT+BEACON5G") == 0) {
           cmd.type = UART_CMD_BEACON_5G;
-        } else if (strcmp(_rxBuffer, "CMD:STOP") == 0 || strcmp(_rxBuffer, "STOP") == 0) {
+        } else if (strcmp(_rxBuffer, "CMD:STOP") == 0 || strcmp(_rxBuffer, "STOP") == 0 || strcmp(_rxBuffer, "AT+STOP") == 0) {
           cmd.type = UART_CMD_STOP;
         } else if (strstr(_rxBuffer, "PING_RAONE") || strstr(_rxBuffer, "HANDSHAKE_REQ")) {
           uartSendPong();
@@ -98,6 +99,9 @@ UartCommand uartPollCommand() {
         } else if (strncmp(_rxBuffer, "CMD:DEAUTH_TARGET:", 18) == 0) {
           cmd.type = UART_CMD_DEAUTH_TARGET;
           strncpy(cmd.payload, _rxBuffer + 18, sizeof(cmd.payload) - 1);
+        } else if (strncmp(_rxBuffer, "DEAUTH_TARGET:", 14) == 0) {
+          cmd.type = UART_CMD_DEAUTH_TARGET;
+          strncpy(cmd.payload, _rxBuffer + 14, sizeof(cmd.payload) - 1);
         }
 
         _rxIndex = 0;
