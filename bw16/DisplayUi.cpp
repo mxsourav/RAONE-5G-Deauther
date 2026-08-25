@@ -479,8 +479,61 @@ void uiDrawTargetDetails(const NetworkInfo &network) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Deauth TX screen
+//  Deauth TX screen & Real-Time Stats
 // ─────────────────────────────────────────────────────────────
+
+static void formatPacketMetric(char *out, size_t outSize, uint32_t count) {
+  if (count < 10000) {
+    snprintf(out, outSize, "%lu", (unsigned long)count);
+  } else if (count < 1000000) {
+    snprintf(out, outSize, "%.1fk", (float)count / 1000.0f);
+  } else {
+    snprintf(out, outSize, "%.2fM", (float)count / 1000000.0f);
+  }
+}
+
+void uiRefreshDeauthLive(uint8_t currentChannel, uint32_t totalSent, uint32_t totalFail, uint16_t pps, bool isHopping, const char *ssid) {
+  oled.fillRect(0, UI_CONTENT_Y, OLED_W, UI_CONTENT_H, SSD1306_BLACK);
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+
+  char buf[32];
+  char sentStr[16];
+  formatPacketMetric(sentStr, sizeof(sentStr), totalSent);
+
+  // Line 1: Mode & Active Channel (Hopping status)
+  if (isHopping) {
+    snprintf(buf, sizeof(buf), "MODE: 5G HOP  CH: %-3u", currentChannel);
+  } else {
+    char apName[16];
+    snprintf(apName, sizeof(apName), "%s", (ssid && ssid[0]) ? ssid : "Target");
+    snprintf(buf, sizeof(buf), "AP: %-8.8s CH: %-2u", apName, currentChannel);
+  }
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 2);
+  oled.print(buf);
+
+  // Line 2: Formatted Total & Success / Error Rate
+  uint32_t totalAttempts = totalSent + totalFail;
+  uint8_t succRate = totalAttempts > 0 ? (uint8_t)((totalSent * 100) / totalAttempts) : 100;
+  uint8_t failRate = 100 - succRate;
+
+  snprintf(buf, sizeof(buf), "SENT: %-5s OK:%u%% ER:%u%%", sentStr, succRate, failRate);
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 13);
+  oled.print(buf);
+
+  // Line 3: Packets Per Second & Raw Count
+  snprintf(buf, sizeof(buf), "RATE: %u pps | #%lu", pps, (unsigned long)totalSent);
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 24);
+  oled.print(buf);
+
+  // Line 4: Animated Activity Indicator Bar (Visual ticker)
+  uint8_t barProgress = (uint8_t)((totalSent * 3) % (OLED_W - 2 * UI_PAD));
+  oled.drawRect(UI_PAD, UI_CONTENT_Y + 35, OLED_W - 2 * UI_PAD, 4, SSD1306_WHITE);
+  oled.fillRect(UI_PAD, UI_CONTENT_Y + 35, barProgress, 4, SSD1306_WHITE);
+
+  drawFooter("NAV=Stop  Hold OK=Back");
+  oledFlush();
+}
 
 void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t packetCount) {
   oled.clearDisplay();
@@ -489,46 +542,12 @@ void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t p
   snprintf(titleBuf, sizeof(titleBuf), "DEAUTH [%s]", is5g ? "5G" : "2.4G");
   drawStatusBar(titleBuf, "TX ACTIVE");
 
-  oled.setTextSize(1);
-  oled.setTextColor(SSD1306_WHITE);
-  
-  // Line 1: Target SSID
-  oled.setCursor(UI_PAD, UI_CONTENT_Y + 1);
-  oled.print("AP: ");
-  printTruncated(ssid && ssid[0] ? ssid : "<hidden>", 15);
-
-  // Line 2: Channel
-  char chBuf[24];
-  snprintf(chBuf, sizeof(chBuf), "CH: %-2u  BURST: v", channel);
-  oled.setCursor(UI_PAD, UI_CONTENT_Y + 11);
-  oled.print(chBuf);
-
-  // Line 3: Big packet counter in center
-  oled.setTextSize(2);
-  char countBuf[16];
-  snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
-  int16_t sw = strlen(countBuf) * 12 - 2;
-  int16_t sx = (OLED_W - sw) / 2;
-  oled.setCursor(sx, UI_CONTENT_Y + 22);
-  oled.print(countBuf);
-
-  oled.setTextSize(1);
-  drawFooter("NAV=Stop  Touch=Back");
-  oledFlush();
+  bool isHopping = (channel == 0 || (ssid && strstr(ssid, "ALL") != nullptr));
+  uiRefreshDeauthLive(channel, packetCount, 0, 0, isHopping, ssid);
 }
 
 void uiRefreshDeauthCounter(uint32_t packetCount) {
-  oled.fillRect(0, UI_CONTENT_Y + 22, OLED_W, 16, SSD1306_BLACK);
-  oled.setTextSize(2);
-  oled.setTextColor(SSD1306_WHITE);
-  char countBuf[16];
-  snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
-  int16_t sw = strlen(countBuf) * 12 - 2;
-  int16_t sx = (OLED_W - sw) / 2;
-  oled.setCursor(sx, UI_CONTENT_Y + 22);
-  oled.print(countBuf);
-  oled.setTextSize(1);
-  oledFlush();
+  uiRefreshDeauthLive(0, packetCount, 0, 0, true, "ALL 5G");
 }
 
 // ─────────────────────────────────────────────────────────────

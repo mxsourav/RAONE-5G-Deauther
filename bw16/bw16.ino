@@ -1100,7 +1100,11 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
 
   bool anySent = false;
   uint32_t sentCount = 0;
+  uint32_t failCount = 0;
   uint32_t lastUiUpdate = millis();
+  uint32_t lastPpsCalc = millis();
+  uint32_t lastSentForPps = 0;
+  uint16_t currentPps = 0;
   uint32_t lastBuzzer = 0;
 
   uint8_t dstMacBuf[6];
@@ -1110,6 +1114,11 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
 
   while (true) {
     if (anyButtonPressed()) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    UartCommand cmd = uartPollCommand();
+    if (cmd.type == UART_CMD_STOP || cmd.type == UART_CMD_BACK) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
@@ -1125,6 +1134,7 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
         sentCount++;
         ledGreenOn();
       } else {
+        failCount++;
         delay(20);
       }
       delay(15);
@@ -1135,6 +1145,7 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
         sentCount++;
         ledGreenOff();
       } else {
+        failCount++;
         delay(20);
       }
       delay(15);
@@ -1142,22 +1153,18 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
     ledGreenOff();
 
     // CRITICAL FIX: Explicit DMA flush yield.
-    // Give the hardware MAC 100ms to completely empty the xmit_frame queue over the air
-    // before we queue the next burst, preventing the 96-frame HardFault.
     delay(100);
+
+    if (millis() - lastPpsCalc >= 1000) {
+      currentPps = (uint16_t)(sentCount - lastSentForPps);
+      lastSentForPps = sentCount;
+      lastPpsCalc = millis();
+    }
 
     if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
-      uiRefreshDeauthCounter(sentCount);
-
-      static uint32_t lastReportedCount = 0;
-      if (sentCount >= lastReportedCount + 10) {
-        lastReportedCount = sentCount;
-        Serial.print(F("[TX STREAM] Sent: ")); Serial.print(sentCount);
-        Serial.print(F(" | Heap: ")); Serial.print((uint32_t)xPortGetFreeHeapSize());
-        Serial.print(F("B | Stage: ")); Serial.print(txProbeGetSummary().current_stage);
-        Serial.print(F(" | Time: ")); Serial.println(millis());
-      }
+      uiRefreshDeauthLive(target.channel, sentCount, failCount, currentPps, false, target.ssid);
+      uartSendStatus("TX", sentCount);
     }
 
     if (sentCount - lastBuzzer >= 30) {
@@ -1205,7 +1212,6 @@ bool runPacketInjectionLab() {
   delay(80);
 
   // CRITICAL FIX: Enable Promiscuous Mode to bypass MAC state machine filtering
-  // Without this, the MAC refuses to transmit raw frames on 5GHz, filling the queue until the CPU crashes.
   wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
 
   // Draw full deauth attack screen with live counter
@@ -1213,13 +1219,22 @@ bool runPacketInjectionLab() {
 
   bool anySent = false;
   uint32_t sentCount = 0;
+  uint32_t failCount = 0;
   uint32_t lastUiUpdate = millis();
+  uint32_t lastPpsCalc = millis();
+  uint32_t lastSentForPps = 0;
+  uint16_t currentPps = 0;
   uint32_t lastBuzzer = 0;
 
   txProbeReset();
 
   while (true) {
     if (anyButtonPressed()) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    UartCommand cmd = uartPollCommand();
+    if (cmd.type == UART_CMD_STOP || cmd.type == UART_CMD_BACK) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
@@ -1235,6 +1250,7 @@ bool runPacketInjectionLab() {
         sentCount++;
         ledGreenOn();
       } else {
+        failCount++;
         delay(20);
       }
 
@@ -1243,22 +1259,18 @@ bool runPacketInjectionLab() {
     ledGreenOff();
 
     // CRITICAL FIX: Explicit DMA flush yield.
-    // Give the hardware MAC 100ms to completely empty the xmit_frame queue over the air
-    // before we queue the next burst, preventing the 96-frame HardFault.
     delay(100);
+
+    if (millis() - lastPpsCalc >= 1000) {
+      currentPps = (uint16_t)(sentCount - lastSentForPps);
+      lastSentForPps = sentCount;
+      lastPpsCalc = millis();
+    }
 
     if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
-      uiRefreshDeauthCounter(sentCount);
-
-      static uint32_t lastReportedCount = 0;
-      if (sentCount >= lastReportedCount + 10) {
-        lastReportedCount = sentCount;
-        Serial.print(F("[TX STREAM] Sent: ")); Serial.print(sentCount);
-        Serial.print(F(" | Heap: ")); Serial.print((uint32_t)xPortGetFreeHeapSize());
-        Serial.print(F("B | Stage: ")); Serial.print(txProbeGetSummary().current_stage);
-        Serial.print(F(" | Time: ")); Serial.println(millis());
-      }
+      uiRefreshDeauthLive(target.channel, sentCount, failCount, currentPps, false, target.ssid);
+      uartSendStatus("TX", sentCount);
     }
 
     if (sentCount - lastBuzzer >= 30) {
@@ -1293,7 +1305,11 @@ bool runDeauthAllChannels(uint8_t band) {
 
   bool anySent = false;
   uint32_t sentCount = 0;
+  uint32_t failCount = 0;
   uint32_t lastUiUpdate = millis();
+  uint32_t lastPpsCalc = millis();
+  uint32_t lastSentForPps = 0;
+  uint16_t currentPps = 0;
   uint8_t broadcastMac[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
   uint8_t fakeApMac[6]    = { 0x02, 0x11, 0x22, 0x33, 0x44, 0x55 };
 
@@ -1325,6 +1341,7 @@ bool runDeauthAllChannels(uint8_t band) {
         sentCount++;
         ledGreenOn();
       } else {
+        failCount++;
         delay(15);
       }
       delay(10);
@@ -1334,9 +1351,15 @@ bool runDeauthAllChannels(uint8_t band) {
     // DMA flush yield
     delay(50);
 
-    if (millis() - lastUiUpdate > 100) {
+    if (millis() - lastPpsCalc >= 1000) {
+      currentPps = (uint16_t)(sentCount - lastSentForPps);
+      lastSentForPps = sentCount;
+      lastPpsCalc = millis();
+    }
+
+    if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
-      uiRefreshDeauthCounter(sentCount);
+      uiRefreshDeauthLive(curCh, sentCount, failCount, currentPps, true, band == 5 ? "ALL 5G" : "ALL 2.4G");
       uartSendStatus("TX", sentCount);
     }
 
