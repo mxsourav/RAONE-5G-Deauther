@@ -126,6 +126,14 @@ static int buildBeacon(uint8_t *buf, const uint8_t *bssid,
   *p++ = 0x01;
   *p++ = channel;
 
+  // ----- IE 5: TIM (Traffic Indication Map - required by iOS/Android) -----
+  *p++ = 0x05;
+  *p++ = 0x04;
+  *p++ = 0x00; // DTIM Count: 0
+  *p++ = 0x01; // DTIM Period: 1
+  *p++ = 0x00; // Bitmap Control: 0
+  *p++ = 0x00; // Partial Virtual Bitmap: 0
+
   return (int)(p - buf);
 }
 
