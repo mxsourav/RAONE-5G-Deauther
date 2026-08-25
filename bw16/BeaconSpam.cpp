@@ -162,7 +162,7 @@ bool beaconSpamStart(uint8_t band) {
   delay(150);
 
   // Force dual-band channel plan (2.4G + 5G)
-  wifi_change_channel_plan(0x25);
+  wifi_change_channel_plan(0x7F);
 
   // Read back
   uint8_t readPlan = 0xFF;
@@ -186,6 +186,10 @@ bool beaconSpamStart(uint8_t band) {
     return false;
   }
   delay(50);
+  
+  // CRITICAL FIX: Enable Promiscuous Mode to bypass MAC state machine filtering
+  // Without this, the MAC refuses to transmit raw frames on 5GHz, filling the queue until the CPU crashes.
+  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
 
   lastHopAt = millis();
   lastBurstAt = 0;
@@ -196,10 +200,11 @@ bool beaconSpamStart(uint8_t band) {
 void beaconSpamStop() {
   Serial.println("[BEACON] beaconSpamStop");
   stats.active = false;
+  wifi_set_promisc(0, NULL, 0);
   wifi_off();
   delay(100);
   wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25);
+  wifi_change_channel_plan(0x7F);
   delay(150);
   Serial.println("[BEACON] beaconSpamStop: DONE, radio restored");
 }

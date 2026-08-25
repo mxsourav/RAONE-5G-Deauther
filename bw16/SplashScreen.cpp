@@ -56,3 +56,22 @@ void splashDrawProgress(Adafruit_SSD1306 &oled, uint8_t percent, const char *msg
   oledFlush();
 }
 
+void splashDrawInitialScreen(Adafruit_SSD1306 &oled) {
+  oled.clearDisplay();
+  
+  oled.setTextColor(SSD1306_WHITE);
+  oled.setTextSize(2);
+  const char *title = "RaOne";
+  int16_t tx = (OLED_W - (int16_t)(strlen(title) * 12)) / 2;
+  oled.setCursor(tx, 20);
+  oled.print(title);
+  
+  oled.setTextSize(1);
+  const char *sub = "github.com/mxsourav";
+  int16_t sx = (OLED_W - (int16_t)(strlen(sub) * 6)) / 2;
+  oled.setCursor(sx, 45);
+  oled.print(sub);
+
+  oledFlush();
+}
+

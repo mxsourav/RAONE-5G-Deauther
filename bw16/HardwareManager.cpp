@@ -2,14 +2,14 @@
 #include "gpio_api.h"
 
 // ─────────────────────────────────────────────────────────────
-//  HardwareManager.cpp – LED + Buzzer for RAONE V2.5
+//  HardwareManager.cpp – LED + Buzzer for RAONE V7.0
 //  All 3 LEDs (RED, GREEN, YELLOW) on standard safe Arduino pins
 //  RED    = PA15 (D9)
 //  GREEN  = PA14 (D10)
 //  YELLOW = PA13 (D11)
 // ─────────────────────────────────────────────────────────────
 
-static gpio_t _btnOk;  // PB20 TTP223 touch sensor = OK button (active HIGH)
+static gpio_t _btnOk;
 
 void hwBegin() {
   // Buzzer
@@ -30,7 +30,7 @@ void hwBegin() {
   digitalWrite(LED_GREEN, LOW);
   digitalWrite(LED_YELLOW, LOW);
 
-  // OK touch sensor on PB20 — mbed GPIO (TTP223, active HIGH)
+  // OK touch sensor on PB_20 — mbed GPIO (TTP223, active HIGH)
   gpio_init(&_btnOk, PB_20);
   gpio_dir(&_btnOk, PIN_INPUT);
   gpio_mode(&_btnOk, PullDown);
@@ -43,7 +43,7 @@ void hwBegin() {
 
 // ── Button primitives ────────────────────────────────────────
 
-// OK button = TTP223 touch sensor on PB20 (active HIGH)
+// OK button = TTP223 touch sensor on PB_20 (active HIGH)
 bool okPressed() {
   return gpio_read(&_btnOk) == 1;
 }

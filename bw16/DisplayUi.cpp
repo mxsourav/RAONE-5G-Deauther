@@ -168,6 +168,10 @@ void uiDrawSplashProgress(uint8_t percent, const char *msg) {
   splashDrawProgress(oled, percent, msg);
 }
 
+void uiDrawInitialLogo() {
+  splashDrawInitialScreen(oled);
+}
+
 // ─────────────────────────────────────────────────────────────
 //  Generic screens
 // ─────────────────────────────────────────────────────────────
@@ -495,7 +499,7 @@ void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t p
 
   // Line 2: Channel
   char chBuf[24];
-  snprintf(chBuf, sizeof(chBuf), "CH: %-2u  BURST: ACTIVE", channel);
+  snprintf(chBuf, sizeof(chBuf), "CH: %-2u  BURST: v", channel);
   oled.setCursor(UI_PAD, UI_CONTENT_Y + 11);
   oled.print(chBuf);
 
@@ -503,7 +507,7 @@ void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t p
   oled.setTextSize(2);
   char countBuf[16];
   snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
-  int16_t sw = strlen(countBuf) * 12;
+  int16_t sw = strlen(countBuf) * 12 - 2;
   int16_t sx = (OLED_W - sw) / 2;
   oled.setCursor(sx, UI_CONTENT_Y + 22);
   oled.print(countBuf);
@@ -519,7 +523,7 @@ void uiRefreshDeauthCounter(uint32_t packetCount) {
   oled.setTextColor(SSD1306_WHITE);
   char countBuf[16];
   snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
-  int16_t sw = strlen(countBuf) * 12;
+  int16_t sw = strlen(countBuf) * 12 - 2;
   int16_t sx = (OLED_W - sw) / 2;
   oled.setCursor(sx, UI_CONTENT_Y + 22);
   oled.print(countBuf);

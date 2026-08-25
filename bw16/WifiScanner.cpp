@@ -60,7 +60,7 @@ void wifiScannerBegin() {
   Serial.println("[WIFI] wifiScannerBegin: initializing STA mode...");
 
   wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25); // Force the dual-band override directly
+  wifi_change_channel_plan(0x7F); // Force the dual-band override directly
 
   // Verify channel plan
   uint8_t readPlan = 0xFF;
