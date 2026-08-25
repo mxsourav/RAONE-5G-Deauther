@@ -535,6 +535,12 @@ void drawBleMenu() {
 // ─────────────────────────────────────────────────────────────
 
 void handleNav() {
+  if (uiState == UI_SLAVE_LINKED) {
+    drawMainMenu();
+    delay(150);
+    return;
+  }
+
   if (uiState == UI_MAIN_MENU) {
     mainMenuIndex = nextIndex(mainMenuIndex, MAIN_MENU_COUNT);
     drawMainMenu();
@@ -630,6 +636,12 @@ void handleNav() {
 // ─────────────────────────────────────────────────────────────
 
 void handleOk() {
+  if (uiState == UI_SLAVE_LINKED) {
+    drawMainMenu();
+    delay(150);
+    return;
+  }
+
   if (uiState == UI_MAIN_MENU) { openMainMenuItem(); return; }
   if (uiState == UI_BLE_MENU)  { openBleMenuItem();  return; }
 
@@ -813,6 +825,11 @@ void handleOk() {
 // ─────────────────────────────────────────────────────────────
 
 void handleBack() {
+  if (uiState == UI_MAIN_MENU && getSystemMode() == SYS_MODE_SLAVE) {
+    uiState = UI_SLAVE_LINKED;
+    uiDrawSlaveLinked("TetraX ESP32");
+    return;
+  }
   if (uiState == UI_BLE_MENU)         { drawMainMenu(); return; }
   if (uiState == UI_IR_MENU)          { drawMainMenu(); return; }
   if (uiState == UI_PLACEHOLDER)      { drawMainMenu(); return; }
