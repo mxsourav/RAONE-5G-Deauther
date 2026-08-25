@@ -1313,4 +1313,40 @@ void uiDrawGenericMessage(const char *title, const char *msg1, const char *msg2)
   oledFlush();
 }
 
+void uiDrawSlaveLinked(const char *masterInfo) {
+  oled.clearDisplay();
+  drawStatusBar("SLAVE LINKED", "UART");
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+  
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 4);
+  oled.print("Master: ");
+  oled.print(masterInfo ? masterInfo : "TetraX ESP32");
+  
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 16);
+  oled.print("Baud: 115200 (8-N-1)");
+  
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 28);
+  oled.print("Role: 5GHz Coprocessor");
+
+  drawFooter("Remote Control Active");
+  oledFlush();
+}
+
+void uiRefreshSlaveStatus(const char *cmd, uint32_t count) {
+  oled.fillRect(0, UI_CONTENT_Y + 26, OLED_W, 20, SSD1306_BLACK);
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+  
+  char buf[32];
+  if (count > 0) {
+    snprintf(buf, sizeof(buf), "TX: %lu | %s", (unsigned long)count, cmd ? cmd : "RUNNING");
+  } else {
+    snprintf(buf, sizeof(buf), "CMD: %s", cmd ? cmd : "IDLE");
+  }
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 28);
+  oled.print(buf);
+  oledFlush();
+}
+
 

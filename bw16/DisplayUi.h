@@ -78,4 +78,8 @@ void uiDrawClientList(const char *macs[], uint8_t selected, uint8_t listTop, uin
 void uiDrawActionMenu(const NetworkInfo &network, uint8_t selected);
 void uiDrawGenericMessage(const char *title, const char *msg1, const char *msg2);
 
+// Slave Mode screen
+void uiDrawSlaveLinked(const char *masterInfo = "TetraX ESP32");
+void uiRefreshSlaveStatus(const char *cmd, uint32_t count);
+
 

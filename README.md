@@ -14,6 +14,12 @@ If you are using the NiceMCU RTL8720DN board, the factory often populates the 0-
 ## Version History
 
 ### v7.0 (Current)
+* **[NEW] Dual-Mode Architecture (Standalone / Slave):**
+  * **Auto-Detect Handshake:** Listens on `Serial` (115200 baud, 8-N-1) for 2.0 seconds during boot.
+  * **Slave Mode (with TetraX Master):** Links with TetraX ESP32 as a dedicated 5GHz coprocessor. Accepts remote navigation (`CMD:NAV`, `CMD:OK`, `CMD:BACK`) and dual-band attack triggers over UART.
+  * **Standalone Mode:** If no master is detected, smoothly enters standalone mode with onboard OLED, TTP223 touch sensor, and physical button controls.
+* **[NEW] All-Channel Hopping Modes:**
+  * Added direct standalone and remote support for 5GHz all-channel hopping (Ch 36-161) and 2.4GHz all-channel hopping.
 * **[RESOLVED] 5GHz Raw TX Deadlock / Freeze:**
   * **Root Cause Fixed:** Resolved the ~96-packet CPU crash caused by Realtek `alloc_mgtxmitframe()` driver queue overflows during raw frame injection.
   * **Hardware Promiscuous Mode:** Enabled `wifi_set_promisc(RTW_PROMISC_ENABLE_2)` before all raw Wi-Fi transmission attacks to bypass MAC filtering, allowing 5GHz management frames to transmit OTA immediately.
@@ -21,9 +27,8 @@ If you are using the NiceMCU RTL8720DN board, the factory often populates the 0-
 * **Touch Sensor Debounce & Hold:**
   * Configured `BTN_LONG_PRESS_MS` to 2500ms (2.5s hold required for universal back/cancel) to eliminate accidental touch sensor triggers.
   * Short touch activates standard `OK` / selection without triggering accidental menu exits.
-* **UX & UI Improvements:**
-  * Added instant "ATTACK INIT: Activating Mode..." status overlay on all Wi-Fi attack transitions while the radio locks channel and mode.
-  * Integrated multi-band Wi-Fi Radar, Client Scanning, BLE Spam/Scan, and IR Blaster into unified UI.
+* **Beacon Mobile Compatibility:**
+  * Integrated mandatory 802.11 TIM (IE 5) element in `buildBeacon()` for full Android and iOS beacon parser compatibility.
 
 ### v1.3.0
 * **[RESOLVED] 5GHz Hardware & Software Bug:** The notorious 5GHz issue is finally fixed! 
