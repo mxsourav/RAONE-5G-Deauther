@@ -100,27 +100,53 @@ void ledSetSole(uint8_t led) {
   }
 }
 
+// Discrete Melody LED controller with zero bleed during note rests
 void ledMelodySet(uint8_t led) {
-  // Always lock onboard RGB to 100% Solid Purple (#7b00ff)
-  ledSetOnboardPurple();
-
   if (!g_ledEnabled) {
-    pinMode(PA15, OUTPUT);
-    digitalWrite(PA15, LOW);
+    pinMode(PA15, OUTPUT); digitalWrite(PA15, LOW);
+    pinMode(PA14, OUTPUT); digitalWrite(PA14, LOW);
+    pinMode(PA13, OUTPUT); digitalWrite(PA13, LOW);
+    pinMode(PA12, OUTPUT); digitalWrite(PA12, LOW);
     return;
   }
 
   pinMode(PA15, OUTPUT);
-  if (led != 0) {
-    digitalWrite(PA15, HIGH); // External Red LED pulse
-  } else {
+  pinMode(PA14, OUTPUT);
+  pinMode(PA13, OUTPUT);
+  pinMode(PA12, OUTPUT);
+
+  if (led == 1) {        // 1 = RED ONLY (PA15 HIGH, others LOW)
+    digitalWrite(PA15, HIGH);
+    digitalWrite(PA14, LOW);
+    digitalWrite(PA13, LOW);
+    digitalWrite(PA12, LOW);
+  } else if (led == 2) { // 2 = GREEN ONLY (PA14 HIGH, others LOW)
     digitalWrite(PA15, LOW);
+    digitalWrite(PA14, HIGH);
+    digitalWrite(PA13, LOW);
+    digitalWrite(PA12, LOW);
+  } else if (led == 3) { // 3 = YELLOW ONLY (PA13 HIGH, others LOW)
+    digitalWrite(PA15, LOW);
+    digitalWrite(PA14, LOW);
+    digitalWrite(PA13, HIGH);
+    digitalWrite(PA12, LOW);
+  } else if (led == 4) { // 4 = ALL THREE TOGETHER (Final chord / celebration)
+    digitalWrite(PA15, HIGH);
+    digitalWrite(PA14, HIGH);
+    digitalWrite(PA13, HIGH);
+    digitalWrite(PA12, LOW);
+  } else {               // 0 = REST (All LEDs strictly OFF, zero bleed!)
+    digitalWrite(PA15, LOW);
+    digitalWrite(PA14, LOW);
+    digitalWrite(PA13, LOW);
+    digitalWrite(PA12, LOW);
   }
 }
 
-// Strict cycle: External status LED pulse
+// Strict repeating cycle: RED (1) -> GREEN (2) -> YELLOW (3) -> RED (1) -> GREEN (2) -> YELLOW (3)...
 void ledStepRGY(uint8_t index) {
-  ledMelodySet((index % 2) + 1);
+  static const uint8_t RGY[] = { 1, 2, 3 }; // 1=Red, 2=Green, 3=Yellow
+  ledMelodySet(RGY[index % 3]);
 }
 
 
