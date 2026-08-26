@@ -185,6 +185,51 @@ static void drawTightString(int16_t x, int16_t y, const char *str, uint8_t maxCh
   }
 }
 
+// Creative Cyber HUD Divider with center node and tech end-notches
+static void drawCyberDivider(int16_t x1, int16_t x2, int16_t y) {
+  int16_t mid = (x1 + x2) / 2;
+  // Flanking tech lines
+  oled.drawFastHLine(x1, y, mid - x1 - 8, SSD1306_WHITE);
+  oled.drawFastHLine(mid + 9, y, x2 - mid - 8, SSD1306_WHITE);
+  // End corner notches
+  oled.drawPixel(x1, y - 2, SSD1306_WHITE);
+  oled.drawPixel(x1, y + 2, SSD1306_WHITE);
+  oled.drawPixel(x2, y - 2, SSD1306_WHITE);
+  oled.drawPixel(x2, y + 2, SSD1306_WHITE);
+  // Center cyber diamond node
+  oled.fillRoundRect(mid - 4, y - 2, 9, 5, 1, SSD1306_WHITE);
+  oled.drawPixel(mid, y, SSD1306_BLACK);
+}
+
+// Creative Segmented Cyber Cell Bar with Tech End-Brackets
+static void drawSegmentedCyberBar(int16_t x, int16_t y, int16_t w, uint8_t pct) {
+  // Left Tech Bracket [<
+  oled.drawFastVLine(x, y - 1, 10, SSD1306_WHITE);
+  oled.drawFastHLine(x, y - 1, 4, SSD1306_WHITE);
+  oled.drawFastHLine(x, y + 8, 4, SSD1306_WHITE);
+
+  // Right Tech Bracket >]
+  oled.drawFastVLine(x + w, y - 1, 10, SSD1306_WHITE);
+  oled.drawFastHLine(x + w - 3, y - 1, 4, SSD1306_WHITE);
+  oled.drawFastHLine(x + w - 3, y + 8, 4, SSD1306_WHITE);
+
+  // 10 Segmented Cyber Cell Blocks
+  const uint8_t NUM_BLOCKS = 10;
+  uint8_t filledCount = (pct * NUM_BLOCKS) / 100;
+  int16_t blockStartX = x + 7;
+  int16_t blockW = 7;
+  int16_t blockGap = 2;
+
+  for (uint8_t b = 0; b < NUM_BLOCKS; b++) {
+    int16_t bx = blockStartX + b * (blockW + blockGap);
+    if (b < filledCount) {
+      oled.fillRect(bx, y + 1, blockW, 6, SSD1306_WHITE);
+    } else {
+      oled.drawRect(bx, y + 1, blockW, 6, SSD1306_WHITE);
+    }
+  }
+}
+
 void uiRunGlitchBootLock() {
   // ── 1. INITIAL GLITCH ANIMATION FOR "Ra-One" (WITH SYNCED AUDIO) ───
   static const char *const GLITCH_STRS[] = {
@@ -241,74 +286,77 @@ void uiRunGlitchBootLock() {
   };
 
   while (true) {
-    // ── BIOMETRIC TOUCH SENSOR HOLD (1.5 SECONDS TO UNLOCK) ─────
+    // ── STEALTH BIOMETRIC TOUCH SENSOR (1.0s Deadband + 1.2s Authorization) ───
     if (okPressed()) {
       if (touchStart == 0) {
         touchStart = millis();
-        if (g_buzzerEnabled) playTone(1400, 20);
       }
 
       uint32_t holdMs = millis() - touchStart;
-      uint8_t pct = (holdMs >= 1500) ? 100 : (uint8_t)((holdMs * 100) / 1500);
 
-      // Reactive LED progression:
-      // 0%  - 33%:  RED LED active
-      // 34% - 66%:  YELLOW LED active
-      // 67% - 99%:  GREEN LED active
-      // 100%:       ALL LEDs flash together!
-      if (pct < 34) {
-        ledMelodySet(1); // Red LED
-      } else if (pct < 67) {
-        ledMelodySet(3); // Yellow LED
-      } else if (pct < 100) {
-        ledMelodySet(2); // Green LED
-      } else {
-        ledMelodySet(4); // All Three LEDs
+      // FIRST 1.0 SECOND (0 - 1000ms): ABSOLUTE ZERO REACTION!
+      // Casual taps or short touches under 1 second reveal nothing to unauthorized users.
+      if (holdMs >= 1000) {
+        // AFTER 1.0s CONTINUOUS HOLD: ACTIVATE BIOMETRIC AUTHENTICATION (1.2s duration)
+        uint32_t authMs = holdMs - 1000;
+        uint8_t pct = (authMs >= 1200) ? 100 : (uint8_t)((authMs * 100) / 1200);
+
+        // Reactive LED progression:
+        // 0%  - 33%:  RED LED active
+        // 34% - 66%:  YELLOW LED active
+        // 67% - 99%:  GREEN LED active
+        // 100%:       ALL LEDs flash together!
+        if (pct < 34) {
+          ledMelodySet(1); // Red LED
+        } else if (pct < 67) {
+          ledMelodySet(3); // Yellow LED
+        } else if (pct < 100) {
+          ledMelodySet(2); // Green LED
+        } else {
+          ledMelodySet(4); // All Three LEDs
+        }
+
+        // Biometric charging audio feedback (frequency rises smoothly with progress)
+        buzzerBiometricCharge(pct);
+
+        oledClear();
+        oled.setTextColor(SSD1306_WHITE);
+
+        // Bold Title (Pinned in position)
+        drawBoldRaOne((OLED_W - 6 * 12) / 2, 4, "Ra-One");
+
+        // Creative Cyber HUD Divider
+        drawCyberDivider(14, 114, 23);
+
+        oled.setTextSize(1);
+        oled.setCursor((OLED_W - 17 * 6) / 2, 27);
+        oled.print("AUTHENTICATING...");
+
+        // Creative Segmented Cyber Cell Bar
+        drawSegmentedCyberBar(12, 38, 104, pct);
+
+        // Status percentage text
+        oled.setCursor((OLED_W - 14 * 6) / 2, 53);
+        if (pct < 100) {
+          char pBuf[20];
+          snprintf(pBuf, sizeof(pBuf), "SCANNING...%2u%%", pct);
+          oled.print(pBuf);
+        } else {
+          oled.print("ACCESS GRANTED");
+        }
+        oledFlush();
+
+        if (pct >= 100) {
+          // Unlock Achieved!
+          delay(150);
+          ledMelodySet(0);
+          if (g_buzzerEnabled) buzzerSuccess();
+          ledFlashGreen(2, 60);
+          break;
+        }
+        delay(20);
+        continue;
       }
-
-      // Biometric charging audio feedback (frequency rises smoothly with progress)
-      buzzerBiometricCharge(pct);
-
-      oledClear();
-      oled.setTextColor(SSD1306_WHITE);
-
-      // Bold Title (Pinned in position)
-      drawBoldRaOne((OLED_W - 6 * 12) / 2, 4, "Ra-One");
-
-      oled.drawFastHLine(14, 24, 100, SSD1306_WHITE);
-
-      oled.setTextSize(1);
-      oled.setCursor((OLED_W - 17 * 6) / 2, 28);
-      oled.print("AUTHENTICATING...");
-
-      // Scanning Progress Bar
-      oled.drawRect(14, 40, 100, 8, SSD1306_WHITE);
-      int16_t fillW = (96 * pct) / 100;
-      if (fillW > 0) {
-        oled.fillRect(16, 42, fillW, 4, SSD1306_WHITE);
-      }
-
-      // Status percentage text
-      oled.setCursor((OLED_W - 14 * 6) / 2, 52);
-      if (pct < 100) {
-        char pBuf[20];
-        snprintf(pBuf, sizeof(pBuf), "SCANNING...%2u%%", pct);
-        oled.print(pBuf);
-      } else {
-        oled.print("ACCESS GRANTED");
-      }
-      oledFlush();
-
-      if (pct >= 100) {
-        // Unlock Achieved!
-        delay(150);
-        ledMelodySet(0);
-        if (g_buzzerEnabled) buzzerSuccess();
-        ledFlashGreen(2, 60);
-        break;
-      }
-      delay(20);
-      continue;
     } else {
       if (touchStart != 0) {
         touchStart = 0;
@@ -316,16 +364,16 @@ void uiRunGlitchBootLock() {
       }
     }
 
-    // ── NOTICEABLE FULL-WORD DISTORTION GLITCH ON "Ra-One" (NO POSITION SHIFT) ───
+    // ── SUSTAINED FULL-WORD DISTORTION GLITCH ON "Ra-One" (NO POSITION SHIFT) ───
     const char *titleText = "Ra-One";
     bool activeGlitchThisFrame = false;
 
     if (glitchFrameCount > 0) {
       glitchFrameCount--;
-      titleText = MINOR_GLITCH_WORDS[glitchVariant % 6];
+      titleText = MINOR_GLITCH_WORDS[(glitchVariant + glitchFrameCount) % 6];
       activeGlitchThisFrame = true;
     } else if (millis() > glitchCooldown) {
-      glitchFrameCount = random(2, 4); // Active for 2-3 frames (~60-90ms)
+      glitchFrameCount = random(8, 13); // Sustained for 8-12 frames (~240ms - 360ms)
       glitchVariant = random(6);
       glitchCooldown = millis() + random(3500, 6000);
       buzzerMicroGlitch(); // Synchronized audio blip!
@@ -379,8 +427,8 @@ void uiRunGlitchBootLock() {
       oled.drawFastHLine(titleX - 2, titleY + random(2, 14), 72 + 4, SSD1306_WHITE);
     }
 
-    // 2. Cyber divider line
-    oled.drawFastHLine(18, 29, 92, SSD1306_WHITE);
+    // 2. Creative Cyber HUD Divider
+    drawCyberDivider(16, 112, 29);
 
     // 3. Subtitle rendering with tight 5px char advance (single line, no "_" cursor)
     uint8_t curStrLen = strlen(curStr);
