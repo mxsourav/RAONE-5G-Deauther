@@ -29,12 +29,10 @@ void hwBegin() {
 }
 
 void ledSetOnboardPurple() {
-  pinMode(PA12, OUTPUT);
-  pinMode(PA13, OUTPUT);
   pinMode(PA14, OUTPUT);
-  digitalWrite(PA12, HIGH); // Red channel ON
-  digitalWrite(PA13, HIGH); // Blue channel ON
-  digitalWrite(PA14, LOW);  // Green channel OFF (Prevents Teal/Cyan)
+  digitalWrite(PA14, LOW);   // Green: 0 (from #7b00ff)
+  analogWrite(PA12, 123);    // Red: 123 (from #7b00ff)
+  analogWrite(PA13, 255);    // Blue: 255 (from #7b00ff)
 }
 
 // ── Button primitives ────────────────────────────────────────
