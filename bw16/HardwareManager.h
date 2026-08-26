@@ -42,4 +42,7 @@ void buzzerError();
 void buzzerSuccess();
 void buzzerBootMelody();
 void buzzerScanDone();
+void buzzerGlitchEffect(uint8_t intensity = 1);
+void buzzerMicroGlitch();
+void buzzerBiometricCharge(uint8_t pct);
 

@@ -164,51 +164,65 @@ void uiBegin() {
   oledFlush();
 }
 
+// Bold Text Renderer (size 2) with shadow thickness overdraw
+static void drawBoldRaOne(int16_t x, int16_t y, const char *text) {
+  oled.setTextSize(2);
+  oled.setTextColor(SSD1306_WHITE);
+  oled.setCursor(x, y);
+  oled.print(text);
+  oled.setCursor(x + 1, y);
+  oled.print(text);
+  oled.setCursor(x, y + 1);
+  oled.print(text);
+  oled.setCursor(x + 1, y + 1);
+  oled.print(text);
+}
+
+// Tight String Renderer (5px character advance) so 22-char "instagram/mxsourav.dev" fits in 110px!
+static void drawTightString(int16_t x, int16_t y, const char *str, uint8_t maxChars) {
+  for (uint8_t i = 0; i < maxChars && str[i] != '\0'; i++) {
+    oled.drawChar(x + (i * 5), y, str[i], SSD1306_WHITE, SSD1306_BLACK, 1);
+  }
+}
+
 void uiRunGlitchBootLock() {
-  // ── 1. INITIAL GLITCH ANIMATION FOR "Ra-One" ──────────────────
+  // ── 1. INITIAL GLITCH ANIMATION FOR "Ra-One" (WITH SYNCED AUDIO) ───
   static const char *const GLITCH_STRS[] = {
     "R@-0N3", "RA_ONE", "R4-0NE", "RA-ON£", "R#--N3", "Ra-0ne", "R4_ON3", "Ra-One"
   };
   const uint8_t GLITCH_COUNT = sizeof(GLITCH_STRS) / sizeof(GLITCH_STRS[0]);
 
-  for (uint8_t frame = 0; frame < 16; frame++) {
+  for (uint8_t frame = 0; frame < 18; frame++) {
     oledClear();
-    oled.setTextColor(SSD1306_WHITE);
-    oled.setTextSize(2);
 
-    const char *text = (frame < 12) ? GLITCH_STRS[frame % GLITCH_COUNT] : "Ra-One";
-    int16_t jx = (frame < 12) ? random(-3, 4) : 0;
-    int16_t jy = (frame < 12) ? random(-2, 3) : 0;
+    const char *text = (frame < 14) ? GLITCH_STRS[frame % GLITCH_COUNT] : "Ra-One";
+    int16_t jx = (frame < 14) ? random(-3, 4) : 0;
+    int16_t jy = (frame < 14) ? random(-2, 3) : 0;
 
     int16_t tw = strlen(text) * 12;
     int16_t tx = (OLED_W - tw) / 2 + jx;
-    oled.setCursor(tx, 10 + jy);
-    oled.print(text);
+    drawBoldRaOne(tx, 10 + jy, text);
 
-    if (frame < 12) {
-      uint8_t noiseLines = random(1, 3);
-      for (uint8_t n = 0; n < noiseLines; n++) {
-        int16_t ly = random(0, 64);
-        int16_t lx = random(0, 60);
-        int16_t lw = random(20, 70);
-        oled.fillRect(lx, ly, lw, 1, SSD1306_WHITE);
-      }
-      if (g_buzzerEnabled && frame % 4 == 0) {
-        playTone(random(2200, 4200), 4);
-      }
+    if (frame < 14) {
+      buzzerGlitchEffect(2); // High-tech digital noise sweep
     }
 
     oledFlush();
-    delay(40);
+    delay(35);
   }
+
+  // Settle on bold Ra-One
+  oledClear();
+  drawBoldRaOne((OLED_W - 6 * 12) / 2, 8, "Ra-One");
+  oledFlush();
+  delay(100);
 
   // ── 2. SUBTITLES & STEALTH BIOMETRIC UNLOCK LOOP ──────────────
   static const char *const SUBTITLES[] = {
-    "by @mxsourav",
     "github.com/mxsourav",
-    "instagram.com/mxsourav.dev"
+    "instagram/mxsourav.dev"
   };
-  const uint8_t SUB_COUNT = 3;
+  const uint8_t SUB_COUNT = 2;
 
   enum SubAnimState { SUB_TYPE_IN, SUB_HOLD, SUB_TYPE_OUT };
   SubAnimState subState = SUB_TYPE_IN;
@@ -218,21 +232,26 @@ void uiRunGlitchBootLock() {
   uint32_t lastAnimTick = millis();
   uint32_t holdStart = 0;
   uint32_t touchStart = 0;
-  uint32_t glitchCooldown = millis() + random(2500, 4500);
-  bool microGlitch = false;
+  uint32_t glitchCooldown = millis() + random(3000, 5500);
+  uint8_t glitchFrameCount = 0;
+  uint8_t glitchVariant = 0;
+
+  static const char *const MINOR_GLITCH_WORDS[] = {
+    "R4-0NE", "R#-0N£", "RΔ-ØN3", "R[-0]E", "RA_0N3", "R4-0N3"
+  };
 
   while (true) {
     // ── BIOMETRIC TOUCH SENSOR HOLD (1.5 SECONDS TO UNLOCK) ─────
     if (okPressed()) {
       if (touchStart == 0) {
         touchStart = millis();
-        if (g_buzzerEnabled) playTone(1400, 15);
+        if (g_buzzerEnabled) playTone(1400, 20);
       }
 
       uint32_t holdMs = millis() - touchStart;
       uint8_t pct = (holdMs >= 1500) ? 100 : (uint8_t)((holdMs * 100) / 1500);
 
-      // Reactive LED behavior while holding biometric touch sensor:
+      // Reactive LED progression:
       // 0%  - 33%:  RED LED active
       // 34% - 66%:  YELLOW LED active
       // 67% - 99%:  GREEN LED active
@@ -247,13 +266,14 @@ void uiRunGlitchBootLock() {
         ledMelodySet(4); // All Three LEDs
       }
 
+      // Biometric charging audio feedback (frequency rises smoothly with progress)
+      buzzerBiometricCharge(pct);
+
       oledClear();
       oled.setTextColor(SSD1306_WHITE);
 
-      // Title
-      oled.setTextSize(2);
-      oled.setCursor((OLED_W - 6 * 12) / 2, 4);
-      oled.print("Ra-One");
+      // Bold Title (Pinned in position)
+      drawBoldRaOne((OLED_W - 6 * 12) / 2, 4, "Ra-One");
 
       oled.drawFastHLine(14, 24, 100, SSD1306_WHITE);
 
@@ -261,7 +281,7 @@ void uiRunGlitchBootLock() {
       oled.setCursor((OLED_W - 17 * 6) / 2, 28);
       oled.print("AUTHENTICATING...");
 
-      // Biometric Scanning Progress Bar
+      // Scanning Progress Bar
       oled.drawRect(14, 40, 100, 8, SSD1306_WHITE);
       int16_t fillW = (96 * pct) / 100;
       if (fillW > 0) {
@@ -274,46 +294,51 @@ void uiRunGlitchBootLock() {
         char pBuf[20];
         snprintf(pBuf, sizeof(pBuf), "SCANNING...%2u%%", pct);
         oled.print(pBuf);
-        if (g_buzzerEnabled && (pct % 25 == 0)) {
-          playTone(1000 + pct * 12, 8);
-        }
       } else {
         oled.print("ACCESS GRANTED");
       }
       oledFlush();
 
       if (pct >= 100) {
-        // Complete Unlock!
+        // Unlock Achieved!
         delay(150);
         ledMelodySet(0);
         if (g_buzzerEnabled) buzzerSuccess();
         ledFlashGreen(2, 60);
         break;
       }
-      delay(25);
+      delay(20);
       continue;
     } else {
-      // Finger released: turn off LEDs & reset touch tracking
       if (touchStart != 0) {
         touchStart = 0;
         ledMelodySet(0);
       }
     }
 
-    // ── SUBTLE OCCASIONAL GLITCH ON "Ra-One" ─────────────────────
-    if (millis() > glitchCooldown) {
-      microGlitch = true;
-      glitchCooldown = millis() + random(3000, 6000);
-    } else {
-      microGlitch = false;
+    // ── NOTICEABLE FULL-WORD DISTORTION GLITCH ON "Ra-One" (NO POSITION SHIFT) ───
+    const char *titleText = "Ra-One";
+    bool activeGlitchThisFrame = false;
+
+    if (glitchFrameCount > 0) {
+      glitchFrameCount--;
+      titleText = MINOR_GLITCH_WORDS[glitchVariant % 6];
+      activeGlitchThisFrame = true;
+    } else if (millis() > glitchCooldown) {
+      glitchFrameCount = random(2, 4); // Active for 2-3 frames (~60-90ms)
+      glitchVariant = random(6);
+      glitchCooldown = millis() + random(3500, 6000);
+      buzzerMicroGlitch(); // Synchronized audio blip!
+      titleText = MINOR_GLITCH_WORDS[glitchVariant % 6];
+      activeGlitchThisFrame = true;
     }
 
-    // ── SUBTITLE IN/OUT ANIMATION STATE MACHINE (NO SOUND) ──────
+    // ── SUBTITLE IN/OUT ANIMATION (NO SOUND, NO "_" CURSOR) ─────
     const char *curStr = SUBTITLES[subIdx];
     uint8_t fullLen = strlen(curStr);
 
     if (subState == SUB_TYPE_IN) {
-      if (millis() - lastAnimTick >= 45) {
+      if (millis() - lastAnimTick >= 40) {
         lastAnimTick = millis();
         if (charPos < fullLen) {
           charPos++;
@@ -343,65 +368,32 @@ void uiRunGlitchBootLock() {
     oledClear();
     oled.setTextColor(SSD1306_WHITE);
 
-    // 1. Title "Ra-One" with minor glitch effect
-    oled.setTextSize(2);
-    int16_t gx = 0, gy = 0;
-    const char *titleStr = "Ra-One";
-    if (microGlitch) {
-      gx = (random(2) == 0) ? -1 : 1;
-      titleStr = (random(2) == 0) ? "R4-One" : "Ra-0ne";
+    // 1. Bold "Ra-One" (stays at fixed centered position X=28, Y=8)
+    int16_t titleX = (OLED_W - 6 * 12) / 2;
+    int16_t titleY = 8;
+    drawBoldRaOne(titleX, titleY, titleText);
+
+    // If glitch active, draw 2 thin raster slice tears across the word
+    if (activeGlitchThisFrame) {
+      oled.drawFastHLine(titleX - 6, titleY + random(2, 14), 72 + 12, SSD1306_INVERSE);
+      oled.drawFastHLine(titleX - 2, titleY + random(2, 14), 72 + 4, SSD1306_WHITE);
     }
-    oled.setCursor((OLED_W - 6 * 12) / 2 + gx, 10 + gy);
-    oled.print(titleStr);
 
     // 2. Cyber divider line
-    oled.drawFastHLine(18, 30, 92, SSD1306_WHITE);
+    oled.drawFastHLine(18, 29, 92, SSD1306_WHITE);
 
-    // 3. Subtitle rendering (handles both single line and long URLs cleanly)
-    oled.setTextSize(1);
-    char dispBuf[32];
-    strncpy(dispBuf, curStr, charPos);
-    dispBuf[charPos] = '\0';
-
-    if (fullLen <= 20) {
-      // Single centered line with cursor
-      int16_t sx = (OLED_W - (int16_t)(strlen(dispBuf) * 6)) / 2;
-      if (sx < 2) sx = 2;
-      oled.setCursor(sx, 40);
-      oled.print(dispBuf);
-      if (subState != SUB_HOLD || (millis() / 350) % 2 == 0) {
-        oled.print("_");
-      }
-    } else {
-      // Multi-line split for long URLs (e.g. "instagram.com/mxsourav.dev")
-      char line1[20] = {0};
-      char line2[20] = {0};
-      uint8_t splitAt = 14; // Split at "instagram.com/"
-      if (charPos <= splitAt) {
-        strncpy(line1, dispBuf, charPos);
-      } else {
-        strncpy(line1, dispBuf, splitAt);
-        strncpy(line2, dispBuf + splitAt, charPos - splitAt);
-      }
-
-      int16_t s1 = (OLED_W - (int16_t)(strlen(line1) * 6)) / 2;
-      oled.setCursor(max((int16_t)2, s1), 36);
-      oled.print(line1);
-
-      if (charPos > splitAt) {
-        int16_t s2 = (OLED_W - (int16_t)(strlen(line2) * 6)) / 2;
-        oled.setCursor(max((int16_t)2, s2), 48);
-        oled.print(line2);
-      }
-      if (subState != SUB_HOLD || (millis() / 350) % 2 == 0) {
-        oled.print("_");
-      }
-    }
+    // 3. Subtitle rendering with tight 5px char advance (single line, no "_" cursor)
+    uint8_t curStrLen = strlen(curStr);
+    int16_t subWidth = curStrLen * 5;
+    int16_t subX = (OLED_W - subWidth) / 2;
+    if (subX < 2) subX = 2;
+    drawTightString(subX, 42, curStr, charPos);
 
     oledFlush();
     delay(30);
   }
 }
+
 
 
 void uiDrawSplashProgress(uint8_t percent, const char *msg) {

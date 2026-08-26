@@ -234,6 +234,29 @@ void buzzerSuccess() {
   playTone(2400, 80);
 }
 
+void buzzerGlitchEffect(uint8_t intensity) {
+  if (!g_buzzerEnabled) return;
+  static const uint16_t GLITCH_FREQS[] = { 4200, 1800, 3600, 950, 4800, 1300, 2900, 5200 };
+  uint8_t steps = (intensity > 1) ? 4 : 2;
+  for (uint8_t i = 0; i < steps; i++) {
+    playTone(GLITCH_FREQS[random(8)], random(3, 7));
+    delayMicroseconds(random(300, 1200));
+  }
+}
+
+void buzzerMicroGlitch() {
+  if (!g_buzzerEnabled) return;
+  playTone(3900, 4);
+  delayMicroseconds(600);
+  playTone(1700, 4);
+}
+
+void buzzerBiometricCharge(uint8_t pct) {
+  if (!g_buzzerEnabled) return;
+  uint16_t freq = 700 + ((uint16_t)pct * 22); // 700Hz -> 2900Hz smooth rise
+  playTone(freq, 8);
+}
+
 // ── Hedwig's Theme (Harry Potter) ─────────────────────────────
 // Exact note frequencies and timing from Harry_Potter.ino reference
 void buzzerBootMelody() {
