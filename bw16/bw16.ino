@@ -252,8 +252,8 @@ void setup() {
   hwBegin();
   uiBegin();
 
-  // 2. Paint boot screen instantly so user never sees a black display
-  uiDrawSplashProgress(5, "INITIALIZING...");
+  // 2. Glitch Animation {Ra-One}, Typewriter {by @mxsourav}, and Biometric Fingerprint 1.5s Unlock!
+  uiRunGlitchBootLock();
 
   Serial.println(F("\n\n=========================================="));
   Serial.println(F("NICE MCU RTL8720DN DIAGNOSTIC BOOT"));

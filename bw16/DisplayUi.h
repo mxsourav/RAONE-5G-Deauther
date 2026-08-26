@@ -15,6 +15,7 @@
 
 void uiBegin();
 void oledFlush();
+void uiRunGlitchBootLock();
 void uiDrawSplashProgress(uint8_t percent, const char *msg = nullptr);
 void uiDrawInitialLogo();
 
