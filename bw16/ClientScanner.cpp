@@ -115,7 +115,7 @@ void clientScanStart(uint8_t channel, const uint8_t *targetBssid) {
   wifi_off();
   delay(100);
   wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25);
+  wifi_change_channel_plan(0x7F);
   delay(100);
   wifi_set_channel(channel);
   delay(50);

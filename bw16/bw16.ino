@@ -665,6 +665,45 @@ void handleNav() {
 }
 
 // ─────────────────────────────────────────────────────────────
+//  Client Scan Runner (6-second interactive sniffer)
+// ─────────────────────────────────────────────────────────────
+
+void runClientScan(uint8_t channel, const uint8_t *targetMacBytes) {
+  uiState = UI_CLIENT_SCANNING;
+  clientScanStart(channel, targetMacBytes);
+
+  uint32_t startMs = millis();
+  while (millis() - startMs < 6000) {
+    if (attackStopRequested()) {
+      clientScanStop();
+      buzzerClick();
+      uiState = UI_ACTION_MENU;
+      uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex);
+      return;
+    }
+
+    uint32_t elapsed = millis() - startMs;
+    uint8_t remaining = (elapsed < 6000) ? (6 - (elapsed / 1000)) : 1;
+    char subMsg[32];
+    snprintf(subMsg, sizeof(subMsg), "Found: %u | %us left", clientScanCount(), remaining);
+    uiDrawGenericMessage("SCANNING CLIENTS", subMsg, "Hold OK to cancel");
+
+    delay(200);
+    yield();
+  }
+
+  clientScanStop();
+  buzzerScanDone();
+
+  uiState = UI_CLIENT_LIST;
+  clientListSel = 0;
+  clientListTop = 0;
+  const char *macStrs[MAX_CLIENTS];
+  for (uint8_t i = 0; i < clientScanCount(); i++) macStrs[i] = clientScanGet(i).macStr;
+  uiDrawClientList(macStrs, clientListSel, clientListTop, clientScanCount());
+}
+
+// ─────────────────────────────────────────────────────────────
 //  OK handler – select / confirm
 // ─────────────────────────────────────────────────────────────
 
@@ -827,9 +866,7 @@ void handleOk() {
       // Scan Clients
       uint8_t targetMacBytes[6];
       parseMacAddress(wifiScannerNetwork(actionNetworkIdx).bssid, targetMacBytes);
-      uiState = UI_CLIENT_SCANNING;
-      clientScanStart(wifiScannerNetwork(actionNetworkIdx).channel, targetMacBytes);
-      uiDrawGenericMessage("Scanning Clients...", "Sniffing data frames", "Wait 6s...");
+      runClientScan(wifiScannerNetwork(actionNetworkIdx).channel, targetMacBytes);
     }
     else if (actionMenuIndex == 2) {
       // Clone & Beacon
