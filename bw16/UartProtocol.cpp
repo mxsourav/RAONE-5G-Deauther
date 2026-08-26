@@ -8,13 +8,6 @@ static char _rxBuf[128];
 static uint8_t _rxIdx = 0;
 static unsigned long _lastBeaconMs = 0;
 
-// Quick LED flash to visually confirm UART activity
-static void uartFlashLed() {
-  digitalWrite(LED_GREEN, LED_ON_STATE);
-  delay(30);
-  digitalWrite(LED_GREEN, LED_OFF_STATE);
-}
-
 void uartProtocolBegin(unsigned long baud) {
   Serial.begin(baud); // Hardware LOG_UART on PA7 (TX) and PA8 (RX)
   Serial.println(F("[UART] LOG_UART initialized on PA7/PA8 @ 115200"));
@@ -29,7 +22,6 @@ void setSystemMode(SystemMode mode) {
 }
 
 void uartSendPong() {
-  uartFlashLed(); // Visual confirmation: GREEN blink = ping received!
   Serial.print("RAONE_READY\n");
   Serial.print("PONG_RAONE_SLAVE_READY\n");
   Serial.flush();

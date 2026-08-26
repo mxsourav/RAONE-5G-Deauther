@@ -185,8 +185,6 @@ void telemetryWatchdogTask(const void *arg) {
 
   while (1) {
     delay(1000);
-    // Toggle Yellow LED as independent hardware heartbeat for FreeRTOS scheduler liveness
-    digitalWrite(LED_YELLOW, !digitalRead(LED_YELLOW));
 
     TxProbeSummary summary = txProbeGetSummary();
     
@@ -216,7 +214,13 @@ void telemetryWatchdogTask(const void *arg) {
 
 void setup() {
   Serial.begin(115200);
-  delay(150);
+
+  // 1. Initialize hardware and OLED display IMMEDIATELY on boot
+  hwBegin();
+  uiBegin();
+
+  // 2. Paint boot screen instantly so user never sees a black display
+  uiDrawSplashProgress(5, "INITIALIZING...");
 
   Serial.println(F("\n\n=========================================="));
   Serial.println(F("NICE MCU RTL8720DN DIAGNOSTIC BOOT"));
@@ -226,35 +230,73 @@ void setup() {
   Serial.println(F("Starting TX diagnostics..."));
   Serial.println(F("==========================================\n"));
 
-  // Start telemetry watchdog immediately with AboveNormal priority (preempts main task on freeze)
-  os_thread_create_arduino(telemetryWatchdogTask, NULL, OS_PRIORITY_ABOVENORMAL, 2048);
+  // 3. Full 4.5-Second Melodic Boot Splash (Harry Potter Hedwig Theme)
+  struct MelodyNote {
+    uint16_t freq;
+    uint16_t dur;
+    uint16_t pause;
+  };
 
-  hwBegin();
-  uartProtocolBegin(115200);
-  irBegin();
-  uiBegin();
-  uiDrawInitialLogo();
+  static const MelodyNote NOTES[] = {
+    { 494, 150,  50 }, // B4
+    { 659, 200,  70 }, // E5
+    { 784,  90,  40 }, // G5
+    { 740, 150,  50 }, // F#5
+    { 659, 260,  80 }, // E5
+    { 988, 150,  60 }, // B5
+    { 880, 260,  80 }, // A5
+    { 740, 260,  80 }, // F#5
+    { 659, 200,  70 }, // E5
+    { 784,  90,  40 }, // G5
+    { 740, 150,  50 }, // F#5
+    { 622, 260,  80 }, // D#5
+    { 698, 150,  60 }, // F5
+    { 494, 260,  90 }, // B4
+    { 440, 150,  60 }, // A4
+    { 494, 280,  60 }  // B4
+  };
 
-  wifiScannerBegin();
-  sniffBegin();
-  bleBegin();
-  beaconSpamBegin();
-  bleSpamBegin();
+  const size_t totalNotes = sizeof(NOTES) / sizeof(NOTES[0]);
 
-  // Start background dual-band WiFi scan immediately
-  wifiScannerStartScan();
+  for (size_t i = 0; i < totalNotes; i++) {
+    uint8_t percent = ((i + 1) * 100) / totalNotes;
+    const char *msg = "BOOTING RAONE...";
+    if (percent < 20) {
+      msg = "INIT HARDWARE...";
+    } else if (percent < 40) {
+      msg = "CALIBRATING RADIO...";
+    } else if (percent < 60) {
+      msg = "SCANNING 2.4G & 5G...";
+    } else if (percent < 85) {
+      msg = "BUILDING AP MATRIX...";
+    } else {
+      msg = "SYSTEM READY!";
+    }
 
-  // ─── Ultra-Fast 1.5s Boot Splash ───
-  for (uint8_t i = 0; i < 3; i++) {
-    uint8_t percent = (i + 1) * 33;
-    const char *msg = (i == 0) ? "INIT HARDWARE..." : (i == 1) ? "CALIBRATING RADIO..." : "SYSTEM READY!";
     uiDrawSplashProgress(percent, msg);
-    
-    uartPollCommand();
+
+    // Staggered non-blocking subsystem initialization across melody steps
+    if (i == 0) {
+      uartProtocolBegin(115200);
+      irBegin();
+      os_thread_create_arduino(telemetryWatchdogTask, NULL, OS_PRIORITY_ABOVENORMAL, 2048);
+    } else if (i == 2) {
+      wifiScannerBegin();
+      sniffBegin();
+      bleBegin();
+      beaconSpamBegin();
+      bleSpamBegin();
+    } else if (i == 5) {
+      wifiScannerStartScan();
+    } else if (i >= 6) {
+      uartPollCommand();
+    }
+
+    // Rhythmic Red -> Green -> Yellow LED cycle on each note
     ledStepRGY(i);
-    playTone(1800 + (i * 400), 60);
+    playTone(NOTES[i].freq, NOTES[i].dur);
     ledAllOff();
-    delay(100);
+    if (NOTES[i].pause > 0) delay(NOTES[i].pause);
   }
 
   // Non-blocking scan check
@@ -265,7 +307,7 @@ void setup() {
   ledCelebrateSync(); // Exact 3x Flash + 3x Beep synchronized together!
   setLedMode(LED_MODE_IDLE);
 
-  // Boot directly into Main Menu with zero hang (Slave mode activates on-demand via UART)
+  // Boot directly into Main Menu
   setSystemMode(SYS_MODE_STANDALONE);
   drawMainMenu();
 }

@@ -68,6 +68,9 @@ void ledAllOff() {
   ledRedOff();
   ledGreenOff();
   ledYellowOff();
+  // Keep onboard RGB LED solid PURPLE permanently
+  pinMode(ONBOARD_RGB_R, OUTPUT);
+  digitalWrite(ONBOARD_RGB_R, HIGH);
 }
 
 // ── LED flash patterns ────────────────────────────────────────
@@ -154,23 +157,12 @@ void setLedMode(LedMode mode) {
 }
 
 void ledTaskUpdate() {
-  if (_currentLedMode == LED_MODE_OFF) {
+  if (_currentLedMode == LED_MODE_OFF || _currentLedMode == LED_MODE_IDLE) {
     ledAllOff();
     return;
   }
 
   uint32_t now = millis();
-
-  // Subtle Idle Heartbeat: quick single pulse on Green every 3.5 seconds
-  if (_currentLedMode == LED_MODE_IDLE) {
-    uint32_t cycle = now % 3500;
-    if (cycle < 60) {
-      ledGreenOn();
-    } else {
-      ledGreenOff();
-    }
-    return;
-  }
 
   if (_currentLedMode == LED_MODE_TASK_SUCCESS) {
     // Keep solid green for 1.5s then return to idle
