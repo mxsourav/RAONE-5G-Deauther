@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define FIRMWARE_NAME    "RAONE"
-#define FIRMWARE_VERSION "V9.0 DUAL-BAND"
+#define FIRMWARE_VERSION "V8.0 DUAL-BAND"
 #define FIRMWARE_BOARD   "BW16 RTL8720DN"
 
 #define ONBOARD_RGB_R    PA12 // D12 - Red channel of onboard RGB LED

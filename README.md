@@ -13,7 +13,28 @@ If you are using the NiceMCU RTL8720DN board, the factory often populates the 0-
 
 ## Version History
 
-### v7.0 (Current)
+### v8.0 (Current)
+* **[NEW] Cyber Glitch & Biometric Touch Security Lock:**
+  * **Stealth Boot Lock:** Power-on triggers an audiovisual cyber glitch distortion on the bold `Ra-One` title with synchronized digital frequency bursts, followed by a tight single-line cycling subtitle animation (`github.com/mxsourav` and `instagram/mxsourav.dev`).
+  * **Biometric 1.5s Touch Unlock:** The device runs in complete stealth with zero prompt text. The system only unlocks and boots when the TTP223 capacitive touch sensor (`PB_20`) is held continuously for 1.5 seconds.
+  * **Escalating Audio & Reactive LED Feedback:** Features rising frequency synthesizer charging audio and a progressive **RED $\rightarrow$ YELLOW $\rightarrow$ GREEN** status LED charge-up sequence during biometric authentication.
+  * **Ambient Noticeable Glitch:** In-place letter-corruption distortion with horizontal micro-tears and synchronized audio chirps occurs subtly during standby without moving the word position.
+* **[NEW] Client Sniffing & Target Action Menu:**
+  * Interactive 6-second Promiscuous Client Sniffer with dual-band channel plan (`0x7F`) to discover active station MAC addresses connected to target APs.
+  * Dedicated interactive Client List UI with individual client targeting and real-time countdown timer.
+* **[NEW] Multi-Reason Channel Hopping Engine:**
+  * Hopping deauth across 2.4GHz & 5GHz channels sends dual-direction spoofed management frames (`AP` $\rightarrow$ `Broadcast` & `Client` $\rightarrow$ `AP`) across multi-vendor 802.11 reason codes (`0x0007`, `0x0002`, `0x0006`, `0x0001`) to forcefully drop all client device types (iOS, Android, Windows, IoT).
+* **[NEW] System Settings Screen:**
+  * Interactive toggles for Buzzer (`ON/OFF`) and Status LEDs (`ON/OFF`) on the fly.
+* **[RESOLVED] Hardware Pin Isolation & Solid Purple Onboard RGB:**
+  * Isolated onboard RGB PWM registers (`PA12`, `PA13`, `PA14`) from external status LEDs so the onboard diode stays 100% rock-solid deep purple (`#7b00ff`) without color shifting during scans, idle, or attacks.
+  * Discrete external 3-LED repeating rhythm (**RED** $\rightarrow$ **GREEN** $\rightarrow$ **YELLOW**) during boot and scan melodies with zero bleed during rests.
+* **[RESOLVED] NAV Button Smooth Hold Auto-Scroll:**
+  * Added hardware auto-repeat scrolling (350ms initial delay + 200ms repeat interval) for smooth menu and network list navigation.
+* **[RESOLVED] Network Scan Filtering:**
+  * Re-scan cleans promiscuous radio state and strictly discards empty/non-printable `<hidden>` SSIDs.
+
+### v7.0
 * **[NEW] Dual-Mode Architecture (Standalone / Slave):**
   * **Auto-Detect Handshake:** Listens on `Serial` (115200 baud, 8-N-1) for 2.0 seconds during boot.
   * **Slave Mode (with TetraX Master):** Links with TetraX ESP32 as a dedicated 5GHz coprocessor. Accepts remote navigation (`CMD:NAV`, `CMD:OK`, `CMD:BACK`) and dual-band attack triggers over UART.

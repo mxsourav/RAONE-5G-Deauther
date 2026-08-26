@@ -1,12 +1,12 @@
-# Graph Report - D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16  (2026-08-25)
+# Graph Report - D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16  (2026-08-27)
 
 ## Corpus Check
-- 33 files · ~2,586,365 words
+- 35 files · ~2,592,829 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 227 nodes · 437 edges · 31 communities detected
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.8)
+- 266 nodes · 507 edges · 31 communities detected
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 53 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -43,78 +43,78 @@
 - [[_COMMUNITY_Community 30|Community 30]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `oledFlush()` - 29 edges
-2. `drawStatusBar()` - 25 edges
-3. `drawFooter()` - 24 edges
-4. `oledClear()` - 22 edges
+1. `oledFlush()` - 35 edges
+2. `drawStatusBar()` - 29 edges
+3. `drawFooter()` - 27 edges
+4. `oledClear()` - 24 edges
 5. `printTruncated()` - 13 edges
-6. `uiRefreshWifiAnalyzer()` - 12 edges
-7. `uiDrawNetworkList()` - 9 edges
-8. `uiRefreshBleAnalyzer()` - 9 edges
-9. `uiDrawNetworkListAll()` - 8 edges
-10. `uiDrawNetworkDetails()` - 8 edges
+6. `uiRunGlitchBootLock()` - 13 edges
+7. `uiRefreshWifiAnalyzer()` - 12 edges
+8. `playTone()` - 12 edges
+9. `uiDrawNetworkList()` - 9 edges
+10. `uiRefreshBleAnalyzer()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `bleSpamCurrent()` --calls--> `uiRefreshBleSpam()`  [INFERRED]
+  D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\BleSpam.cpp → D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\DisplayUi.cpp
 - `beaconSpamSsidCount()` --calls--> `uiRefreshBeaconSpam()`  [INFERRED]
   D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\BeaconSpam.cpp → D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\DisplayUi.cpp
 - `beaconSpamCurrentSsid()` --calls--> `uiRefreshBeaconSpam()`  [INFERRED]
   D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\BeaconSpam.cpp → D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\DisplayUi.cpp
 - `bleSpamCount()` --calls--> `uiRefreshBleSpam()`  [INFERRED]
   D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\BleSpam.cpp → D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\DisplayUi.cpp
-- `bleSpamCurrent()` --calls--> `uiRefreshBleSpam()`  [INFERRED]
-  D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\BleSpam.cpp → D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\DisplayUi.cpp
-- `bleKindLabel()` --calls--> `uiDrawBleDetails()`  [INFERRED]
+- `bleCopyDevice()` --calls--> `uiRefreshBleList()`  [INFERRED]
   D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\BluetoothScanner.cpp → D:\Gaar Fata Project\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16-5Ghz-main\BWifiKill-BW16\bw16\DisplayUi.cpp
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.14
-Nodes (43): bleCopyDevice(), bleCount(), drawFooter(), drawRssiBar(), drawStatusBar(), oledClear(), oledFlush(), printTruncated() (+35 more)
+Cohesion: 0.11
+Nodes (51): beaconSpamCurrentSsid(), beaconSpamSsidCount(), bleSpamCount(), bleCopyDevice(), bleCount(), bleKindLabel(), drawBoldRaOne(), drawFooter() (+43 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.1
-Nodes (19): beginDeviceWrite(), bleAnalyzerReset(), bleAnalyzerStatus(), bleAvgRssi(), bleBaseline(), bleKindLabel(), blePps(), blePpsHistory() (+11 more)
+Cohesion: 0.07
+Nodes (27): applyAdvertAndAddr(), bleSpamCurrent(), bleSpamStart(), bleSpamStop(), bleSpamTick(), genRandomMac(), beginDeviceWrite(), bleActive() (+19 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.19
-Nodes (22): uiBegin(), buzzerBeep(), buzzerBootMelody(), buzzerClick(), buzzerError(), buzzerScanDone(), buzzerSuccess(), hwBegin() (+14 more)
+Cohesion: 0.09
+Nodes (22): uiDrawActionMenu(), uiDrawLabStats(), uiDrawNetworkList(), ledTaskUpdate(), labStatsAverageRssi(), labStatsPrintToSerial(), isLikelyPmfProtected(), labTestEvaluate() (+14 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.13
-Nodes (17): isLikelyPmfProtected(), labTestEvaluate(), labTestPrepare(), labTestSimulateDeauth(), missPercent(), wifiScannerBusiestChannel(), wifiScannerCount(), wifiScannerCountBand() (+9 more)
+Cohesion: 0.12
+Nodes (32): uiBegin(), uiRunGlitchBootLock(), buzzerBeep(), buzzerBiometricCharge(), buzzerBootMelody(), buzzerClick(), buzzerError(), buzzerGlitchEffect() (+24 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.15
-Nodes (16): uiRefreshWifiAnalyzer(), channel5IndexOf(), promiscOnFrame(), sniffResetStats(), sniffStart(), wifiAnalyzerBand(), wifiAnalyzerBaseline(), wifiAnalyzerHistory() (+8 more)
+Nodes (17): uiDrawWifiAnalyzer(), uiRefreshWifiAnalyzer(), channel5IndexOf(), promiscOnFrame(), sniffResetStats(), sniffStart(), wifiAnalyzerBand(), wifiAnalyzerBaseline() (+9 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.15
-Nodes (7): beaconSpamCurrentSsid(), beaconSpamSsidCount(), beaconSpamTick(), buildBeacon(), wifi_tx_beacon_frame(), wifi_tx_deauth_frame(), wifi_tx_raw_frame()
+Cohesion: 0.14
+Nodes (6): beaconSpamTick(), buildBeacon(), probeRecord(), wifi_tx_beacon_frame(), wifi_tx_deauth_frame(), wifi_tx_raw_frame()
 
 ### Community 6 - "Community 6"
-Cohesion: 0.21
-Nodes (9): applyAdvertAndAddr(), bleSpamCount(), bleSpamCurrent(), bleSpamStart(), bleSpamStop(), bleSpamTick(), genRandomMac(), bleActive() (+1 more)
+Cohesion: 0.25
+Nodes (5): checkBufferMatch(), strToLower(), uartCheckMasterHandshake(), uartPollCommand(), uartSendPong()
 
 ### Community 7 - "Community 7"
 Cohesion: 0.33
 Nodes (8): clientScanPoll(), clientScanStart(), clientScanStop(), clientSniffCallback(), findClient(), isBroadcastMac(), isBssidMac(), macToStr()
 
 ### Community 8 - "Community 8"
-Cohesion: 0.36
-Nodes (6): irCodeCount(), irCodeName(), irMark(), irSendNec(), irSpace(), irTransmit()
+Cohesion: 0.29
+Nodes (8): uiDrawIrMenu(), uiRefreshIrMenu(), irCodeCount(), irCodeName(), irMark(), irSendNec(), irSpace(), irTransmit()
 
 ### Community 9 - "Community 9"
 Cohesion: 0.4
-Nodes (2): labStatsAverageRssi(), labStatsPrintToSerial()
+Nodes (4): uiDrawInitialLogo(), uiDrawSplashProgress(), splashDrawInitialScreen(), splashDrawProgress()
 
 ### Community 10 - "Community 10"
 Cohesion: 0.5
 Nodes (0): 
 
 ### Community 11 - "Community 11"
-Cohesion: 0.67
-Nodes (2): uiDrawSplashProgress(), splashDrawProgress()
+Cohesion: 1.0
+Nodes (0): 
 
 ### Community 12 - "Community 12"
 Cohesion: 1.0
@@ -193,41 +193,43 @@ Cohesion: 1.0
 Nodes (0): 
 
 ## Knowledge Gaps
-- **Thin community `Community 12`** (1 nodes): `fix.py`
+- **Thin community `Community 11`** (1 nodes): `fix.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 13`** (1 nodes): `fix2.py`
+- **Thin community `Community 12`** (1 nodes): `fix2.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 14`** (1 nodes): `fix3.py`
+- **Thin community `Community 13`** (1 nodes): `fix3.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 15`** (1 nodes): `BeaconSpam.h`
+- **Thin community `Community 14`** (1 nodes): `BeaconSpam.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 16`** (1 nodes): `BleSpam.h`
+- **Thin community `Community 15`** (1 nodes): `BleSpam.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (1 nodes): `BluetoothScanner.h`
+- **Thin community `Community 16`** (1 nodes): `BluetoothScanner.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (1 nodes): `ClientScanner.h`
+- **Thin community `Community 17`** (1 nodes): `ClientScanner.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 19`** (1 nodes): `Config.h`
+- **Thin community `Community 18`** (1 nodes): `Config.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (1 nodes): `DisplayUi.h`
+- **Thin community `Community 19`** (1 nodes): `DisplayUi.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 21`** (1 nodes): `HardwareManager.h`
+- **Thin community `Community 20`** (1 nodes): `HardwareManager.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 22`** (1 nodes): `IrBlaster.h`
+- **Thin community `Community 21`** (1 nodes): `IrBlaster.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 23`** (1 nodes): `LabStats.h`
+- **Thin community `Community 22`** (1 nodes): `LabStats.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 24`** (1 nodes): `LabTestEngine.h`
+- **Thin community `Community 23`** (1 nodes): `LabTestEngine.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 25`** (1 nodes): `packet-injection.h`
+- **Thin community `Community 24`** (1 nodes): `packet-injection.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 26`** (1 nodes): `PromiscuousSniffer.h`
+- **Thin community `Community 25`** (1 nodes): `PromiscuousSniffer.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (1 nodes): `SplashScreen.h`
+- **Thin community `Community 26`** (1 nodes): `SplashScreen.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 28`** (1 nodes): `TargetManager.h`
+- **Thin community `Community 27`** (1 nodes): `TargetManager.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (1 nodes): `Theme.h`
+- **Thin community `Community 28`** (1 nodes): `Theme.h`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 29`** (1 nodes): `UartProtocol.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 30`** (1 nodes): `WifiScanner.h`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -235,15 +237,17 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `oledFlush()` connect `Community 0` to `Community 1`, `Community 2`, `Community 11`, `Community 4`?**
-  _High betweenness centrality (0.171) - this node is a cross-community bridge._
-- **Why does `uiBegin()` connect `Community 2` to `Community 0`?**
-  _High betweenness centrality (0.138) - this node is a cross-community bridge._
-- **Why does `uiRefreshWifiAnalyzer()` connect `Community 4` to `Community 0`?**
+- **Why does `oledFlush()` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 8`, `Community 9`?**
+  _High betweenness centrality (0.158) - this node is a cross-community bridge._
+- **Why does `uiRunGlitchBootLock()` connect `Community 3` to `Community 0`?**
   _High betweenness centrality (0.129) - this node is a cross-community bridge._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.14 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.09 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.13 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12 - nodes in this community are weakly interconnected._
+- **Should `Community 5` be split into smaller, more focused modules?**
+  _Cohesion score 0.14 - nodes in this community are weakly interconnected._
