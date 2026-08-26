@@ -47,41 +47,104 @@ bool navPressed() {
   return digitalRead(BTN_NAV) == LOW;
 }
 
-// ── LED primitives (Locked to permanent Solid Purple — no flashing/pulsing) ──
+void ledRedOn()     { pinMode(PA15, OUTPUT); digitalWrite(PA15, HIGH); }
+void ledRedOff()    { pinMode(PA15, OUTPUT); digitalWrite(PA15, LOW); }
 
-void ledRedOn()     { ledSetOnboardPurple(); }
-void ledRedOff()    { ledSetOnboardPurple(); }
+void ledGreenOn()   { pinMode(PA14, OUTPUT); digitalWrite(PA14, HIGH); }
+void ledGreenOff()  { pinMode(PA14, OUTPUT); digitalWrite(PA14, LOW); }
 
-void ledGreenOn()   { ledSetOnboardPurple(); }
-void ledGreenOff()  { ledSetOnboardPurple(); }
-
-void ledYellowOn()  { ledSetOnboardPurple(); }
-void ledYellowOff() { ledSetOnboardPurple(); }
+void ledYellowOn()  { pinMode(PA13, OUTPUT); digitalWrite(PA13, HIGH); }
+void ledYellowOff() { pinMode(PA13, OUTPUT); digitalWrite(PA13, LOW); }
 
 void ledAllOff() {
-  ledSetOnboardPurple();
+  pinMode(PA15, OUTPUT);
+  digitalWrite(PA15, LOW); // External Red OFF
+  ledSetOnboardPurple();   // Restores Solid Purple (#7b00ff) on onboard RGB
 }
 
 // ── LED flash patterns ────────────────────────────────────────
 
-void ledFlashRed(uint8_t times, uint16_t ms)    { (void)times; (void)ms; ledSetOnboardPurple(); }
-void ledFlashGreen(uint8_t times, uint16_t ms)  { (void)times; (void)ms; ledSetOnboardPurple(); }
-void ledFlashYellow(uint8_t times, uint16_t ms) { (void)times; (void)ms; ledSetOnboardPurple(); }
-
-void ledSetSole(uint8_t led)                    { (void)led; ledSetOnboardPurple(); }
-void ledStepRGY(uint8_t index)                  { (void)index; ledSetOnboardPurple(); }
-void ledChaseStep(uint8_t step)                 { (void)step; ledSetOnboardPurple(); }
-
-void ledCelebrateSync() {
+void ledFlashRed(uint8_t times, uint16_t ms) {
+  for (uint8_t i = 0; i < times; i++) {
+    pinMode(PA15, OUTPUT);
+    digitalWrite(PA15, HIGH); delay(ms);
+    digitalWrite(PA15, LOW);  delay(ms);
+  }
   ledSetOnboardPurple();
-  for (uint8_t i = 0; i < 3; i++) {
-    playTone(2800, 60);
-    delay(60);
+}
+
+void ledFlashGreen(uint8_t times, uint16_t ms) {
+  for (uint8_t i = 0; i < times; i++) {
+    pinMode(PA14, OUTPUT);
+    digitalWrite(PA14, HIGH); delay(ms);
+    digitalWrite(PA14, LOW);  delay(ms);
+  }
+  ledSetOnboardPurple();
+}
+
+void ledFlashYellow(uint8_t times, uint16_t ms) {
+  for (uint8_t i = 0; i < times; i++) {
+    pinMode(PA13, OUTPUT);
+    digitalWrite(PA13, HIGH); delay(ms);
+    digitalWrite(PA13, LOW);  delay(ms);
+  }
+  ledSetOnboardPurple();
+}
+
+void ledSetSole(uint8_t led) {
+  switch (led) {
+    case 1: ledRedOn();  ledYellowOff(); ledGreenOff(); break;
+    case 2: ledRedOff(); ledYellowOn();  ledGreenOff(); break;
+    case 3: ledRedOff(); ledYellowOff(); ledGreenOn();  break;
+    default: ledAllOff(); break;
   }
 }
 
-void ledBootSequence() {
+// Cycle exactly: RED -> GREEN -> YELLOW -> RED in sync with melody notes
+void ledStepRGY(uint8_t index) {
+  pinMode(PA15, OUTPUT);
+  pinMode(PA14, OUTPUT);
+  pinMode(PA13, OUTPUT);
+  uint8_t mod = index % 3;
+  if (mod == 0) {
+    digitalWrite(PA15, HIGH); // External Red ON
+    digitalWrite(PA14, LOW);  // Green OFF
+    digitalWrite(PA13, LOW);  // Yellow OFF
+  } else if (mod == 1) {
+    digitalWrite(PA15, LOW);  // Red OFF
+    digitalWrite(PA14, HIGH); // External Green ON
+    digitalWrite(PA13, LOW);  // Yellow OFF
+  } else {
+    digitalWrite(PA15, LOW);  // Red OFF
+    digitalWrite(PA14, LOW);  // Green OFF
+    digitalWrite(PA13, HIGH); // External Yellow ON
+  }
+}
+
+void ledChaseStep(uint8_t step) {
+  ledStepRGY(step);
+}
+
+void ledCelebrateSync() {
+  for (uint8_t i = 0; i < 3; i++) {
+    pinMode(PA15, OUTPUT);
+    pinMode(PA14, OUTPUT);
+    pinMode(PA13, OUTPUT);
+    digitalWrite(PA15, HIGH);
+    digitalWrite(PA14, HIGH);
+    digitalWrite(PA13, HIGH);
+    playTone(2800, 60);
+    ledAllOff();
+    delay(60);
+  }
   ledSetOnboardPurple();
+}
+
+void ledBootSequence() {
+  for (uint8_t i = 0; i < 6; i++) {
+    ledStepRGY(i);
+    delay(60);
+  }
   ledCelebrateSync();
 }
 
@@ -90,11 +153,16 @@ static LedMode _currentLedMode = LED_MODE_OFF;
 
 void setLedMode(LedMode mode) {
   _currentLedMode = mode;
-  ledSetOnboardPurple();
+  if (mode == LED_MODE_IDLE || mode == LED_MODE_OFF) {
+    ledSetOnboardPurple();
+  }
 }
 
 void ledTaskUpdate() {
-  ledSetOnboardPurple();
+  // Idle state preserves solid purple with zero flickering
+  if (_currentLedMode == LED_MODE_IDLE || _currentLedMode == LED_MODE_OFF) {
+    ledSetOnboardPurple();
+  }
 }
 
 // ── Buzzer ────────────────────────────────────────────────────

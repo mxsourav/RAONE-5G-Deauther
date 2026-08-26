@@ -131,8 +131,34 @@ static const uint8_t ACTION_MENU_COUNT = 6;
 // OK = TTP223 touch sensor on PB20 (active HIGH)
 // NAV = Tactile push button on PB3 (active LOW)
 
+static uint32_t _touchHoldStartTime = 0;
+
+static bool attackStopRequested() {
+  // 1. Tactile NAV button (PB3): deliberate press immediately stops
+  if (navPressed()) {
+    while (navPressed()) delay(10);
+    return true;
+  }
+
+  // 2. Touch sensor (TTP223 on PB_20): requires continuous hold for >800ms to stop (avoids accidental touch aborts)
+  if (okPressed()) {
+    if (_touchHoldStartTime == 0) {
+      _touchHoldStartTime = millis();
+    } else if (millis() - _touchHoldStartTime >= 800) {
+      _touchHoldStartTime = 0;
+      buzzerClick();
+      while (okPressed()) delay(10);
+      return true;
+    }
+  } else {
+    _touchHoldStartTime = 0;
+  }
+
+  return false;
+}
+
 static bool anyButtonPressed() {
-  return okPressed() || navPressed();
+  return attackStopRequested();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -293,8 +319,10 @@ void setup() {
     uiDrawSplashProgress(percent, msg);
     uartPollCommand();
 
-    // Play note with clear, steady timing
+    // Rhythmic Red -> Green -> Yellow external LED pulse in sync with melody note
+    ledStepRGY(i);
     playTone(NOTES[i].freq, NOTES[i].dur);
+    ledAllOff();
     if (NOTES[i].pause > 0) delay(NOTES[i].pause);
   }
 
@@ -302,7 +330,9 @@ void setup() {
   bool scanFinished = false;
   wifiScannerPollScan(&scanFinished);
 
+  ledCelebrateSync();
   buzzerSuccess();
+  setLedMode(LED_MODE_IDLE);
   setSystemMode(SYS_MODE_STANDALONE);
   drawMainMenu();
 }
@@ -1296,7 +1326,7 @@ bool runDeauthAllChannels(uint8_t band) {
   uint8_t chIndex = 0;
 
   while (true) {
-    if (anyButtonPressed()) {
+    if (attackStopRequested()) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
@@ -1311,20 +1341,18 @@ bool runDeauthAllChannels(uint8_t band) {
 
     // Burst on current channel
     for (uint8_t burst = 0; burst < 10; burst++) {
-      if (anyButtonPressed()) return stopPacketInjectionLab(anySent, sentCount);
+      if (attackStopRequested()) return stopPacketInjectionLab(anySent, sentCount);
 
       bool sent = wifi_tx_deauth_frame(fakeApMac, broadcastMac, fakeApMac, LAB_DEAUTH_REASON);
       if (sent) {
         anySent = true;
         sentCount++;
-        ledGreenOn();
       } else {
         failCount++;
         delay(15);
       }
       delay(10);
     }
-    ledGreenOff();
 
     // DMA flush yield
     delay(50);
@@ -1337,9 +1365,9 @@ bool runDeauthAllChannels(uint8_t band) {
 
     if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
-      // Pass 0 as channel to indicate Hopping mode to both local UI and Master
-      uiRefreshDeauthLive(0, sentCount, failCount, currentPps, true, band == 5 ? "ALL 5G" : "ALL 2.4G");
-      uartSendLiveStats(0, sentCount, failCount, currentPps);
+      // Pass curCh so live active hopping channel (36, 40, 44, etc.) is visible on OLED and Master
+      uiRefreshDeauthLive(curCh, sentCount, failCount, currentPps, true, band == 5 ? "ALL 5G" : "ALL 2.4G");
+      uartSendLiveStats(curCh, sentCount, failCount, currentPps);
     }
 
     chIndex = (chIndex + 1) % count;
@@ -1393,7 +1421,7 @@ bool labStopRequested() {
 }
 
 void waitForLabButtonsReleased() {
-  while (anyButtonPressed()) delay(20);
+  while (okPressed() || navPressed()) delay(20);
 }
 
 bool isInjectionBlockedSecurity(uint32_t security) {
@@ -1537,6 +1565,19 @@ void runScan() {
   uint8_t animFrame = 0;
 
   while (millis() - scanStartTime < 5000) {
+    // Check if user holds touch sensor (>800ms) or presses NAV button to cancel scan
+    if (attackStopRequested()) {
+      bool dummy = false;
+      wifiScannerPollScan(&dummy);
+      buzzerClick();
+      ledAllOff();
+      setLedMode(LED_MODE_IDLE);
+      uiDrawStatus("Scan Cancelled");
+      delay(400);
+      drawMainMenu();
+      return;
+    }
+
     uint32_t elapsed = millis() - scanStartTime;
     uint8_t remaining = (elapsed < 5000) ? (5 - (elapsed / 1000)) : 1;
 
