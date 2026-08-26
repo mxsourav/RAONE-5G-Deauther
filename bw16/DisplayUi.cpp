@@ -165,29 +165,28 @@ void uiBegin() {
 }
 
 void uiRunGlitchBootLock() {
-  // ── 1. GLITCH ANIMATION FOR "Ra-One" ───────────────────────────
+  // ── 1. INITIAL GLITCH ANIMATION FOR "Ra-One" ──────────────────
   static const char *const GLITCH_STRS[] = {
     "R@-0N3", "RA_ONE", "R4-0NE", "RA-ON£", "R#--N3", "Ra-0ne", "R4_ON3", "Ra-One"
   };
   const uint8_t GLITCH_COUNT = sizeof(GLITCH_STRS) / sizeof(GLITCH_STRS[0]);
 
-  for (uint8_t frame = 0; frame < 18; frame++) {
+  for (uint8_t frame = 0; frame < 16; frame++) {
     oledClear();
     oled.setTextColor(SSD1306_WHITE);
     oled.setTextSize(2);
 
-    const char *text = (frame < 14) ? GLITCH_STRS[frame % GLITCH_COUNT] : "Ra-One";
-    int16_t jx = (frame < 14) ? random(-3, 4) : 0;
-    int16_t jy = (frame < 14) ? random(-2, 3) : 0;
+    const char *text = (frame < 12) ? GLITCH_STRS[frame % GLITCH_COUNT] : "Ra-One";
+    int16_t jx = (frame < 12) ? random(-3, 4) : 0;
+    int16_t jy = (frame < 12) ? random(-2, 3) : 0;
 
     int16_t tw = strlen(text) * 12;
     int16_t tx = (OLED_W - tw) / 2 + jx;
     oled.setCursor(tx, 10 + jy);
     oled.print(text);
 
-    // Glitch artifact scanlines
-    if (frame < 14) {
-      uint8_t noiseLines = random(1, 4);
+    if (frame < 12) {
+      uint8_t noiseLines = random(1, 3);
       for (uint8_t n = 0; n < noiseLines; n++) {
         int16_t ly = random(0, 64);
         int16_t lx = random(0, 60);
@@ -195,145 +194,215 @@ void uiRunGlitchBootLock() {
         oled.fillRect(lx, ly, lw, 1, SSD1306_WHITE);
       }
       if (g_buzzerEnabled && frame % 4 == 0) {
-        playTone(random(2200, 4500), 4);
+        playTone(random(2200, 4200), 4);
       }
     }
 
     oledFlush();
-    delay(45);
+    delay(40);
   }
 
-  // Settle on clean Ra-One
-  oledClear();
-  oled.setTextSize(2);
-  oled.setTextColor(SSD1306_WHITE);
-  oled.setCursor((OLED_W - 6 * 12) / 2, 8);
-  oled.print("Ra-One");
-  oledFlush();
-  delay(120);
+  // ── 2. SUBTITLES & STEALTH BIOMETRIC UNLOCK LOOP ──────────────
+  static const char *const SUBTITLES[] = {
+    "by @mxsourav",
+    "github.com/mxsourav",
+    "instagram.com/mxsourav.dev"
+  };
+  const uint8_t SUB_COUNT = 3;
 
-  // ── 2. TYPE-IN (TYPEWRITER) ANIMATION FOR "by @mxsourav" ─────
-  const char *subText = "by @mxsourav";
-  uint8_t subLen = strlen(subText);
+  enum SubAnimState { SUB_TYPE_IN, SUB_HOLD, SUB_TYPE_OUT };
+  SubAnimState subState = SUB_TYPE_IN;
 
-  for (uint8_t i = 1; i <= subLen; i++) {
-    oledClear();
-    // Title
-    oled.setTextSize(2);
-    oled.setTextColor(SSD1306_WHITE);
-    oled.setCursor((OLED_W - 6 * 12) / 2, 8);
-    oled.print("Ra-One");
-
-    // Subtitle typed so far
-    oled.setTextSize(1);
-    char buf[16];
-    strncpy(buf, subText, i);
-    buf[i] = '\0';
-
-    int16_t sx = (OLED_W - (int16_t)(subLen * 6)) / 2;
-    oled.setCursor(sx, 27);
-    oled.print(buf);
-
-    // Blinking terminal cursor
-    oled.print("_");
-
-    oledFlush();
-    if (g_buzzerEnabled) {
-      playTone(3200, 8);
-    }
-    delay(50);
-  }
-
-  delay(150);
-
-  // ── 3. BIOMETRIC 1.5-SECOND TOUCH SENSOR UNLOCK LOOP ─────────
+  uint8_t subIdx = 0;
+  uint8_t charPos = 1;
+  uint32_t lastAnimTick = millis();
+  uint32_t holdStart = 0;
   uint32_t touchStart = 0;
-  uint8_t animTick = 0;
+  uint32_t glitchCooldown = millis() + random(2500, 4500);
+  bool microGlitch = false;
 
   while (true) {
+    // ── BIOMETRIC TOUCH SENSOR HOLD (1.5 SECONDS TO UNLOCK) ─────
     if (okPressed()) {
       if (touchStart == 0) {
         touchStart = millis();
-        if (g_buzzerEnabled) playTone(1200, 20);
+        if (g_buzzerEnabled) playTone(1400, 15);
       }
 
       uint32_t holdMs = millis() - touchStart;
       uint8_t pct = (holdMs >= 1500) ? 100 : (uint8_t)((holdMs * 100) / 1500);
 
-      oledClear();
-      // Title & Creator
-      oled.setTextSize(2);
-      oled.setTextColor(SSD1306_WHITE);
-      oled.setCursor((OLED_W - 6 * 12) / 2, 5);
-      oled.print("Ra-One");
-
-      oled.setTextSize(1);
-      oled.setCursor((OLED_W - 12 * 6) / 2, 23);
-      oled.print("by @mxsourav");
-      oled.drawFastHLine(14, 34, 100, SSD1306_WHITE);
-
-      // Biometric Fingerprint Scanning Bar
-      oled.drawRect(14, 38, 100, 10, SSD1306_WHITE);
-      int16_t fillW = (96 * pct) / 100;
-      if (fillW > 0) {
-        oled.fillRect(16, 40, fillW, 6, SSD1306_WHITE);
+      // Reactive LED behavior while holding biometric touch sensor:
+      // 0%  - 33%:  RED LED active
+      // 34% - 66%:  YELLOW LED active
+      // 67% - 99%:  GREEN LED active
+      // 100%:       ALL LEDs flash together!
+      if (pct < 34) {
+        ledMelodySet(1); // Red LED
+      } else if (pct < 67) {
+        ledMelodySet(3); // Yellow LED
+      } else if (pct < 100) {
+        ledMelodySet(2); // Green LED
+      } else {
+        ledMelodySet(4); // All Three LEDs
       }
 
-      // Scanning text
-      oled.setCursor(18, 51);
+      oledClear();
+      oled.setTextColor(SSD1306_WHITE);
+
+      // Title
+      oled.setTextSize(2);
+      oled.setCursor((OLED_W - 6 * 12) / 2, 4);
+      oled.print("Ra-One");
+
+      oled.drawFastHLine(14, 24, 100, SSD1306_WHITE);
+
+      oled.setTextSize(1);
+      oled.setCursor((OLED_W - 17 * 6) / 2, 28);
+      oled.print("AUTHENTICATING...");
+
+      // Biometric Scanning Progress Bar
+      oled.drawRect(14, 40, 100, 8, SSD1306_WHITE);
+      int16_t fillW = (96 * pct) / 100;
+      if (fillW > 0) {
+        oled.fillRect(16, 42, fillW, 4, SSD1306_WHITE);
+      }
+
+      // Status percentage text
+      oled.setCursor((OLED_W - 14 * 6) / 2, 52);
       if (pct < 100) {
-        char pBuf[24];
-        snprintf(pBuf, sizeof(pBuf), "AUTHENTICATING %u%%", pct);
+        char pBuf[20];
+        snprintf(pBuf, sizeof(pBuf), "SCANNING...%2u%%", pct);
         oled.print(pBuf);
         if (g_buzzerEnabled && (pct % 25 == 0)) {
-          playTone(1000 + pct * 15, 10);
+          playTone(1000 + pct * 12, 8);
         }
       } else {
-        oled.print("*** ACCESS GRANTED ***");
+        oled.print("ACCESS GRANTED");
       }
       oledFlush();
 
       if (pct >= 100) {
-        // Complete unlock!
-        delay(120);
+        // Complete Unlock!
+        delay(150);
+        ledMelodySet(0);
         if (g_buzzerEnabled) buzzerSuccess();
         ledFlashGreen(2, 60);
         break;
       }
       delay(25);
+      continue;
     } else {
-      touchStart = 0;
-      animTick++;
+      // Finger released: turn off LEDs & reset touch tracking
+      if (touchStart != 0) {
+        touchStart = 0;
+        ledMelodySet(0);
+      }
+    }
 
-      oledClear();
-      // Title & Creator
-      oled.setTextSize(2);
-      oled.setTextColor(SSD1306_WHITE);
-      oled.setCursor((OLED_W - 6 * 12) / 2, 5);
-      oled.print("Ra-One");
+    // ── SUBTLE OCCASIONAL GLITCH ON "Ra-One" ─────────────────────
+    if (millis() > glitchCooldown) {
+      microGlitch = true;
+      glitchCooldown = millis() + random(3000, 6000);
+    } else {
+      microGlitch = false;
+    }
 
-      oled.setTextSize(1);
-      oled.setCursor((OLED_W - 12 * 6) / 2, 23);
-      oled.print("by @mxsourav");
-      oled.drawFastHLine(14, 34, 100, SSD1306_WHITE);
+    // ── SUBTITLE IN/OUT ANIMATION STATE MACHINE (NO SOUND) ──────
+    const char *curStr = SUBTITLES[subIdx];
+    uint8_t fullLen = strlen(curStr);
 
-      // Fingerprint lock prompt with pulse effect
-      if ((animTick / 6) % 2 == 0) {
-        oled.setCursor(8, 41);
-        oled.print("[ HOLD TOUCH TO START ]");
-        oled.setCursor(20, 52);
-        oled.print("FINGERPRINT LOCK");
+    if (subState == SUB_TYPE_IN) {
+      if (millis() - lastAnimTick >= 45) {
+        lastAnimTick = millis();
+        if (charPos < fullLen) {
+          charPos++;
+        } else {
+          subState = SUB_HOLD;
+          holdStart = millis();
+        }
+      }
+    } else if (subState == SUB_HOLD) {
+      if (millis() - holdStart >= 1800) {
+        subState = SUB_TYPE_OUT;
+      }
+    } else if (subState == SUB_TYPE_OUT) {
+      if (millis() - lastAnimTick >= 25) {
+        lastAnimTick = millis();
+        if (charPos > 0) {
+          charPos--;
+        } else {
+          subIdx = (subIdx + 1) % SUB_COUNT;
+          charPos = 1;
+          subState = SUB_TYPE_IN;
+        }
+      }
+    }
+
+    // ── RENDER FRAME ────────────────────────────────────────────
+    oledClear();
+    oled.setTextColor(SSD1306_WHITE);
+
+    // 1. Title "Ra-One" with minor glitch effect
+    oled.setTextSize(2);
+    int16_t gx = 0, gy = 0;
+    const char *titleStr = "Ra-One";
+    if (microGlitch) {
+      gx = (random(2) == 0) ? -1 : 1;
+      titleStr = (random(2) == 0) ? "R4-One" : "Ra-0ne";
+    }
+    oled.setCursor((OLED_W - 6 * 12) / 2 + gx, 10 + gy);
+    oled.print(titleStr);
+
+    // 2. Cyber divider line
+    oled.drawFastHLine(18, 30, 92, SSD1306_WHITE);
+
+    // 3. Subtitle rendering (handles both single line and long URLs cleanly)
+    oled.setTextSize(1);
+    char dispBuf[32];
+    strncpy(dispBuf, curStr, charPos);
+    dispBuf[charPos] = '\0';
+
+    if (fullLen <= 20) {
+      // Single centered line with cursor
+      int16_t sx = (OLED_W - (int16_t)(strlen(dispBuf) * 6)) / 2;
+      if (sx < 2) sx = 2;
+      oled.setCursor(sx, 40);
+      oled.print(dispBuf);
+      if (subState != SUB_HOLD || (millis() / 350) % 2 == 0) {
+        oled.print("_");
+      }
+    } else {
+      // Multi-line split for long URLs (e.g. "instagram.com/mxsourav.dev")
+      char line1[20] = {0};
+      char line2[20] = {0};
+      uint8_t splitAt = 14; // Split at "instagram.com/"
+      if (charPos <= splitAt) {
+        strncpy(line1, dispBuf, charPos);
       } else {
-        oled.drawRect(14, 39, 100, 12, SSD1306_WHITE);
-        oled.setCursor(22, 42);
-        oled.print("HOLD TOUCH 1.5s");
+        strncpy(line1, dispBuf, splitAt);
+        strncpy(line2, dispBuf + splitAt, charPos - splitAt);
       }
 
-      oledFlush();
-      delay(50);
+      int16_t s1 = (OLED_W - (int16_t)(strlen(line1) * 6)) / 2;
+      oled.setCursor(max((int16_t)2, s1), 36);
+      oled.print(line1);
+
+      if (charPos > splitAt) {
+        int16_t s2 = (OLED_W - (int16_t)(strlen(line2) * 6)) / 2;
+        oled.setCursor(max((int16_t)2, s2), 48);
+        oled.print(line2);
+      }
+      if (subState != SUB_HOLD || (millis() / 350) % 2 == 0) {
+        oled.print("_");
+      }
     }
+
+    oledFlush();
+    delay(30);
   }
 }
+
 
 void uiDrawSplashProgress(uint8_t percent, const char *msg) {
   splashDrawProgress(oled, percent, msg);
