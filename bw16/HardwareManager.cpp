@@ -100,25 +100,39 @@ void ledSetSole(uint8_t led) {
   }
 }
 
-// Cycle exactly: RED -> GREEN -> YELLOW -> RED in sync with melody notes
-void ledStepRGY(uint8_t index) {
+// Discrete Melody LED controller with zero bleed during note rests
+void ledMelodySet(uint8_t led) {
   pinMode(PA15, OUTPUT);
   pinMode(PA14, OUTPUT);
   pinMode(PA13, OUTPUT);
-  uint8_t mod = index % 3;
-  if (mod == 0) {
-    digitalWrite(PA15, HIGH); // External Red ON
-    digitalWrite(PA14, LOW);  // Green OFF
-    digitalWrite(PA13, LOW);  // Yellow OFF
-  } else if (mod == 1) {
-    digitalWrite(PA15, LOW);  // Red OFF
-    digitalWrite(PA14, HIGH); // External Green ON
-    digitalWrite(PA13, LOW);  // Yellow OFF
-  } else {
-    digitalWrite(PA15, LOW);  // Red OFF
-    digitalWrite(PA14, LOW);  // Green OFF
-    digitalWrite(PA13, HIGH); // External Yellow ON
+
+  if (led == 1) {        // RED ONLY (PA15)
+    digitalWrite(PA15, HIGH);
+    digitalWrite(PA14, LOW);
+    digitalWrite(PA13, LOW);
+  } else if (led == 2) { // GREEN ONLY (PA14)
+    digitalWrite(PA15, LOW);
+    digitalWrite(PA14, HIGH);
+    digitalWrite(PA13, LOW);
+  } else if (led == 3) { // YELLOW ONLY (PA13)
+    digitalWrite(PA15, LOW);
+    digitalWrite(PA14, LOW);
+    digitalWrite(PA13, HIGH);
+  } else if (led == 4) { // ALL THREE TOGETHER (PA15 + PA14 + PA13)
+    digitalWrite(PA15, HIGH);
+    digitalWrite(PA14, HIGH);
+    digitalWrite(PA13, HIGH);
+  } else {               // ZERO / REST (Strictly OFF, zero color bleed!)
+    digitalWrite(PA15, LOW);
+    digitalWrite(PA14, LOW);
+    digitalWrite(PA13, LOW);
   }
+}
+
+// Cycle exactly: RED -> GREEN -> YELLOW -> RED in sync with melody notes
+void ledStepRGY(uint8_t index) {
+  uint8_t mod = index % 3;
+  ledMelodySet(mod + 1);
 }
 
 void ledChaseStep(uint8_t step) {
@@ -127,14 +141,9 @@ void ledChaseStep(uint8_t step) {
 
 void ledCelebrateSync() {
   for (uint8_t i = 0; i < 3; i++) {
-    pinMode(PA15, OUTPUT);
-    pinMode(PA14, OUTPUT);
-    pinMode(PA13, OUTPUT);
-    digitalWrite(PA15, HIGH);
-    digitalWrite(PA14, HIGH);
-    digitalWrite(PA13, HIGH);
+    ledMelodySet(4); // All three LEDs ON
     playTone(2800, 60);
-    ledAllOff();
+    ledMelodySet(0); // All three LEDs OFF
     delay(60);
   }
   ledSetOnboardPurple();

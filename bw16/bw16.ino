@@ -274,29 +274,37 @@ void setup() {
   os_thread_create_arduino(asyncRadioInitTask, NULL, OS_PRIORITY_NORMAL, 4096);
 
   // 4. 100% Smooth Continuous 4.5-Second Melodic Boot Splash (Harry Potter Hedwig Theme)
-  struct MelodyNote {
-    uint16_t freq;
-    uint16_t dur;
-    uint16_t pause;
+  struct BootMelodyStep {
+    uint16_t freq;  // Note pitch (Hz)
+    uint16_t dur;   // Note duration (ms)
+    uint16_t pause; // Inter-note silence (ms)
+    uint8_t  led;   // 1=Red, 2=Green, 3=Yellow, 4=All Three
   };
 
-  static const MelodyNote NOTES[] = {
-    { 494, 150,  50 }, // B4
-    { 659, 200,  70 }, // E5
-    { 784,  90,  40 }, // G5
-    { 740, 150,  50 }, // F#5
-    { 659, 260,  80 }, // E5
-    { 988, 150,  60 }, // B5
-    { 880, 260,  80 }, // A5
-    { 740, 260,  80 }, // F#5
-    { 659, 200,  70 }, // E5
-    { 784,  90,  40 }, // G5
-    { 740, 150,  50 }, // F#5
-    { 622, 260,  80 }, // D#5
-    { 698, 150,  60 }, // F5
-    { 494, 260,  90 }, // B4
-    { 440, 150,  60 }, // A4
-    { 494, 280,  60 }  // B4
+  static const BootMelodyStep NOTES[] = {
+    // Measure 1: B4 (upbeat) -> E5 (downbeat) -> G5 (passing) -> F#5 (pivot)
+    { 494, 150,  50, 1 }, // Note 0:  B4  -> RED (pickup pulse)
+    { 659, 220,  60, 2 }, // Note 1:  E5  -> GREEN (strong accent)
+    { 784, 100,  40, 3 }, // Note 2:  G5  -> YELLOW (quick bright step)
+    { 740, 150,  50, 2 }, // Note 3:  F#5 -> GREEN (melodic pivot)
+
+    // Measure 2: E5 (sustained) -> B5 (leap) -> A5 (peak held note)
+    { 659, 300,  80, 1 }, // Note 4:  E5  -> RED (sustained hold)
+    { 988, 160,  60, 3 }, // Note 5:  B5  -> YELLOW (high jump)
+    { 880, 320,  80, 2 }, // Note 6:  A5  -> GREEN (peak hold)
+
+    // Measure 3: F#5 (falling sustain) -> E5 (downbeat) -> G5 -> F#5
+    { 740, 320,  80, 1 }, // Note 7:  F#5 -> RED (sustained glow)
+    { 659, 220,  60, 2 }, // Note 8:  E5  -> GREEN (downbeat accent)
+    { 784, 100,  40, 3 }, // Note 9:  G5  -> YELLOW (quick step)
+    { 740, 150,  50, 2 }, // Note 10: F#5 -> GREEN (pivot)
+
+    // Measure 4: D#5 (deep tension) -> F5 -> B4 (low bass) -> A4 -> B4 (resolution)
+    { 622, 300,  80, 1 }, // Note 11: D#5 -> RED (deep hold)
+    { 698, 160,  60, 3 }, // Note 12: F5  -> YELLOW (bright step)
+    { 494, 300,  80, 1 }, // Note 13: B4  -> RED (low bass hold)
+    { 440, 160,  60, 2 }, // Note 14: A4  -> GREEN (cadence step)
+    { 494, 380, 100, 4 }  // Note 15: B4  -> ALL THREE (Grand Final Chord!)
   };
 
   const size_t totalNotes = sizeof(NOTES) / sizeof(NOTES[0]);
@@ -319,10 +327,12 @@ void setup() {
     uiDrawSplashProgress(percent, msg);
     uartPollCommand();
 
-    // Rhythmic Red -> Green -> Yellow external LED pulse in sync with melody note
-    ledStepRGY(i);
+    // 1. Turn ON exactly the assigned LED for the exact duration of the note
+    ledMelodySet(NOTES[i].led);
     playTone(NOTES[i].freq, NOTES[i].dur);
-    ledAllOff();
+
+    // 2. Turn strictly OFF all LEDs during the rest period (Zero bleed!)
+    ledMelodySet(0);
     if (NOTES[i].pause > 0) delay(NOTES[i].pause);
   }
 
@@ -332,6 +342,7 @@ void setup() {
 
   ledCelebrateSync();
   buzzerSuccess();
+  ledSetOnboardPurple();
   setLedMode(LED_MODE_IDLE);
   setSystemMode(SYS_MODE_STANDALONE);
   drawMainMenu();
@@ -1527,36 +1538,43 @@ void runScan() {
   }
 
   // 5-Second Scan Melody (Mission Impossible / Cyber Scan Chiptune)
-  struct ScanNote {
-    uint16_t freq;
-    uint16_t dur;
-    uint16_t pause;
+  struct ScanMelodyStep {
+    uint16_t freq;  // Pitch (Hz)
+    uint16_t dur;   // Sustain (ms)
+    uint16_t pause; // Silence (ms)
+    uint8_t  led;   // 1=Red, 2=Green, 3=Yellow, 4=All Three
   };
 
-  static const ScanNote SCAN_MELODY[] = {
-    { 392,  90, 40 }, // G4
-    { 392,  90, 40 }, // G4
-    { 466, 120, 40 }, // Bb4
-    { 523, 120, 40 }, // C5
-    { 392,  90, 40 }, // G4
-    { 392,  90, 40 }, // G4
-    { 349, 120, 40 }, // F4
-    { 370, 120, 40 }, // F#4
-    { 392,  90, 40 }, // G4
-    { 392,  90, 40 }, // G4
-    { 466, 120, 40 }, // Bb4
-    { 523, 120, 40 }, // C5
-    { 392,  90, 40 }, // G4
-    { 392,  90, 40 }, // G4
-    { 349, 120, 40 }, // F4
-    { 370, 120, 40 }, // F#4
-    { 466, 180, 50 }, // Bb4
-    { 440, 180, 50 }, // A4
-    { 392, 280, 60 }, // G4
-    { 587, 180, 50 }, // D5
-    { 523, 180, 50 }, // C5
-    { 466, 180, 50 }, // Bb4
-    { 392, 350, 50 }  // G4
+  static const ScanMelodyStep SCAN_MELODY[] = {
+    // 5/4 Rhythmic Pattern: Dun-Dun-DA-DA | Dun-Dun-DA-DA
+    { 392, 100, 40, 1 }, // Note 0:  G4  -> RED (pulse 1)
+    { 392, 100, 40, 1 }, // Note 1:  G4  -> RED (pulse 2)
+    { 466, 140, 40, 3 }, // Note 2:  Bb4 -> YELLOW (high accent 1)
+    { 523, 140, 40, 2 }, // Note 3:  C5  -> GREEN (high accent 2)
+
+    { 392, 100, 40, 1 }, // Note 4:  G4  -> RED (pulse 1)
+    { 392, 100, 40, 1 }, // Note 5:  G4  -> RED (pulse 2)
+    { 349, 140, 40, 3 }, // Note 6:  F4  -> YELLOW (low accent 1)
+    { 370, 140, 40, 2 }, // Note 7:  F#4 -> GREEN (low accent 2)
+
+    { 392, 100, 40, 1 }, // Note 8:  G4  -> RED (pulse 1)
+    { 392, 100, 40, 1 }, // Note 9:  G4  -> RED (pulse 2)
+    { 466, 140, 40, 3 }, // Note 10: Bb4 -> YELLOW (high accent 1)
+    { 523, 140, 40, 2 }, // Note 11: C5  -> GREEN (high accent 2)
+
+    { 392, 100, 40, 1 }, // Note 12: G4  -> RED (pulse 1)
+    { 392, 100, 40, 1 }, // Note 13: G4  -> RED (pulse 2)
+    { 349, 140, 40, 3 }, // Note 14: F4  -> YELLOW (low accent 1)
+    { 370, 140, 40, 2 }, // Note 15: F#4 -> GREEN (low accent 2)
+
+    // Climax & Cadence
+    { 466, 200, 50, 3 }, // Note 16: Bb4 -> YELLOW (leap)
+    { 440, 200, 50, 2 }, // Note 17: A4  -> GREEN (step)
+    { 392, 300, 60, 1 }, // Note 18: G4  -> RED (base hold)
+    { 587, 200, 50, 3 }, // Note 19: D5  -> YELLOW (flare)
+    { 523, 200, 50, 2 }, // Note 20: C5  -> GREEN (step)
+    { 466, 200, 50, 3 }, // Note 21: Bb4 -> YELLOW (step)
+    { 392, 400, 80, 4 }  // Note 22: G4  -> ALL THREE (Grand Finish!)
   };
   const size_t noteCount = sizeof(SCAN_MELODY) / sizeof(SCAN_MELODY[0]);
 
@@ -1570,7 +1588,8 @@ void runScan() {
       bool dummy = false;
       wifiScannerPollScan(&dummy);
       buzzerClick();
-      ledAllOff();
+      ledMelodySet(0);
+      ledSetOnboardPurple();
       setLedMode(LED_MODE_IDLE);
       uiDrawStatus("Scan Cancelled");
       delay(400);
@@ -1587,9 +1606,9 @@ void runScan() {
 
     // Play next note of the scan melody synchronized with LEDs
     if (noteIndex < noteCount) {
-      ledStepRGY(noteIndex);
+      ledMelodySet(SCAN_MELODY[noteIndex].led);
       playTone(SCAN_MELODY[noteIndex].freq, SCAN_MELODY[noteIndex].dur);
-      ledAllOff();
+      ledMelodySet(0);
       if (SCAN_MELODY[noteIndex].pause > 0) {
         delay(SCAN_MELODY[noteIndex].pause);
       }
@@ -1604,8 +1623,9 @@ void runScan() {
   wifiScannerPollScan(&scanOk);
 
   // Scan completed celebration
-  ledAllOff();
+  ledMelodySet(0);
   ledFlashGreen(3, 80);
+  ledSetOnboardPurple();
   setLedMode(LED_MODE_IDLE);
   buzzerScanDone();
 
