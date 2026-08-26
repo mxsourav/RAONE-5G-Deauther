@@ -16,6 +16,23 @@ static rtw_result_t scanResultHandler(rtw_scan_handler_result_t *scanResult) {
 
   rtw_scan_result_t *record = &scanResult->ap_details;
 
+  // Filter out empty / hidden SSIDs completely (no <hidden> entries in list)
+  if (record->SSID.len == 0 || record->SSID.val[0] == '\0') {
+    return RTW_SUCCESS;
+  }
+
+  // Check for all-whitespace / non-printable SSIDs
+  bool hasValidChars = false;
+  for (uint8_t k = 0; k < record->SSID.len; k++) {
+    if (record->SSID.val[k] > 32 && record->SSID.val[k] < 127) {
+      hasValidChars = true;
+      break;
+    }
+  }
+  if (!hasValidChars) {
+    return RTW_SUCCESS;
+  }
+
   // Format BSSID string
   char bssidBuf[18];
   snprintf(bssidBuf, sizeof(bssidBuf),
@@ -26,14 +43,6 @@ static rtw_result_t scanResultHandler(rtw_scan_handler_result_t *scanResult) {
   // Check for existing BSSID in our table
   for (uint8_t i = 0; i < networkCount; i++) {
     if (strcmp(networks[i].bssid, bssidBuf) == 0) {
-      // If we previously had an empty/hidden SSID and now we received a named SSID, UNCLOAK IT!
-      if ((networks[i].ssid[0] == '\0' || strcmp(networks[i].ssid, "<hidden>") == 0) && record->SSID.len > 0) {
-        uint8_t ssidLen = record->SSID.len > WL_SSID_MAX_LENGTH ? WL_SSID_MAX_LENGTH : record->SSID.len;
-        memcpy(networks[i].ssid, record->SSID.val, ssidLen);
-        networks[i].ssid[ssidLen] = '\0';
-      }
-      // CRITICAL FIX: If current record has empty SSID but we ALREADY know the name from a previous scan,
-      // PRESERVE the known SSID name so it never turns into [Hidden]!
       networks[i].rssi = record->signal_strength;
       networks[i].channel = record->channel;
       networks[i].security = record->security;
@@ -70,6 +79,7 @@ extern "C" {
 void wifiScannerBegin() {
   Serial.println("[WIFI] wifiScannerBegin: initializing STA mode...");
 
+  wifi_set_promisc(0, NULL, 0);
   wifi_on(RTW_MODE_STA);
   wifi_change_channel_plan(0x7F); // Dual-band 2.4GHz + 5GHz full channel plan
 
@@ -100,7 +110,12 @@ bool wifiScannerScan() {
 static void _bgScanTask(const void *arg) {
   (void)arg;
   Serial.println("[SCAN] Background scan thread started...");
-  wifi_scan_networks_mcc(scanResultHandler, NULL);
+  wifi_set_promisc(0, NULL, 0);
+  wifi_on(RTW_MODE_STA);
+  wifi_change_channel_plan(0x7F);
+  int ret = wifi_scan_networks_mcc(scanResultHandler, NULL);
+  Serial.print("[SCAN] wifi_scan_networks_mcc ret: ");
+  Serial.println(ret);
   scanComplete = true;
   Serial.println("[SCAN] Background scan thread finished.");
   vTaskDelete(NULL);

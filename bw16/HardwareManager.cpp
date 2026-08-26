@@ -100,46 +100,29 @@ void ledSetSole(uint8_t led) {
   }
 }
 
-// Discrete Melody LED controller with zero bleed during note rests
 void ledMelodySet(uint8_t led) {
-  if (!g_ledEnabled) { // System setting: LEDs disabled
+  // Always lock onboard RGB to 100% Solid Purple (#7b00ff)
+  ledSetOnboardPurple();
+
+  if (!g_ledEnabled) {
+    pinMode(PA15, OUTPUT);
     digitalWrite(PA15, LOW);
-    digitalWrite(PA14, LOW);
-    digitalWrite(PA13, LOW);
     return;
   }
-  pinMode(PA15, OUTPUT);
-  pinMode(PA14, OUTPUT);
-  pinMode(PA13, OUTPUT);
 
-  if (led == 1) {        // RED ONLY (PA15)
-    digitalWrite(PA15, HIGH);
-    digitalWrite(PA14, LOW);
-    digitalWrite(PA13, LOW);
-  } else if (led == 2) { // GREEN ONLY (PA14)
+  pinMode(PA15, OUTPUT);
+  if (led != 0) {
+    digitalWrite(PA15, HIGH); // External Red LED pulse
+  } else {
     digitalWrite(PA15, LOW);
-    digitalWrite(PA14, HIGH);
-    digitalWrite(PA13, LOW);
-  } else if (led == 3) { // YELLOW ONLY (PA13)
-    digitalWrite(PA15, LOW);
-    digitalWrite(PA14, LOW);
-    digitalWrite(PA13, HIGH);
-  } else if (led == 4) { // ALL THREE TOGETHER (PA15 + PA14 + PA13)
-    digitalWrite(PA15, HIGH);
-    digitalWrite(PA14, HIGH);
-    digitalWrite(PA13, HIGH);
-  } else {               // ZERO / REST (Strictly OFF, zero color bleed!)
-    digitalWrite(PA15, LOW);
-    digitalWrite(PA14, LOW);
-    digitalWrite(PA13, LOW);
   }
 }
 
-// Strict cycle: RED(1) -> GREEN(2) -> YELLOW(3) -> RED(1) -> GREEN(2) -> YELLOW(3) ...
+// Strict cycle: External status LED pulse
 void ledStepRGY(uint8_t index) {
-  static const uint8_t RGY[] = { 1, 2, 3 }; // 1=Red, 2=Green, 3=Yellow
-  ledMelodySet(RGY[index % 3]);
+  ledMelodySet((index % 2) + 1);
 }
+
 
 void ledChaseStep(uint8_t step) {
   ledStepRGY(step);

