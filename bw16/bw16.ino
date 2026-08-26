@@ -233,6 +233,7 @@ void setup() {
   uartProtocolBegin(115200);
   irBegin();
   uiBegin();
+  uiDrawInitialLogo();
 
   wifiScannerBegin();
   sniffBegin();
