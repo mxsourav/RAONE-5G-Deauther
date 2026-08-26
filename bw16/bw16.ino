@@ -1230,7 +1230,6 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
       if (sent1) {
         anySent = true;
         sentCount++;
-        ledGreenOn();
       } else {
         failCount++;
         delay(20);
@@ -1241,14 +1240,12 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
       if (sent2) {
         anySent = true;
         sentCount++;
-        ledGreenOff();
       } else {
         failCount++;
         delay(20);
       }
       delay(15);
     }
-    ledGreenOff();
 
     // CRITICAL FIX: Explicit DMA flush yield.
     delay(100);
@@ -1340,7 +1337,6 @@ bool runPacketInjectionLab() {
       if (sent) {
         anySent = true;
         sentCount++;
-        ledGreenOn();
       } else {
         failCount++;
         delay(20);
@@ -1348,7 +1344,6 @@ bool runPacketInjectionLab() {
 
       delay(15);
     }
-    ledGreenOff();
 
     // CRITICAL FIX: Explicit DMA flush yield.
     delay(100);

@@ -47,14 +47,14 @@ bool navPressed() {
   return digitalRead(BTN_NAV) == LOW;
 }
 
-void ledRedOn()     { pinMode(PA15, OUTPUT); digitalWrite(PA15, HIGH); }
+void ledRedOn()     { if (g_ledEnabled) { pinMode(PA15, OUTPUT); digitalWrite(PA15, HIGH); } }
 void ledRedOff()    { pinMode(PA15, OUTPUT); digitalWrite(PA15, LOW); }
 
-void ledGreenOn()   { pinMode(PA14, OUTPUT); digitalWrite(PA14, HIGH); }
-void ledGreenOff()  { pinMode(PA14, OUTPUT); digitalWrite(PA14, LOW); }
+void ledGreenOn()   { if (g_ledEnabled) { pinMode(PA15, OUTPUT); digitalWrite(PA15, HIGH); } }
+void ledGreenOff()  { pinMode(PA15, OUTPUT); digitalWrite(PA15, LOW); }
 
-void ledYellowOn()  { pinMode(PA13, OUTPUT); digitalWrite(PA13, HIGH); }
-void ledYellowOff() { pinMode(PA13, OUTPUT); digitalWrite(PA13, LOW); }
+void ledYellowOn()  { if (g_ledEnabled) { pinMode(PA15, OUTPUT); digitalWrite(PA15, HIGH); } }
+void ledYellowOff() { pinMode(PA15, OUTPUT); digitalWrite(PA15, LOW); }
 
 void ledAllOff() {
   pinMode(PA15, OUTPUT);
@@ -65,6 +65,7 @@ void ledAllOff() {
 // ── LED flash patterns ────────────────────────────────────────
 
 void ledFlashRed(uint8_t times, uint16_t ms) {
+  if (!g_ledEnabled) return;
   for (uint8_t i = 0; i < times; i++) {
     pinMode(PA15, OUTPUT);
     digitalWrite(PA15, HIGH); delay(ms);
@@ -74,19 +75,21 @@ void ledFlashRed(uint8_t times, uint16_t ms) {
 }
 
 void ledFlashGreen(uint8_t times, uint16_t ms) {
+  if (!g_ledEnabled) return;
   for (uint8_t i = 0; i < times; i++) {
-    pinMode(PA14, OUTPUT);
-    digitalWrite(PA14, HIGH); delay(ms);
-    digitalWrite(PA14, LOW);  delay(ms);
+    pinMode(PA15, OUTPUT);
+    digitalWrite(PA15, HIGH); delay(ms);
+    digitalWrite(PA15, LOW);  delay(ms);
   }
   ledSetOnboardPurple();
 }
 
 void ledFlashYellow(uint8_t times, uint16_t ms) {
+  if (!g_ledEnabled) return;
   for (uint8_t i = 0; i < times; i++) {
-    pinMode(PA13, OUTPUT);
-    digitalWrite(PA13, HIGH); delay(ms);
-    digitalWrite(PA13, LOW);  delay(ms);
+    pinMode(PA15, OUTPUT);
+    digitalWrite(PA15, HIGH); delay(ms);
+    digitalWrite(PA15, LOW);  delay(ms);
   }
   ledSetOnboardPurple();
 }
