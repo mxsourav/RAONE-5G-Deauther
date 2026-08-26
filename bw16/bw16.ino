@@ -212,10 +212,21 @@ void telemetryWatchdogTask(const void *arg) {
   }
 }
 
+void asyncRadioInitTask(const void *arg) {
+  (void)arg;
+  wifiScannerBegin();
+  sniffBegin();
+  bleBegin();
+  beaconSpamBegin();
+  bleSpamBegin();
+  wifiScannerStartScan();
+  vTaskDelete(NULL);
+}
+
 void setup() {
   Serial.begin(115200);
 
-  // 1. Initialize hardware and OLED display IMMEDIATELY on boot
+  // 1. Initialize hardware (Sets onboard RGB to Solid PURPLE permanently) & OLED display
   hwBegin();
   uiBegin();
 
@@ -230,7 +241,13 @@ void setup() {
   Serial.println(F("Starting TX diagnostics..."));
   Serial.println(F("==========================================\n"));
 
-  // 3. Full 4.5-Second Melodic Boot Splash (Harry Potter Hedwig Theme)
+  // 3. Launch background threads concurrently (Zero blocking on melody!)
+  uartProtocolBegin(115200);
+  irBegin();
+  os_thread_create_arduino(telemetryWatchdogTask, NULL, OS_PRIORITY_ABOVENORMAL, 2048);
+  os_thread_create_arduino(asyncRadioInitTask, NULL, OS_PRIORITY_NORMAL, 4096);
+
+  // 4. 100% Smooth Continuous 4.5-Second Melodic Boot Splash (Harry Potter Hedwig Theme)
   struct MelodyNote {
     uint16_t freq;
     uint16_t dur;
@@ -274,28 +291,10 @@ void setup() {
     }
 
     uiDrawSplashProgress(percent, msg);
+    uartPollCommand();
 
-    // Staggered non-blocking subsystem initialization across melody steps
-    if (i == 0) {
-      uartProtocolBegin(115200);
-      irBegin();
-      os_thread_create_arduino(telemetryWatchdogTask, NULL, OS_PRIORITY_ABOVENORMAL, 2048);
-    } else if (i == 2) {
-      wifiScannerBegin();
-      sniffBegin();
-      bleBegin();
-      beaconSpamBegin();
-      bleSpamBegin();
-    } else if (i == 5) {
-      wifiScannerStartScan();
-    } else if (i >= 6) {
-      uartPollCommand();
-    }
-
-    // Rhythmic Red -> Green -> Yellow LED cycle on each note
-    ledStepRGY(i);
+    // Play note with clear, steady timing
     playTone(NOTES[i].freq, NOTES[i].dur);
-    ledAllOff();
     if (NOTES[i].pause > 0) delay(NOTES[i].pause);
   }
 
@@ -303,11 +302,7 @@ void setup() {
   bool scanFinished = false;
   wifiScannerPollScan(&scanFinished);
 
-  ledAllOff();
-  ledCelebrateSync(); // Exact 3x Flash + 3x Beep synchronized together!
-  setLedMode(LED_MODE_IDLE);
-
-  // Boot directly into Main Menu
+  buzzerSuccess();
   setSystemMode(SYS_MODE_STANDALONE);
   drawMainMenu();
 }
