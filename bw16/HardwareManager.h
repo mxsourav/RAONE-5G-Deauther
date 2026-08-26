@@ -25,6 +25,11 @@ void ledYellowOff();
 void ledFlashRed(uint8_t times, uint16_t ms);
 void ledFlashGreen(uint8_t times, uint16_t ms);
 void ledFlashYellow(uint8_t times, uint16_t ms);
+void ledSetSole(uint8_t led); // 0=All Off, 1=Red, 2=Yellow, 3=Green
+void ledStepRGY(uint8_t index); // Exact Red -> Green -> Yellow cycle
+void ledSetOnboardPurple();     // Set onboard RGB to Solid Purple
+void ledChaseStep(uint8_t step);
+void ledCelebrateSync();
 void ledBootSequence();
 void setLedMode(LedMode mode);
 void ledTaskUpdate();

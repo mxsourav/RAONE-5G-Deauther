@@ -36,8 +36,40 @@ extern "C" void* alloc_mgtxmitframe(void* ptr);
 extern "C" void update_mgntframe_attrib(void* ptr, void* frame_control);
 extern "C" int dump_mgntframe(void* ptr, void* frame_control);
 
+enum TxProbeStage : uint8_t {
+  TX_STAGE_IDLE = 0,
+  TX_STAGE_ALLOC_ENTER = 1,
+  TX_STAGE_ALLOC_RETURN = 2,
+  TX_STAGE_ATTRIB_ENTER = 3,
+  TX_STAGE_ATTRIB_DONE = 4,
+  TX_STAGE_DUMP_ENTER = 5,
+  TX_STAGE_DUMP_RETURN = 6
+};
+
+struct TxProbeEntry {
+  uint32_t frame_seq;
+  uint32_t timestamp_ms;
+  void*    alloc_ptr;
+  int      dump_ret;
+  uint32_t free_heap;
+  uint8_t  stage;
+};
+
+struct TxProbeSummary {
+  uint32_t total_entered;
+  uint32_t alloc_success;
+  uint32_t alloc_null;
+  uint32_t dump_success;
+  uint8_t  current_stage;
+  uint32_t last_activity_ms;
+};
+
 bool wifi_tx_raw_frame(const void* frame, size_t length);
-bool wifi_tx_deauth_frame(void* src_mac, void* dst_mac, uint16_t reason = 0x06);
+bool wifi_tx_deauth_frame(void* src_mac, void* dst_mac, void* bssid, uint16_t reason = 0x06);
 bool wifi_tx_beacon_frame(void* src_mac, void* dst_mac, const char *ssid);
+
+void txProbeReset();
+void txProbePrintReport();
+TxProbeSummary txProbeGetSummary();
 
 #endif

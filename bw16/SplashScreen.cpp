@@ -56,3 +56,7 @@ void splashDrawProgress(Adafruit_SSD1306 &oled, uint8_t percent, const char *msg
   oledFlush();
 }
 
+void splashDrawInitialScreen(Adafruit_SSD1306 &oled) {
+  // Completely removed pre-boot screen
+}
+

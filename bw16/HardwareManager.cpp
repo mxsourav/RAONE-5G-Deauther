@@ -2,14 +2,14 @@
 #include "gpio_api.h"
 
 // ─────────────────────────────────────────────────────────────
-//  HardwareManager.cpp – LED + Buzzer for RAONE V2.5
+//  HardwareManager.cpp – LED + Buzzer for RAONE V7.0
 //  All 3 LEDs (RED, GREEN, YELLOW) on standard safe Arduino pins
 //  RED    = PA15 (D9)
 //  GREEN  = PA14 (D10)
 //  YELLOW = PA13 (D11)
 // ─────────────────────────────────────────────────────────────
 
-static gpio_t _btnOk;  // PB20 TTP223 touch sensor = OK button (active HIGH)
+static gpio_t _btnOk;
 
 void hwBegin() {
   // Buzzer
@@ -21,16 +21,11 @@ void hwBegin() {
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_YELLOW, OUTPUT);
 
-  // Pulse all 3 LEDs HIGH for 500ms on startup for visual confirmation
-  digitalWrite(LED_RED, HIGH);
-  digitalWrite(LED_GREEN, HIGH);
-  digitalWrite(LED_YELLOW, HIGH);
-  delay(500);
-  digitalWrite(LED_RED, LOW);
-  digitalWrite(LED_GREEN, LOW);
-  digitalWrite(LED_YELLOW, LOW);
+  // Onboard RGB LED -> Set to Solid PURPLE (Red channel PA12 ON)
+  pinMode(ONBOARD_RGB_R, OUTPUT);
+  digitalWrite(ONBOARD_RGB_R, HIGH);
 
-  // OK touch sensor on PB20 — mbed GPIO (TTP223, active HIGH)
+  // OK touch sensor on PB_20 — mbed GPIO (TTP223, active HIGH)
   gpio_init(&_btnOk, PB_20);
   gpio_dir(&_btnOk, PIN_INPUT);
   gpio_mode(&_btnOk, PullDown);
@@ -41,9 +36,14 @@ void hwBegin() {
   ledAllOff();
 }
 
+void ledSetOnboardPurple() {
+  pinMode(ONBOARD_RGB_R, OUTPUT);
+  digitalWrite(ONBOARD_RGB_R, HIGH);
+}
+
 // ── Button primitives ────────────────────────────────────────
 
-// OK button = TTP223 touch sensor on PB20 (active HIGH)
+// OK button = TTP223 touch sensor on PB_20 (active HIGH)
 bool okPressed() {
   return gpio_read(&_btnOk) == 1;
 }
@@ -93,12 +93,47 @@ void ledFlashYellow(uint8_t times, uint16_t ms) {
   }
 }
 
-void ledBootSequence() {
-  for (uint8_t pass = 0; pass < 2; pass++) {
-    ledRedOn();   delay(150); ledRedOff();   delay(80);
-    ledGreenOn(); delay(150); ledGreenOff(); delay(80);
-    ledYellowOn();delay(150); ledYellowOff();delay(80);
+void ledSetSole(uint8_t led) {
+  switch (led) {
+    case 1: ledRedOn();  ledYellowOff(); ledGreenOff(); break;
+    case 2: ledRedOff(); ledYellowOn();  ledGreenOff(); break;
+    case 3: ledRedOff(); ledYellowOff(); ledGreenOn();  break;
+    default: ledAllOff(); break;
   }
+}
+
+// Cycle exactly: RED -> GREEN -> YELLOW -> RED -> GREEN -> YELLOW
+void ledStepRGY(uint8_t index) {
+  uint8_t mod = index % 3;
+  if (mod == 0) {
+    ledRedOn();  ledGreenOff(); ledYellowOff();
+  } else if (mod == 1) {
+    ledRedOff(); ledGreenOn();  ledYellowOff();
+  } else if (mod == 2) {
+    ledRedOff(); ledGreenOff(); ledYellowOn();
+  }
+}
+
+void ledChaseStep(uint8_t step) {
+  ledStepRGY(step);
+}
+
+// Exactly synchronized Confirmation Beeps (3 ticks + 3 flashes together!)
+void ledCelebrateSync() {
+  for (uint8_t i = 0; i < 3; i++) {
+    ledRedOn(); ledYellowOn(); ledGreenOn();
+    playTone(2800, 60); // Flash + Beep 1:1 synchronized!
+    ledAllOff();
+    delay(60);
+  }
+}
+
+void ledBootSequence() {
+  for (uint8_t i = 0; i < 6; i++) {
+    ledStepRGY(i);
+    delay(60);
+  }
+  ledCelebrateSync();
 }
 
 // ── LED State Machine ─────────────────────────────────────────
@@ -113,23 +148,41 @@ void setLedMode(LedMode mode) {
   _ledLastAt = millis();
   ledAllOff();
 
-  if (mode == LED_MODE_IDLE) {
-    ledRedOn();
-  } else if (mode == LED_MODE_TASK_SUCCESS) {
+  if (mode == LED_MODE_TASK_SUCCESS) {
     ledGreenOn();
   }
 }
 
 void ledTaskUpdate() {
-  if (_currentLedMode == LED_MODE_IDLE ||
-      _currentLedMode == LED_MODE_TASK_SUCCESS ||
-      _currentLedMode == LED_MODE_OFF) return;
+  if (_currentLedMode == LED_MODE_OFF) {
+    ledAllOff();
+    return;
+  }
 
   uint32_t now = millis();
-  uint32_t interval = 250;
 
+  // Subtle Idle Heartbeat: quick single pulse on Green every 3.5 seconds
+  if (_currentLedMode == LED_MODE_IDLE) {
+    uint32_t cycle = now % 3500;
+    if (cycle < 60) {
+      ledGreenOn();
+    } else {
+      ledGreenOff();
+    }
+    return;
+  }
+
+  if (_currentLedMode == LED_MODE_TASK_SUCCESS) {
+    // Keep solid green for 1.5s then return to idle
+    if (now - _ledLastAt > 1500) {
+      setLedMode(LED_MODE_IDLE);
+    }
+    return;
+  }
+
+  uint32_t interval = 200;
   if (_currentLedMode == LED_MODE_TASK_RUNNING) {
-    interval = 100;
+    interval = 80; // Rapid green staccato
   }
 
   if (now - _ledLastAt >= interval) {
@@ -137,10 +190,13 @@ void ledTaskUpdate() {
     _ledState = !_ledState;
 
     if (_currentLedMode == LED_MODE_SCANNING) {
+      // Smooth amber scanning pulse
       if (_ledState) ledYellowOn(); else ledYellowOff();
     } else if (_currentLedMode == LED_MODE_TASK_RUNNING) {
+      // Fast green attack activity
       if (_ledState) ledGreenOn(); else ledGreenOff();
     } else if (_currentLedMode == LED_MODE_TASK_FAIL) {
+      // Red alert flash
       if (_ledState) ledRedOn(); else ledRedOff();
     }
   }

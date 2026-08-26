@@ -23,9 +23,20 @@ static rtw_result_t scanResultHandler(rtw_scan_handler_result_t *scanResult) {
            record->BSSID.octet[0], record->BSSID.octet[1], record->BSSID.octet[2],
            record->BSSID.octet[3], record->BSSID.octet[4], record->BSSID.octet[5]);
 
-  // Check for duplicate BSSID
+  // Check for existing BSSID in our table
   for (uint8_t i = 0; i < networkCount; i++) {
     if (strcmp(networks[i].bssid, bssidBuf) == 0) {
+      // If we previously had an empty/hidden SSID and now we received a named SSID, UNCLOAK IT!
+      if ((networks[i].ssid[0] == '\0' || strcmp(networks[i].ssid, "<hidden>") == 0) && record->SSID.len > 0) {
+        uint8_t ssidLen = record->SSID.len > WL_SSID_MAX_LENGTH ? WL_SSID_MAX_LENGTH : record->SSID.len;
+        memcpy(networks[i].ssid, record->SSID.val, ssidLen);
+        networks[i].ssid[ssidLen] = '\0';
+      }
+      // CRITICAL FIX: If current record has empty SSID but we ALREADY know the name from a previous scan,
+      // PRESERVE the known SSID name so it never turns into [Hidden]!
+      networks[i].rssi = record->signal_strength;
+      networks[i].channel = record->channel;
+      networks[i].security = record->security;
       return RTW_SUCCESS;
     }
   }
@@ -60,7 +71,7 @@ void wifiScannerBegin() {
   Serial.println("[WIFI] wifiScannerBegin: initializing STA mode...");
 
   wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25); // Force the dual-band override directly
+  wifi_change_channel_plan(0x7F); // Dual-band 2.4GHz + 5GHz full channel plan
 
   // Verify channel plan
   uint8_t readPlan = 0xFF;
@@ -68,7 +79,7 @@ void wifiScannerBegin() {
   Serial.print("[WIFI] Channel plan initialized to: 0x");
   Serial.println(readPlan, HEX);
 
-  delay(100);
+  delay(50);
   Serial.println("[WIFI] wifiScannerBegin: READY.");
 }
 
@@ -92,7 +103,6 @@ bool wifiScannerStartScan() {
     return false;
   }
 
-  networkCount = 0;
   scanComplete = false;
   scanStartedAt = millis();
   scanInProgress = true;
@@ -103,7 +113,7 @@ bool wifiScannerStartScan() {
     scanInProgress = false;
     return false;
   }
-  Serial.println("[SCAN] wifi_scan_networks_mcc() started OK. Polling for 10s...");
+  Serial.println("[SCAN] High-speed dual-band scan started. Polling for 3.5s...");
 
   return true;
 }
@@ -113,8 +123,8 @@ bool wifiScannerPollScan(bool *succeeded) {
     return false;
   }
 
-  // Allow radio to hop through all 38 channels (2.4G + 5G) for 10 full seconds
-  if (millis() - scanStartedAt < 10000) {
+  // Full 5.0 second dual-band scan duration
+  if (millis() - scanStartedAt < 5000) {
     return false;
   }
 

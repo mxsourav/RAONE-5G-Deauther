@@ -168,6 +168,10 @@ void uiDrawSplashProgress(uint8_t percent, const char *msg) {
   splashDrawProgress(oled, percent, msg);
 }
 
+void uiDrawInitialLogo() {
+  splashDrawInitialScreen(oled);
+}
+
 // ─────────────────────────────────────────────────────────────
 //  Generic screens
 // ─────────────────────────────────────────────────────────────
@@ -181,6 +185,83 @@ void uiDrawStatus(const char *message) {
   int16_t sx = max((int16_t)UI_PAD, (int16_t)((OLED_W - sw) / 2));
   oled.setCursor(sx, UI_CONTENT_Y + 10);
   oled.print(message);
+  oledFlush();
+}
+
+void uiDrawScanCountdown(uint8_t remainingSeconds, uint32_t elapsedMs, uint8_t foundCount, uint8_t animFrame) {
+  oled.clearDisplay();
+
+  // 1. Status Bar with dynamic countdown e.g. "SCANNING [5s]"
+  char titleBuf[24];
+  snprintf(titleBuf, sizeof(titleBuf), "SCANNING [%us]", remainingSeconds);
+  drawStatusBar(titleBuf, "2.4G+5G");
+
+  // 2. Middle Radar & Loading Animation (Centered at X=64, Y=32)
+  int16_t cx = 64;
+  int16_t cy = 32;
+
+  // Radar Range Rings
+  oled.drawCircle(cx, cy, 18, SSD1306_WHITE);
+  oled.drawCircle(cx, cy, 10, SSD1306_WHITE);
+  oled.drawCircle(cx, cy, 3, SSD1306_WHITE);
+
+  // Crosshairs
+  oled.drawFastHLine(cx - 21, cy, 43, SSD1306_WHITE);
+  oled.drawFastVLine(cx, cy - 17, 35, SSD1306_WHITE);
+
+  // Rotating Radar Sweep Line
+  float angle = (float)(animFrame % 24) * (2.0f * 3.14159265f / 24.0f);
+  int16_t sx = cx + (int16_t)(18.0f * cos(angle));
+  int16_t sy = cy + (int16_t)(18.0f * sin(angle));
+  oled.drawLine(cx, cy, sx, sy, SSD1306_WHITE);
+
+  // 3. Side Signal Waves & Telemetry
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+
+  // Left side: 2.4G signal waves
+  oled.setCursor(2, 18);
+  oled.print("2.4G");
+  uint8_t wave24 = (animFrame % 4);
+  for (uint8_t i = 0; i <= wave24; i++) {
+    oled.drawFastVLine(4 + i * 4, 38 - i * 2, 4 + i * 2, SSD1306_WHITE);
+  }
+
+  // Right side: 5GHz signal waves
+  oled.setCursor(98, 18);
+  oled.print("5G");
+  uint8_t wave5 = ((animFrame + 2) % 4);
+  for (uint8_t i = 0; i <= wave5; i++) {
+    oled.drawFastVLine(100 + i * 4, 38 - i * 2, 4 + i * 2, SSD1306_WHITE);
+  }
+
+  // Blips based on foundCount
+  if (foundCount > 0) {
+    oled.fillCircle(cx - 7, cy - 7, 1, SSD1306_WHITE);
+  }
+  if (foundCount > 3) {
+    oled.fillCircle(cx + 8, cy - 6, 1, SSD1306_WHITE);
+  }
+  if (foundCount > 6) {
+    oled.fillCircle(cx - 9, cy + 6, 1, SSD1306_WHITE);
+  }
+  if (foundCount > 10) {
+    oled.fillCircle(cx + 7, cy + 8, 1, SSD1306_WHITE);
+  }
+
+  // 4. Bottom Progress Bar & AP Count
+  char foundBuf[16];
+  snprintf(foundBuf, sizeof(foundBuf), "AP:%u", foundCount);
+  oled.setCursor(2, 54);
+  oled.print(foundBuf);
+
+  // Progress Bar (Y=55, H=6, X=36 to 124)
+  oled.drawRect(36, 55, 88, 7, SSD1306_WHITE);
+  uint16_t fillW = (uint16_t)((84UL * (elapsedMs > 5000 ? 5000 : elapsedMs)) / 5000UL);
+  if (fillW > 0) {
+    oled.fillRect(38, 57, fillW, 3, SSD1306_WHITE);
+  }
+
   oledFlush();
 }
 
@@ -394,7 +475,7 @@ void uiDrawNetworkListAll(int selectedNetwork, int listTop) {
     return;
   }
 
-  uint8_t itemCount = total + 1; // +1 for [ Back ]
+  uint8_t itemCount = total + 2; // +1 for [ RE-SCAN ], +1 for [ Back ]
 
   for (uint8_t i = 0; i < UI_MENU_VISIBLE && (listTop + i) < itemCount; i++) {
     uint8_t idx = listTop + i;
@@ -410,8 +491,10 @@ void uiDrawNetworkListAll(int selectedNetwork, int listTop) {
 
     oled.setCursor(UI_PAD, ry + 1);
 
-    if (idx < total) {
-      const NetworkInfo &n = wifiScannerNetwork(idx);
+    if (idx == 0) {
+      oled.print("[ RE-SCAN APs ]");
+    } else if (idx <= total) {
+      const NetworkInfo &n = wifiScannerNetwork(idx - 1);
       bool is5G = wifiScannerIs5GHz(n.channel);
       oled.print(is5G ? "5G " : "2G ");
 
@@ -475,8 +558,68 @@ void uiDrawTargetDetails(const NetworkInfo &network) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Deauth TX screen
+//  Deauth TX screen & Real-Time Stats
 // ─────────────────────────────────────────────────────────────
+
+static void formatPacketMetric(char *out, size_t outSize, uint32_t count) {
+  if (count < 10000) {
+    snprintf(out, outSize, "%lu", (unsigned long)count);
+  } else if (count < 1000000) {
+    snprintf(out, outSize, "%.1fk", (float)count / 1000.0f);
+  } else {
+    snprintf(out, outSize, "%.2fM", (float)count / 1000000.0f);
+  }
+}
+
+void uiRefreshDeauthLive(uint8_t currentChannel, uint32_t totalSent, uint32_t totalFail, uint16_t pps, bool isHopping, const char *ssid) {
+  oled.fillRect(0, UI_CONTENT_Y, OLED_W, UI_CONTENT_H, SSD1306_BLACK);
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+
+  char buf[32];
+  char sentStr[16];
+  formatPacketMetric(sentStr, sizeof(sentStr), totalSent);
+
+  // Derive band from SSID if available, default to 5G if unknown
+  bool is5g = true;
+  if (ssid) {
+    if (strstr(ssid, "2.4G") != nullptr) is5g = false;
+  }
+
+  // Line 1: Mode & Active Channel (Hopping status)
+  if (isHopping) {
+    snprintf(buf, sizeof(buf), "MODE: %s HOP  CH:%u", is5g ? "5G" : "2.4G", currentChannel);
+  } else {
+    char apName[16];
+    snprintf(apName, sizeof(apName), "%s", (ssid && ssid[0]) ? ssid : "Target");
+    snprintf(buf, sizeof(buf), "AP:%-8.8s CH:%u", apName, currentChannel);
+  }
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 2);
+  oled.print(buf);
+
+  // Line 2: Raw OK/Fail counts instead of percentages
+  char okStr[12];
+  char errStr[12];
+  formatPacketMetric(okStr, sizeof(okStr), totalSent);
+  formatPacketMetric(errStr, sizeof(errStr), totalFail);
+
+  snprintf(buf, sizeof(buf), "TX:%-4s OK:%s F:%s", sentStr, okStr, errStr);
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 13);
+  oled.print(buf);
+
+  // Line 3: Rate in pkt/s & Raw Count
+  snprintf(buf, sizeof(buf), "RATE:%u pkt/s #%lu", pps, (unsigned long)totalSent);
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 24);
+  oled.print(buf);
+
+  // Line 4: Animated Activity Indicator Bar (Visual ticker)
+  uint8_t barProgress = (uint8_t)((totalSent * 3) % (OLED_W - 2 * UI_PAD));
+  oled.drawRect(UI_PAD, UI_CONTENT_Y + 35, OLED_W - 2 * UI_PAD, 4, SSD1306_WHITE);
+  oled.fillRect(UI_PAD, UI_CONTENT_Y + 35, barProgress, 4, SSD1306_WHITE);
+
+  drawFooter("NAV=Stop  Hold OK=Back");
+  oledFlush();
+}
 
 void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t packetCount) {
   oled.clearDisplay();
@@ -485,46 +628,12 @@ void uiDrawDeauthScreen(const char *ssid, uint8_t channel, bool is5g, uint32_t p
   snprintf(titleBuf, sizeof(titleBuf), "DEAUTH [%s]", is5g ? "5G" : "2.4G");
   drawStatusBar(titleBuf, "TX ACTIVE");
 
-  oled.setTextSize(1);
-  oled.setTextColor(SSD1306_WHITE);
-  
-  // Line 1: Target SSID
-  oled.setCursor(UI_PAD, UI_CONTENT_Y + 1);
-  oled.print("AP: ");
-  printTruncated(ssid && ssid[0] ? ssid : "<hidden>", 15);
-
-  // Line 2: Channel
-  char chBuf[24];
-  snprintf(chBuf, sizeof(chBuf), "CH: %-2u  BURST: ACTIVE", channel);
-  oled.setCursor(UI_PAD, UI_CONTENT_Y + 11);
-  oled.print(chBuf);
-
-  // Line 3: Big packet counter in center
-  oled.setTextSize(2);
-  char countBuf[16];
-  snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
-  int16_t sw = strlen(countBuf) * 12;
-  int16_t sx = (OLED_W - sw) / 2;
-  oled.setCursor(sx, UI_CONTENT_Y + 22);
-  oled.print(countBuf);
-
-  oled.setTextSize(1);
-  drawFooter("NAV=Stop  Touch=Back");
-  oledFlush();
+  bool isHopping = (channel == 0 || (ssid && strstr(ssid, "ALL") != nullptr));
+  uiRefreshDeauthLive(channel, packetCount, 0, 0, isHopping, ssid);
 }
 
 void uiRefreshDeauthCounter(uint32_t packetCount) {
-  oled.fillRect(0, UI_CONTENT_Y + 22, OLED_W, 16, SSD1306_BLACK);
-  oled.setTextSize(2);
-  oled.setTextColor(SSD1306_WHITE);
-  char countBuf[16];
-  snprintf(countBuf, sizeof(countBuf), "%lu", (unsigned long)packetCount);
-  int16_t sw = strlen(countBuf) * 12;
-  int16_t sx = (OLED_W - sw) / 2;
-  oled.setCursor(sx, UI_CONTENT_Y + 22);
-  oled.print(countBuf);
-  oled.setTextSize(1);
-  oledFlush();
+  uiRefreshDeauthLive(0, packetCount, 0, 0, true, "ALL 5G");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1306,6 +1415,42 @@ void uiDrawGenericMessage(const char *title, const char *msg1, const char *msg2)
     oled.setCursor(UI_PAD, UI_CONTENT_Y + 22);
     oled.print(msg2);
   }
+  oledFlush();
+}
+
+void uiDrawSlaveLinked(const char *masterInfo) {
+  oled.clearDisplay();
+  drawStatusBar("SLAVE LINKED", "UART");
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+  
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 4);
+  oled.print("Master: ");
+  oled.print(masterInfo ? masterInfo : "TetraX ESP32");
+  
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 16);
+  oled.print("Baud: 115200 (8-N-1)");
+  
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 28);
+  oled.print("Role: 5GHz Coprocessor");
+
+  drawFooter("Remote Control Active");
+  oledFlush();
+}
+
+void uiRefreshSlaveStatus(const char *cmd, uint32_t count) {
+  oled.fillRect(0, UI_CONTENT_Y + 26, OLED_W, 20, SSD1306_BLACK);
+  oled.setTextSize(1);
+  oled.setTextColor(SSD1306_WHITE);
+  
+  char buf[32];
+  if (count > 0) {
+    snprintf(buf, sizeof(buf), "TX: %lu | %s", (unsigned long)count, cmd ? cmd : "RUNNING");
+  } else {
+    snprintf(buf, sizeof(buf), "CMD: %s", cmd ? cmd : "IDLE");
+  }
+  oled.setCursor(UI_PAD, UI_CONTENT_Y + 28);
+  oled.print(buf);
   oledFlush();
 }
 
