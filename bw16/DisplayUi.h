@@ -84,4 +84,7 @@ void uiDrawGenericMessage(const char *title, const char *msg1, const char *msg2)
 void uiDrawSlaveLinked(const char *masterInfo = "TetraX ESP32");
 void uiRefreshSlaveStatus(const char *cmd, uint32_t count);
 
+// System Settings screen
+void uiDrawSystemSettings(uint8_t selected, bool buzzerOn, bool ledOn);
+
 

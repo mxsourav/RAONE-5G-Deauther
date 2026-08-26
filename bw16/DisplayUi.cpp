@@ -1454,4 +1454,36 @@ void uiRefreshSlaveStatus(const char *cmd, uint32_t count) {
   oledFlush();
 }
 
+void uiDrawSystemSettings(uint8_t selected, bool buzzerOn, bool ledOn) {
+  oledClear();
+  drawStatusBar("SYSTEM SETTINGS");
+  oled.setTextSize(1);
 
+  char item0[24];
+  snprintf(item0, sizeof(item0), "Buzzer:   [%s]", buzzerOn ? "ON " : "OFF");
+
+  char item1[24];
+  snprintf(item1, sizeof(item1), "LEDs:     [%s]", ledOn ? "ON " : "OFF");
+
+  const char *items[4];
+  items[0] = item0;
+  items[1] = item1;
+  items[2] = "System Info";
+  items[3] = "[ Back ]";
+
+  for (uint8_t i = 0; i < 4; i++) {
+    int16_t y = UI_CONTENT_Y + 1 + i * UI_MENU_ROW_H;
+    if (i == selected) {
+      oled.fillRect(0, y, 120, UI_MENU_ROW_H, SSD1306_WHITE);
+      oled.setTextColor(SSD1306_BLACK);
+    } else {
+      oled.setTextColor(SSD1306_WHITE);
+    }
+    oled.setCursor(UI_PAD, y + 1);
+    oled.print(items[i]);
+    oled.setTextColor(SSD1306_WHITE);
+  }
+
+  drawFooter("NAV=next  OK=toggle");
+  oledFlush();
+}

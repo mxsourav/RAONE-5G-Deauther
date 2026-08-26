@@ -102,6 +102,12 @@ void ledSetSole(uint8_t led) {
 
 // Discrete Melody LED controller with zero bleed during note rests
 void ledMelodySet(uint8_t led) {
+  if (!g_ledEnabled) { // System setting: LEDs disabled
+    digitalWrite(PA15, LOW);
+    digitalWrite(PA14, LOW);
+    digitalWrite(PA13, LOW);
+    return;
+  }
   pinMode(PA15, OUTPUT);
   pinMode(PA14, OUTPUT);
   pinMode(PA13, OUTPUT);
@@ -129,10 +135,10 @@ void ledMelodySet(uint8_t led) {
   }
 }
 
-// Cycle exactly: RED -> GREEN -> YELLOW -> RED in sync with melody notes
+// Strict cycle: RED(1) -> GREEN(2) -> YELLOW(3) -> RED(1) -> GREEN(2) -> YELLOW(3) ...
 void ledStepRGY(uint8_t index) {
-  uint8_t mod = index % 3;
-  ledMelodySet(mod + 1);
+  static const uint8_t RGY[] = { 1, 2, 3 }; // 1=Red, 2=Green, 3=Yellow
+  ledMelodySet(RGY[index % 3]);
 }
 
 void ledChaseStep(uint8_t step) {
@@ -173,9 +179,13 @@ void ledTaskUpdate() {
     ledSetOnboardPurple();
   }
 }
+// ── System Settings Globals ──────────────────────────────────
+bool g_buzzerEnabled = true;
+bool g_ledEnabled    = true;
 
 // ── Buzzer ────────────────────────────────────────────────────
 void playTone(uint16_t freq, uint16_t durationMs) {
+  if (!g_buzzerEnabled) { delay(durationMs); return; }
   if (freq == 0) { delay(durationMs); return; }
   uint32_t periodUs = 1000000UL / freq;
   uint32_t halfPeriodUs = periodUs / 2;
@@ -190,10 +200,12 @@ void playTone(uint16_t freq, uint16_t durationMs) {
 }
 
 void buzzerClick() {
+  if (!g_buzzerEnabled) return;
   playTone(3000, 40);
 }
 
 void buzzerBeep(uint16_t freq, uint16_t ms) {
+  if (!g_buzzerEnabled) return;
   playTone(freq, ms);
   delay(10);
 }

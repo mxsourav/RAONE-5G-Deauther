@@ -42,4 +42,7 @@
 // ─── IR blaster ──────────────────────────────────────────────
 #define IR_TX_PIN  PB2   // D5  — Direct GPIO drive (IR Blaster)
 
-
+// ─── System Settings (Runtime Toggles) ───────────────────────
+// These are mutable globals toggled from the System menu
+extern bool g_buzzerEnabled;
+extern bool g_ledEnabled;

