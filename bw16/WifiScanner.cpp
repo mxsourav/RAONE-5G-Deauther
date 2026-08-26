@@ -97,6 +97,15 @@ bool wifiScannerScan() {
   return succeeded;
 }
 
+static void _bgScanTask(const void *arg) {
+  (void)arg;
+  Serial.println("[SCAN] Background scan thread started...");
+  wifi_scan_networks_mcc(scanResultHandler, NULL);
+  scanComplete = true;
+  Serial.println("[SCAN] Background scan thread finished.");
+  vTaskDelete(NULL);
+}
+
 bool wifiScannerStartScan() {
   if (scanInProgress) {
     Serial.println("[SCAN] Already in progress, skipping.");
@@ -106,14 +115,11 @@ bool wifiScannerStartScan() {
   scanComplete = false;
   scanStartedAt = millis();
   scanInProgress = true;
+  networkCount = 0;
 
-  Serial.println("[SCAN] Calling wifi_scan_networks_mcc()...");
-  if (wifi_scan_networks_mcc(scanResultHandler, NULL) != RTW_SUCCESS) {
-    Serial.println("[SCAN] wifi_scan_networks_mcc() FAILED!");
-    scanInProgress = false;
-    return false;
-  }
-  Serial.println("[SCAN] High-speed dual-band scan started. Polling for 3.5s...");
+  Serial.println("[SCAN] Launching async scan thread...");
+  os_thread_create_arduino(_bgScanTask, NULL, OS_PRIORITY_NORMAL, 4096);
+  Serial.println("[SCAN] Dual-band scan started instantly (0ms latency).");
 
   return true;
 }

@@ -1527,6 +1527,9 @@ void runScan() {
   selectedNetwork = 0;
   listTop = 0;
 
+  // Render initial scan frame immediately (0ms instant transition)
+  uiDrawScanCountdown(5, 0, 0, 0);
+
   if (!wifiScannerStartScan()) {
     setLedMode(LED_MODE_IDLE);
     ledFlashRed(2, 100);
