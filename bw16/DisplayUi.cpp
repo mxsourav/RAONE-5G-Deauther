@@ -282,8 +282,9 @@ void uiRunGlitchBootLock() {
   uint8_t glitchVariant = 0;
 
   static const char *const MINOR_GLITCH_WORDS[] = {
-    "R4-0NE", "R#-0N£", "RΔ-ØN3", "R[-0]E", "RA_0N3", "R4-0N3"
+    "R4-0NE", "R@-ONE", "R4-0N3", "Ra-0ne", "RA-0N3", "R4_ONE", "Ra_0N3", "RA-0NE"
   };
+  const uint8_t MINOR_GLITCH_COUNT = sizeof(MINOR_GLITCH_WORDS) / sizeof(MINOR_GLITCH_WORDS[0]);
 
   while (true) {
     // ── STEALTH BIOMETRIC TOUCH SENSOR (1.0s Deadband + 1.2s Authorization) ───
@@ -370,14 +371,14 @@ void uiRunGlitchBootLock() {
 
     if (glitchFrameCount > 0) {
       glitchFrameCount--;
-      titleText = MINOR_GLITCH_WORDS[(glitchVariant + glitchFrameCount) % 6];
+      titleText = MINOR_GLITCH_WORDS[(glitchVariant + glitchFrameCount) % MINOR_GLITCH_COUNT];
       activeGlitchThisFrame = true;
     } else if (millis() > glitchCooldown) {
       glitchFrameCount = random(8, 13); // Sustained for 8-12 frames (~240ms - 360ms)
-      glitchVariant = random(6);
+      glitchVariant = random(MINOR_GLITCH_COUNT);
       glitchCooldown = millis() + random(3500, 6000);
       buzzerMicroGlitch(); // Synchronized audio blip!
-      titleText = MINOR_GLITCH_WORDS[glitchVariant % 6];
+      titleText = MINOR_GLITCH_WORDS[glitchVariant % MINOR_GLITCH_COUNT];
       activeGlitchThisFrame = true;
     }
 
