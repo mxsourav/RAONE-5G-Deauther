@@ -164,18 +164,56 @@ void uiBegin() {
   oledFlush();
 }
 
-// Bold Text Renderer (size 2) with shadow thickness overdraw
-static void drawBoldRaOne(int16_t x, int16_t y, const char *text) {
-  oled.setTextSize(2);
-  oled.setTextColor(SSD1306_WHITE);
-  oled.setCursor(x, y);
-  oled.print(text);
-  oled.setCursor(x + 1, y);
-  oled.print(text);
-  oled.setCursor(x, y + 1);
-  oled.print(text);
-  oled.setCursor(x + 1, y + 1);
-  oled.print(text);
+// Mirrored R (Я) 5x7 Font Column Renderer with Bold Overdraw
+static void drawMirroredR(int16_t x, int16_t y, uint8_t size = 2, bool bold = true) {
+  static const uint8_t MIRRORED_R_COLS[5] = { 0x46, 0x29, 0x19, 0x09, 0x7F };
+  for (uint8_t col = 0; col < 5; col++) {
+    uint8_t line = MIRRORED_R_COLS[col];
+    for (uint8_t row = 0; row < 7; row++) {
+      if (line & 0x01) {
+        int16_t px = x + col * size;
+        int16_t py = y + row * size;
+        oled.fillRect(px, py, size, size, SSD1306_WHITE);
+        if (bold) {
+          oled.fillRect(px + 1, py, size, size, SSD1306_WHITE);
+          oled.fillRect(px, py + 1, size, size, SSD1306_WHITE);
+          oled.fillRect(px + 1, py + 1, size, size, SSD1306_WHITE);
+        }
+      }
+      line >>= 1;
+    }
+  }
+}
+
+// Bold Text Renderer (size 2) with shadow thickness overdraw & optional mirrored R (Я)
+static void drawBoldRaOne(int16_t x, int16_t y, const char *text, bool mirrorR = false) {
+  if (mirrorR) {
+    drawMirroredR(x, y, 2, true);
+    if (text && text[0] != '\0') {
+      const char *rest = text + 1;
+      oled.setTextSize(2);
+      oled.setTextColor(SSD1306_WHITE);
+      oled.setCursor(x + 12, y);
+      oled.print(rest);
+      oled.setCursor(x + 13, y);
+      oled.print(rest);
+      oled.setCursor(x + 12, y + 1);
+      oled.print(rest);
+      oled.setCursor(x + 13, y + 1);
+      oled.print(rest);
+    }
+  } else {
+    oled.setTextSize(2);
+    oled.setTextColor(SSD1306_WHITE);
+    oled.setCursor(x, y);
+    oled.print(text);
+    oled.setCursor(x + 1, y);
+    oled.print(text);
+    oled.setCursor(x, y + 1);
+    oled.print(text);
+    oled.setCursor(x + 1, y + 1);
+    oled.print(text);
+  }
 }
 
 // Tight String Renderer (5px character advance) so 22-char "instagram/mxsourav.dev" fits in 110px!
@@ -233,7 +271,7 @@ static void drawSegmentedCyberBar(int16_t x, int16_t y, int16_t w, uint8_t pct) 
 void uiRunGlitchBootLock() {
   // ── 1. INITIAL GLITCH ANIMATION FOR "Ra-One" (WITH SYNCED AUDIO) ───
   static const char *const GLITCH_STRS[] = {
-    "R@-0N3", "RA_ONE", "R4-0NE", "RA-ON£", "R#--N3", "Ra-0ne", "R4_ON3", "Ra-One"
+    "R@-0N3", "RA_ONE", "R4-0NE", "RA-ON3", "R4--N3", "Ra-0ne", "R4_ON3", "Ra-One"
   };
   const uint8_t GLITCH_COUNT = sizeof(GLITCH_STRS) / sizeof(GLITCH_STRS[0]);
 
@@ -243,10 +281,11 @@ void uiRunGlitchBootLock() {
     const char *text = (frame < 14) ? GLITCH_STRS[frame % GLITCH_COUNT] : "Ra-One";
     int16_t jx = (frame < 14) ? random(-3, 4) : 0;
     int16_t jy = (frame < 14) ? random(-2, 3) : 0;
+    bool mirrorInitial = (frame < 14) && (random(3) == 0);
 
     int16_t tw = strlen(text) * 12;
     int16_t tx = (OLED_W - tw) / 2 + jx;
-    drawBoldRaOne(tx, 10 + jy, text);
+    drawBoldRaOne(tx, 10 + jy, text, mirrorInitial);
 
     if (frame < 14) {
       buzzerGlitchEffect(2); // High-tech digital noise sweep
@@ -277,9 +316,9 @@ void uiRunGlitchBootLock() {
   uint32_t lastAnimTick = millis();
   uint32_t holdStart = 0;
   uint32_t touchStart = 0;
-  uint32_t glitchCooldown = millis() + random(3000, 5500);
   uint8_t glitchFrameCount = 0;
   uint8_t glitchVariant = 0;
+  bool glitchMirrorR = false;
 
   static const char *const MINOR_GLITCH_WORDS[] = {
     "R4-0NE", "R@-ONE", "R4-0N3", "Ra-0ne", "RA-0N3", "R4_ONE", "Ra_0N3", "RA-0NE"
@@ -365,7 +404,7 @@ void uiRunGlitchBootLock() {
       }
     }
 
-    // ── SUSTAINED FULL-WORD DISTORTION GLITCH ON "Ra-One" (NO POSITION SHIFT) ───
+    // ── NOTICEABLE FULL-WORD DISTORTION GLITCH ON "Ra-One" (NO POSITION SHIFT) ───
     const char *titleText = "Ra-One";
     bool activeGlitchThisFrame = false;
 
@@ -373,21 +412,14 @@ void uiRunGlitchBootLock() {
       glitchFrameCount--;
       titleText = MINOR_GLITCH_WORDS[(glitchVariant + glitchFrameCount) % MINOR_GLITCH_COUNT];
       activeGlitchThisFrame = true;
-    } else if (millis() > glitchCooldown) {
-      glitchFrameCount = random(8, 13); // Sustained for 8-12 frames (~240ms - 360ms)
-      glitchVariant = random(MINOR_GLITCH_COUNT);
-      glitchCooldown = millis() + random(3500, 6000);
-      buzzerMicroGlitch(); // Synchronized audio blip!
-      titleText = MINOR_GLITCH_WORDS[glitchVariant % MINOR_GLITCH_COUNT];
-      activeGlitchThisFrame = true;
     }
 
-    // ── SUBTITLE IN/OUT ANIMATION (NO SOUND, NO "_" CURSOR) ─────
+    // ── SUBTITLE IN/OUT ANIMATION (GLITCH-TRIGGERED TEXT TRANSITIONS) ─────
     const char *curStr = SUBTITLES[subIdx];
     uint8_t fullLen = strlen(curStr);
 
     if (subState == SUB_TYPE_IN) {
-      if (millis() - lastAnimTick >= 40) {
+      if (millis() - lastAnimTick >= 35) {
         lastAnimTick = millis();
         if (charPos < fullLen) {
           charPos++;
@@ -398,10 +430,15 @@ void uiRunGlitchBootLock() {
       }
     } else if (subState == SUB_HOLD) {
       if (millis() - holdStart >= 1800) {
+        // Trigger snappy micro-glitch & audio blip right as text transition begins!
+        glitchFrameCount = 3; // Snappy 3 frames (~75-90ms)
+        glitchVariant = random(MINOR_GLITCH_COUNT);
+        glitchMirrorR = (random(2) == 0); // 50% chance of mirrored 'Я' during glitch!
+        buzzerMicroGlitch(); // Synchronized audio blip!
         subState = SUB_TYPE_OUT;
       }
     } else if (subState == SUB_TYPE_OUT) {
-      if (millis() - lastAnimTick >= 25) {
+      if (millis() - lastAnimTick >= 20) {
         lastAnimTick = millis();
         if (charPos > 0) {
           charPos--;
@@ -417,10 +454,10 @@ void uiRunGlitchBootLock() {
     oledClear();
     oled.setTextColor(SSD1306_WHITE);
 
-    // 1. Bold "Ra-One" (stays at fixed centered position X=28, Y=8)
+    // 1. Bold "Ra-One" (stays at fixed centered position X=28, Y=8, with optional mirrored R)
     int16_t titleX = (OLED_W - 6 * 12) / 2;
     int16_t titleY = 8;
-    drawBoldRaOne(titleX, titleY, titleText);
+    drawBoldRaOne(titleX, titleY, titleText, activeGlitchThisFrame ? glitchMirrorR : false);
 
     // If glitch active, draw 2 thin raster slice tears across the word
     if (activeGlitchThisFrame) {
