@@ -308,7 +308,7 @@ void uiRunGlitchBootLock() {
   };
   const uint8_t SUB_COUNT = 2;
 
-  enum SubAnimState { SUB_TYPE_IN, SUB_HOLD, SUB_TYPE_OUT };
+  enum SubAnimState { SUB_TYPE_IN, SUB_HOLD, SUB_GLITCH };
   SubAnimState subState = SUB_TYPE_IN;
 
   uint8_t subIdx = 0;
@@ -404,21 +404,14 @@ void uiRunGlitchBootLock() {
       }
     }
 
-    // ── NOTICEABLE FULL-WORD DISTORTION GLITCH ON "Ra-One" (NO POSITION SHIFT) ───
+    // ── SUBTITLE & SYNCHRONIZED GLITCH STATE MACHINE ────────────
     const char *titleText = "Ra-One";
     bool activeGlitchThisFrame = false;
 
-    if (glitchFrameCount > 0) {
-      glitchFrameCount--;
-      titleText = MINOR_GLITCH_WORDS[(glitchVariant + glitchFrameCount) % MINOR_GLITCH_COUNT];
-      activeGlitchThisFrame = true;
-    }
-
-    // ── SUBTITLE IN/OUT ANIMATION (GLITCH-TRIGGERED TEXT TRANSITIONS) ─────
-    const char *curStr = SUBTITLES[subIdx];
-    uint8_t fullLen = strlen(curStr);
-
     if (subState == SUB_TYPE_IN) {
+      const char *curStr = SUBTITLES[subIdx];
+      uint8_t fullLen = strlen(curStr);
+
       if (millis() - lastAnimTick >= 35) {
         lastAnimTick = millis();
         if (charPos < fullLen) {
@@ -430,23 +423,25 @@ void uiRunGlitchBootLock() {
       }
     } else if (subState == SUB_HOLD) {
       if (millis() - holdStart >= 1800) {
-        // Trigger snappy micro-glitch & audio blip right as text transition begins!
-        glitchFrameCount = 3; // Snappy 3 frames (~75-90ms)
+        // Hold complete: Switch directly to glitch transition!
+        subState = SUB_GLITCH;
+        glitchFrameCount = 3; // Snappy 3 frames (~75ms)
         glitchVariant = random(MINOR_GLITCH_COUNT);
-        glitchMirrorR = (random(2) == 0); // 50% chance of mirrored 'Я' during glitch!
-        buzzerMicroGlitch(); // Synchronized audio blip!
-        subState = SUB_TYPE_OUT;
+        glitchMirrorR = (random(2) == 0); // 50% chance of mirrored 'Я'
+        buzzerMicroGlitch(); // Synchronized audio chirp!
       }
-    } else if (subState == SUB_TYPE_OUT) {
-      if (millis() - lastAnimTick >= 20) {
+    } else if (subState == SUB_GLITCH) {
+      activeGlitchThisFrame = true;
+      titleText = MINOR_GLITCH_WORDS[(glitchVariant + glitchFrameCount) % MINOR_GLITCH_COUNT];
+
+      if (glitchFrameCount > 0) {
+        glitchFrameCount--;
+      } else {
+        // Glitch complete: Switch to the next text and immediately start typing it in!
+        subIdx = (subIdx + 1) % SUB_COUNT;
+        charPos = 1;
+        subState = SUB_TYPE_IN;
         lastAnimTick = millis();
-        if (charPos > 0) {
-          charPos--;
-        } else {
-          subIdx = (subIdx + 1) % SUB_COUNT;
-          charPos = 1;
-          subState = SUB_TYPE_IN;
-        }
       }
     }
 
@@ -454,7 +449,7 @@ void uiRunGlitchBootLock() {
     oledClear();
     oled.setTextColor(SSD1306_WHITE);
 
-    // 1. Bold "Ra-One" (stays at fixed centered position X=28, Y=8, with optional mirrored R)
+    // 1. Bold "Ra-One" (stays at fixed centered position X=28, Y=8, with optional mirrored R during glitch)
     int16_t titleX = (OLED_W - 6 * 12) / 2;
     int16_t titleY = 8;
     drawBoldRaOne(titleX, titleY, titleText, activeGlitchThisFrame ? glitchMirrorR : false);
@@ -468,12 +463,16 @@ void uiRunGlitchBootLock() {
     // 2. Creative Cyber HUD Divider
     drawCyberDivider(16, 112, 29);
 
-    // 3. Subtitle rendering with tight 5px char advance (single line, no "_" cursor)
-    uint8_t curStrLen = strlen(curStr);
-    int16_t subWidth = curStrLen * 5;
-    int16_t subX = (OLED_W - subWidth) / 2;
-    if (subX < 2) subX = 2;
-    drawTightString(subX, 42, curStr, charPos);
+    // 3. Subtitle rendering:
+    // While SUB_GLITCH is active, the subtitle area is cleared so the next text types in freshly after the glitch!
+    if (subState != SUB_GLITCH) {
+      const char *curStr = SUBTITLES[subIdx];
+      uint8_t curStrLen = strlen(curStr);
+      int16_t subWidth = curStrLen * 5;
+      int16_t subX = (OLED_W - subWidth) / 2;
+      if (subX < 2) subX = 2;
+      drawTightString(subX, 42, curStr, charPos);
+    }
 
     oledFlush();
     delay(30);
