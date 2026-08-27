@@ -320,10 +320,30 @@ void uiRunGlitchBootLock() {
   uint8_t glitchVariant = 0;
   bool glitchMirrorR = false;
 
-  static const char *const MINOR_GLITCH_WORDS[] = {
-    "R4-0NE", "R@-ONE", "R4-0N3", "Ra-0ne", "RA-0N3", "R4_ONE", "Ra_0N3", "RA-0NE"
+  // Sequential persistent Title Transformations on every glitch
+  struct TitleTransform {
+    const char *text;
+    bool mirrorR;
   };
-  const uint8_t MINOR_GLITCH_COUNT = sizeof(MINOR_GLITCH_WORDS) / sizeof(MINOR_GLITCH_WORDS[0]);
+
+  static const TitleTransform TITLE_TRANSFORMS[] = {
+    { "Ra-One", false }, // 0: Ra-One
+    { "Ra-One", true  }, // 1: Яa-One
+    { "R4-0NE", true  }, // 2: Я4-0NE
+    { "R@-OnE", false }, // 3: R@-OnE
+    { "R4-0N3", true  }, // 4: Я4-0N3
+    { "Ra_0N3", false }, // 5: Ra_0N3
+    { "Ra-0ne", true  }, // 6: Яa-0ne
+    { "RA-0NE", false }  // 7: RA-0NE
+  };
+  const uint8_t TITLE_TRANSFORM_COUNT = sizeof(TITLE_TRANSFORMS) / sizeof(TITLE_TRANSFORMS[0]);
+
+  static const char *const GLITCH_BURST_GLYPHS[] = {
+    "R4--N3", "R@-0N3", "RA_0NE", "R4_ON3", "RA-ONE", "R#-0N3"
+  };
+  const uint8_t GLITCH_BURST_COUNT = sizeof(GLITCH_BURST_GLYPHS) / sizeof(GLITCH_BURST_GLYPHS[0]);
+
+  uint8_t titleIdx = 0;
 
   while (true) {
     // ── STEALTH BIOMETRIC TOUCH SENSOR (1.0s Deadband + 1.2s Authorization) ───
@@ -404,8 +424,9 @@ void uiRunGlitchBootLock() {
       }
     }
 
-    // ── SUBTITLE & SYNCHRONIZED GLITCH STATE MACHINE ────────────
-    const char *titleText = "Ra-One";
+    // ── SUBTITLE & SYNCHRONIZED TITLE TRANSFORMATION STATE MACHINE ──
+    const char *titleText = TITLE_TRANSFORMS[titleIdx].text;
+    bool mirrorRFlag = TITLE_TRANSFORMS[titleIdx].mirrorR;
     bool activeGlitchThisFrame = false;
 
     if (subState == SUB_TYPE_IN) {
@@ -426,18 +447,21 @@ void uiRunGlitchBootLock() {
         // Hold complete: Switch directly to glitch transition!
         subState = SUB_GLITCH;
         glitchFrameCount = 3; // Snappy 3 frames (~75ms)
-        glitchVariant = random(MINOR_GLITCH_COUNT);
-        glitchMirrorR = (random(2) == 0); // 50% chance of mirrored 'Я'
-        buzzerMicroGlitch(); // Synchronized audio chirp!
+        glitchVariant = random(GLITCH_BURST_COUNT);
+        glitchMirrorR = (random(2) == 0);
+        buzzerMicroGlitch(); // Clean high-tech audio chirp!
       }
     } else if (subState == SUB_GLITCH) {
       activeGlitchThisFrame = true;
-      titleText = MINOR_GLITCH_WORDS[(glitchVariant + glitchFrameCount) % MINOR_GLITCH_COUNT];
+      titleText = GLITCH_BURST_GLYPHS[(glitchVariant + glitchFrameCount) % GLITCH_BURST_COUNT];
+      mirrorRFlag = glitchMirrorR;
 
       if (glitchFrameCount > 0) {
         glitchFrameCount--;
       } else {
-        // Glitch complete: Switch to the next text and immediately start typing it in!
+        // Glitch complete: Advance to next Title Transformation!
+        titleIdx = (titleIdx + 1) % TITLE_TRANSFORM_COUNT;
+        // Advance to next Subtitle!
         subIdx = (subIdx + 1) % SUB_COUNT;
         charPos = 1;
         subState = SUB_TYPE_IN;
@@ -449,10 +473,10 @@ void uiRunGlitchBootLock() {
     oledClear();
     oled.setTextColor(SSD1306_WHITE);
 
-    // 1. Bold "Ra-One" (stays at fixed centered position X=28, Y=8, with optional mirrored R during glitch)
+    // 1. Bold "Ra-One" (stays at fixed centered position X=28, Y=8, with transformed glyph & mirrored R)
     int16_t titleX = (OLED_W - 6 * 12) / 2;
     int16_t titleY = 8;
-    drawBoldRaOne(titleX, titleY, titleText, activeGlitchThisFrame ? glitchMirrorR : false);
+    drawBoldRaOne(titleX, titleY, titleText, mirrorRFlag);
 
     // If glitch active, draw 2 thin raster slice tears across the word
     if (activeGlitchThisFrame) {

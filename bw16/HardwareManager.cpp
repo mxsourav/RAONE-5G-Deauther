@@ -236,19 +236,23 @@ void buzzerSuccess() {
 
 void buzzerGlitchEffect(uint8_t intensity) {
   if (!g_buzzerEnabled) return;
-  static const uint16_t GLITCH_FREQS[] = { 4200, 1800, 3600, 950, 4800, 1300, 2900, 5200 };
-  uint8_t steps = (intensity > 1) ? 4 : 2;
-  for (uint8_t i = 0; i < steps; i++) {
-    playTone(GLITCH_FREQS[random(8)], random(3, 7));
-    delayMicroseconds(random(300, 1200));
+  // Clean high-tech sci-fi arpeggio chirp
+  if (intensity > 1) {
+    playTone(2200, 6);
+    playTone(2800, 6);
+    playTone(3400, 8);
+    playTone(2600, 6);
+  } else {
+    playTone(2600, 6);
+    playTone(3300, 8);
   }
 }
 
 void buzzerMicroGlitch() {
   if (!g_buzzerEnabled) return;
-  playTone(3900, 4);
-  delayMicroseconds(600);
-  playTone(1700, 4);
+  // Clean, crisp high-tech UI chirp blip
+  playTone(2600, 6);
+  playTone(3400, 8);
 }
 
 void buzzerBiometricCharge(uint8_t pct) {
