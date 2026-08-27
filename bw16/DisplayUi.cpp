@@ -433,7 +433,7 @@ void uiRunGlitchBootLock() {
       const char *curStr = SUBTITLES[subIdx];
       uint8_t fullLen = strlen(curStr);
 
-      if (millis() - lastAnimTick >= 35) {
+      if (millis() - lastAnimTick >= 25) {
         lastAnimTick = millis();
         if (charPos < fullLen) {
           charPos++;
@@ -443,13 +443,13 @@ void uiRunGlitchBootLock() {
         }
       }
     } else if (subState == SUB_HOLD) {
-      if (millis() - holdStart >= 1800) {
-        // Hold complete: Switch directly to glitch transition!
+      if (millis() - holdStart >= 900) {
+        // Hold complete (900ms - cut to half time!): Switch directly to glitch transition
         subState = SUB_GLITCH;
         glitchFrameCount = 3; // Snappy 3 frames (~75ms)
         glitchVariant = random(GLITCH_BURST_COUNT);
         glitchMirrorR = (random(2) == 0);
-        buzzerMicroGlitch(); // Clean high-tech audio chirp!
+        // Buzzer muted on minor glitches as requested
       }
     } else if (subState == SUB_GLITCH) {
       activeGlitchThisFrame = true;
