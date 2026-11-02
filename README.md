@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="RAONE-5G Deauther Banner" width="100%">
+</p>
+
 # RAONE-5G Deauther
 
 Dual-band (2.4GHz + 5GHz) Wi-Fi auditor, scanner, and deauther built for the RTL8720DN (BW16 / NiceMCU V1).
